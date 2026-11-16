@@ -1,0 +1,83 @@
+/* Wide: the column as it was; the toggle is hidden and the body is transparent to layout. */
+.picker-toggle {
+  display: none;
+}
+
+.picker-body {
+  display: contents;
+}
+
+@media (max-width: 999px) {
+  .picker {
+    position: relative;
+    z-index: 20;
+    overflow: visible !important;
+    border-right: 0 !important;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .picker-toggle {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    width: 100%;
+    height: 2.75rem;
+    padding: 0 var(--gutter);
+    border: 0;
+    background: var(--surface);
+    text-align: left;
+  }
+
+  .picker-label {
+    font-size: var(--size-xs);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+
+  .picker-current {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: var(--size-sm);
+    font-weight: 600;
+  }
+
+  .picker.is-open > .picker-toggle svg {
+    transform: rotate(180deg);
+  }
+
+  .picker-body {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    display: none;
+    flex-direction: column;
+    max-height: 70vh;
+    overflow-y: auto;
+    background: var(--surface);
+    border-bottom: 1px solid var(--line);
+    box-shadow: var(--shadow-popover);
+  }
+
+  .picker.is-open .picker-body {
+    display: flex;
+  }
+
+  /* Every tab with a left column stacks it above the main pane. */
+  .ctab,
+  .wtab,
+  .wtab.has-panel,
+  .rtab {
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+
+  .wtab.has-panel > .clist {
+    display: block !important;
+  }
+}

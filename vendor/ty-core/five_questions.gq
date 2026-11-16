@@ -1,0 +1,325 @@
+// Copy of tyapi spikes/ty-core/queries/five_questions.gq at 1db845d. Update: copy the
+// file, change this line, run `pnpm gen:model`.
+// 1. What have we committed to?
+
+query active_commitments($party: String) @description("Active commitments a party is bound by, soonest review first.") {
+    match {
+        $p: Party { slug: $party }
+        $c: Commitment { state: "active" }
+        $p commits $c
+    }
+    return { $c.slug as commitment, $c.title as title, $c.scale as scale, $c.horizon_at as horizon, $c.revisit_at as revisit_at }
+    order { revisit_at asc }
+}
+
+query commitment_tree($commitment: String) @description("Everything a commitment entails, down to tasks.") {
+    match {
+        $c: Commitment { slug: $commitment }
+        $c entails{1,6} $sub
+        $sub: Commitment
+    }
+    return { $sub.slug as entailed, $sub.title as title, $sub.scale as scale, $sub.state as state }
+}
+
+query latent_commitments() @description("Commitments inferred from actions or documents that nobody has confirmed: hidden obligations.") {
+    match {
+        $c: Commitment { origin: "inferred", recognition: "unconfirmed" }
+        $k groundsCommitment $c
+    }
+    return { $c.slug as commitment, $c.title as title, $k.statement as evidence, $k.quote as quote }
+}
+
+// 2. Why?
+
+query why($commitment: String) @description("The decision that created a commitment, the alternative it chose, and the reasons for and against.") {
+    match {
+        $c: Commitment { slug: $commitment }
+        $d creates $c
+        $d chose $a
+        $r reasonFor $a
+    }
+    return { $d.statement as decision, $a.statement as chosen, $r.polarity as polarity, $r.statement as reason }
+}
+
+query rejected_alternatives($commitment: String) @description("Alternatives considered and not chosen when the commitment was made.") {
+    match {
+        $c: Commitment { slug: $commitment }
+        $d creates $c
+        $d considered $a
+        not { $d chose $a }
+    }
+    return { $a.statement as alternative, $a.closes_at as closes_at }
+}
+
+query foundations($commitment: String) @description("The beliefs a commitment rests on, their evidence label and falsifier.") {
+    match {
+        $c: Commitment { slug: $commitment }
+        $c restsOn $b
+    }
+    return { $b.kind as kind, $b.statement as belief, $b.status as status, $b.falsifier as falsifier }
+}
+
+// 3. What does it depend on?
+
+query dependencies($commitment: String) @description("Commitments this one depends on, directly or through others.") {
+    match {
+        $c: Commitment { slug: $commitment }
+        $c dependsOn{1,6} $d
+        $d: Commitment
+    }
+    return { $d.slug as depends_on, $d.title as title, $d.state as state }
+}
+
+query allocations($commitment: String) @description("Resources a commitment ties up.") {
+    match {
+        $c: Commitment { slug: $commitment }
+        $c $x:allocates $r
+    }
+    return { $r.kind as kind, $r.name as resource, $x.amount as amount, $x.unit as unit, $x.ends as until }
+}
+
+// 4. What could change?
+
+query contradicted_foundations() @description("Live commitments (active or suspended) resting on a belief that a verified claim contradicts.") {
+    match {
+        $c: Commitment
+        $c.state = "active" or $c.state = "suspended"
+        $c restsOn $b
+        $k contradicts $b
+        $k: Claim { status: "verified" }
+    }
+    return { $c.slug as commitment, $b.statement as belief, $b.status as status, $k.statement as contradicting, $k.observed_at as observed_at }
+}
+
+query news_since_commitment($commitment: String) @description("The information clock: evidence about a commitment's beliefs observed after it was made.") {
+    match {
+        $c: Commitment { slug: $commitment }
+        $c restsOn $b
+        $k (supports | contradicts) $b
+        $k.observed_at > $c.committed_at
+    }
+    return { $b.statement as belief, $k.statement as evidence, $k.observed_at as observed_at }
+}
+
+query tripped() @description("Tripwires that evidence has triggered, with the commitment they guard.") {
+    match {
+        $t: Tripwire
+        $c: Commitment
+        $c guardedBy $t
+        $k $x:tripped $t
+    }
+    return { $c.slug as commitment, $t.kind as kind, $t.condition as condition, $k.statement as evidence, $x.at as at }
+}
+
+query closing_soon($from: DateTime, $to: DateTime) @description("The option clock: alternatives and opportunities that close in a window.") {
+    match {
+        $o: Opportunity
+        $c enables $o
+        $o.closes_at >= $from
+        $o.closes_at <= $to
+    }
+    return { $c.slug as commitment, $o.title as opportunity, $o.kind as kind, $o.closes_at as closes_at }
+    order { closes_at asc }
+}
+
+// 5. What else does it make possible?
+
+query enabled_by($commitment: String) @description("Opportunities a commitment opens, and those it forecloses.") {
+    match {
+        $c: Commitment { slug: $commitment }
+        $c enables $o
+    }
+    return { $o.title as opportunity, $o.kind as kind, $o.status as status, $o.value_estimate as value }
+}
+
+query freed_resources() @description("Resources tied up by released or fulfilled commitments that an identified opportunity could use.") {
+    match {
+        $c: Commitment
+        $c.state = "released" or $c.state = "fulfilled"
+        $c allocates $r
+        $o uses $r
+    }
+    return { $r.name as resource, $c.title as was_tied_up_by, $o.title as could_fund, $o.status as status }
+}
+
+// Governance checks (GraphPolicy check queries: zero rows when healthy)
+
+query transitions_without_authority() @description("State changes not enacted by a decision made under a mandate.") {
+    match {
+        $t: Transition
+        $t transitionOf $c
+        not { $t enactedBy $d  $d exercisedUnder $m }
+    }
+    return { $c.slug as commitment, $t.from_state as from_state, $t.to_state as to_state, $t.at as at }
+}
+
+query late_tripwires() @description("Kill criteria declared after the commitment was made.") {
+    match {
+        $c: Commitment
+        $c guardedBy $t
+        $t.declared_at > $c.committed_at
+    }
+    return { $c.slug as commitment, $t.condition as condition, $t.declared_at as declared_at }
+}
+
+query spending_clock($commitment: String) @description("The spending clock: dated exposure readings for a commitment, newest first, with when the avoidable part stops being avoidable.") {
+    match {
+        $c: Commitment { slug: $commitment }
+        $e exposureOf $c
+    }
+    return { $e.as_of as as_of, $e.kind as kind, $e.amount as amount, $e.unit as unit, $e.irreversible_by as irreversible_by }
+    order { as_of desc }
+}
+
+// Added 2026-10-27 for the demo specs (docs/10-ty-core.md, "Proposed additions").
+
+query owed_to($party: String) @description("Live commitments owed to a party, with the role it is owed in.") {
+    match {
+        $p: Party { slug: $party }
+        $c $o:owes $p
+        $c.state = "active" or $c.state = "proposed" or $c.state = "suspended"
+    }
+    return { $c.slug as commitment, $c.title as title, $c.state as state, $o.role as role, $c.origin as origin }
+    order { commitment asc }
+}
+
+query conflicts() @description("Pairs of commitments that conflict, and how.") {
+    match {
+        $a: Commitment
+        $b: Commitment
+        $a $x:conflictsWith $b
+    }
+    return { $a.slug as commitment, $b.slug as conflicts_with, $x.kind as kind }
+}
+
+query protection_gaps() @description("Commitments that depend on another commitment whose horizon ends first.") {
+    match {
+        $c: Commitment
+        $d: Commitment
+        $c dependsOn $d
+        $d.horizon_at < $c.horizon_at
+    }
+    return { $c.slug as commitment, $c.horizon_at as horizon, $d.slug as depends_on, $d.horizon_at as protection_ends }
+}
+
+query threshold_crossings() @description("Quantitative claims on the wrong side of a belief's threshold, with the commitments resting on it.") {
+    match {
+        $b: Belief
+        $k: Claim
+        $k.metric = $b.metric
+        ($b.comparator = "ge" and $k.value < $b.threshold) or ($b.comparator = "gt" and $k.value <= $b.threshold) or ($b.comparator = "le" and $k.value > $b.threshold) or ($b.comparator = "lt" and $k.value >= $b.threshold)
+        $c restsOn $b
+    }
+    return { $c.slug as commitment, $b.slug as belief, $k.value as value, $b.threshold as threshold, $b.hard_threshold as hard_threshold, $k.observed_at as observed_at }
+    order { commitment asc }
+}
+
+query threshold_breaches() @description("Quantitative claims past a belief's outer limit (threshold plus tolerance), with the commitments resting on it.") {
+    match {
+        $b: Belief
+        $k: Claim
+        $k.metric = $b.metric
+        ($b.comparator = "ge" and $k.value < $b.hard_threshold) or ($b.comparator = "gt" and $k.value <= $b.hard_threshold) or ($b.comparator = "le" and $k.value > $b.hard_threshold) or ($b.comparator = "lt" and $k.value >= $b.hard_threshold)
+        $c restsOn $b
+    }
+    return { $c.slug as commitment, $b.slug as belief, $k.value as value, $b.hard_threshold as hard_threshold, $k.observed_at as observed_at }
+    order { commitment asc }
+}
+
+query expected_evidence($after: DateTime) @description("Reports expected after a date, and the beliefs each will inform.") {
+    match {
+        $s: Source
+        $s willInform $b
+        $s.occurred_at > $after
+    }
+    return { $s.occurred_at as expected, $s.title as source, $b.slug as belief, $b.statement as statement }
+    order { expected asc }
+}
+
+query evidence_judgments($belief: String) @description("Every judged link from a claim to a belief, with who judged it.") {
+    match {
+        $b: Belief { slug: $belief }
+        $k $x:(supports | contradicts) $b
+    }
+    return { $k.slug as claim, $k.statement as statement, $x.judged_by as judged_by, $x.judged_at as judged_at, $x.note as note }
+    order { judged_at asc }
+}
+
+query risk_register($commitment: String) @description("Rated risks in a commitment, who bears them and what drives them.") {
+    match {
+        $c: Commitment { slug: $commitment }
+        $r riskOf $c
+    }
+    return { $r.slug as risk, $r.kind as kind, $r.level as level, $r.previous_level as previous, $r.changed_at as changed_at }
+    order { level desc }
+}
+
+query approvals($decision: String) @description("Who approved a decision, when, and under which mandate.") {
+    match {
+        $d: Decision { slug: $decision }
+        $d $a:approvedBy $p
+    }
+    return { $p.name as approver, $a.at as at, $a.under as under }
+    order { at asc }
+}
+
+query options_held_by_others() @description("Options another party holds over our commitments: rights of first offer, renewal options.") {
+    match {
+        $o: Opportunity
+        $o optionHeldBy $p
+    }
+    return { $o.slug as option, $o.title as title, $p.name as held_by, $o.closes_at as closes_at }
+}
+
+query belief_assessments($belief: String) @description("Every party's dated confidence in a belief, to compare perspectives.") {
+    match {
+        $b: Belief { slug: $belief }
+        $a assessesBelief $b
+        $a assessedBy $p
+    }
+    return { $p.name as assessed_by, $a.value as confidence, $a.as_of as as_of, $a.basis as basis }
+    order { as_of asc }
+}
+
+// Ontology markup (2026-10-27). $terms is a list of CURIEs, typically a class and its subclasses
+// from a book's `subclasses` query, so "any kind of X" is two queries: one to the book, one here.
+
+query parties_tagged($terms: [String]) @description("Parties whose ontology term is in a list of CURIEs.") {
+    match {
+        $p: Party
+        $p.ontology_term in $terms
+    }
+    return { $p.slug as party, $p.name as name, $p.ontology_term as term }
+    order { party asc }
+}
+
+query commitments_owed_to_tagged($terms: [String]) @description("Live commitments owed to a party whose ontology term is in a list of CURIEs.") {
+    match {
+        $p: Party
+        $p.ontology_term in $terms
+        $c $o:owes $p
+        $c.state = "active" or $c.state = "proposed" or $c.state = "suspended"
+    }
+    return { $c.slug as commitment, $c.title as title, $o.role as role, $p.name as party, $p.ontology_term as term }
+    order { commitment asc }
+}
+
+query contracts_tagged($terms: [String]) @description("Contracts whose ontology term is in a list of CURIEs, with the commitments they formalize.") {
+    match {
+        $k: Contract
+        $k.ontology_term in $terms
+        $c formalizedBy $k
+    }
+    return { $k.slug as contract, $k.title as title, $k.ontology_term as term, $c.slug as commitment }
+    order { contract asc }
+}
+
+query holdings_tagged($terms: [String]) @description("Positions holding an instrument whose ontology term is in a list of CURIEs.") {
+    match {
+        $i: Instrument
+        $i.ontology_term in $terms
+        $c $h:holds $i
+    }
+    return { $c.slug as commitment, $h.stance as stance, $i.name as instrument, $i.ontology_term as term }
+    order { commitment asc }
+}

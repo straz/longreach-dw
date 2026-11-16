@@ -1,0 +1,209 @@
+.clist {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--surface);
+  border-right: 1px solid var(--line);
+}
+
+.clist-tools {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.clist-search {
+  height: var(--control-h);
+  padding: 0 var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--canvas);
+  font-size: var(--size-sm);
+}
+
+.clist-search:focus {
+  background: var(--surface);
+  border-color: var(--ink-3);
+  outline: none;
+}
+
+.clist-new {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  height: var(--control-h);
+  border: 0;
+  border-radius: var(--radius);
+  background: var(--action);
+  color: var(--ink-on-dark);
+  font-size: var(--size-sm);
+  font-weight: 600;
+  transition: background-color var(--dur) var(--ease-out);
+}
+
+.clist-new:hover {
+  background: var(--action-dark);
+}
+
+.clist-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding-bottom: var(--space-5);
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
+}
+
+.clist-overview {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: var(--space-2) var(--space-2) 0;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius);
+  color: var(--ink-2);
+  font-size: var(--size-sm);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.clist-overview:hover {
+  background: var(--canvas);
+}
+
+.clist-overview.is-selected {
+  background: var(--action-soft);
+  color: var(--action-dark);
+}
+
+.clist-group {
+  margin-top: var(--space-3);
+}
+
+.clist-group-title {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  padding: 0 var(--space-4) var(--space-1);
+}
+
+.clist-group.is-attention .clist-group-title {
+  color: var(--attention);
+}
+
+.clist-group-title button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-left: -13px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  color: inherit;
+}
+
+.clist-group-title button:hover {
+  color: var(--ink);
+}
+
+.clist-group.is-attention .clist-group-title button:hover {
+  color: var(--attention-ink);
+}
+
+.clist-caret {
+  transition: transform var(--dur) var(--ease-out);
+}
+
+.clist-caret.is-open {
+  transform: rotate(90deg);
+}
+
+.clist-count {
+  font-weight: 600;
+  opacity: 0.8;
+}
+
+.clist-note {
+  margin-left: auto;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  font-size: var(--size-xs);
+}
+
+.clist-row {
+  display: grid;
+  grid-template-columns: 14px minmax(0, 1fr);
+  column-gap: var(--space-2);
+  padding: 6px var(--space-4) 6px calc(var(--space-4) - 2px);
+  border-left: 2px solid transparent;
+  color: inherit;
+  text-decoration: none;
+  transition: background-color var(--dur) var(--ease-out);
+}
+
+.clist-row:hover {
+  background: var(--canvas);
+}
+
+.clist-row.is-selected {
+  background: var(--action-soft);
+  border-left-color: var(--action);
+}
+
+.clist-row:focus-visible {
+  outline-offset: -2px;
+}
+
+.clist-mark {
+  grid-row: 1;
+  display: flex;
+  align-items: center;
+  height: 1.3rem;
+}
+
+.clist-title {
+  font-size: var(--size-sm);
+  font-weight: 600;
+  line-height: 1.3rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.clist-meta {
+  grid-column: 2;
+  display: flex;
+  gap: var(--space-3);
+  font-size: var(--size-xs);
+  color: var(--ink-3);
+}
+
+.clist-row.is-moved .clist-window {
+  color: var(--window);
+  font-weight: 600;
+}
+
+.clist-empty {
+  padding: var(--space-4);
+  font-size: var(--size-sm);
+  color: var(--ink-3);
+}
+
+.clist-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-4);
+}
+
+.clist-skeleton span {
+  height: 0.8rem;
+  border-radius: 3px;
+  background: var(--surface-muted);
+}

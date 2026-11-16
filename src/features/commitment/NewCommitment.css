@@ -1,0 +1,50 @@
+.newc {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.clist-new:disabled {
+  background: var(--line);
+  color: var(--ink-3);
+  cursor: default;
+}
+
+.newc-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: -2rem;
+  z-index: 30;
+  display: grid;
+  padding: var(--space-1);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  box-shadow: var(--shadow-popover);
+}
+
+.newc-menu button {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-2) var(--space-3);
+  border: 0;
+  border-radius: var(--radius);
+  background: none;
+  text-align: left;
+}
+
+.newc-menu button:hover {
+  background: var(--canvas);
+}
+
+.newc-menu strong {
+  font-size: var(--size-sm);
+}
+
+.newc-menu span {
+  font-size: var(--size-xs);
+  color: var(--ink-3);
+  line-height: 1.4;
+}

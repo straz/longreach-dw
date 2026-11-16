@@ -1,0 +1,70 @@
+.chevrons {
+  padding: var(--space-3) var(--gutter) 0;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+}
+
+.chevrons-list {
+  display: flex;
+}
+
+/* Arrow shapes. The first chevron has a flat left edge; each next one tucks
+   under the previous point. */
+.chevron {
+  --notch: 16px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-right: -10px;
+  padding: var(--space-2) calc(var(--notch) + 18px) var(--space-2) calc(var(--notch) + 14px);
+  border: 0;
+  background: var(--surface-muted);
+  color: var(--ink-2);
+  text-align: left;
+  clip-path: polygon(0 0, calc(100% - var(--notch)) 0, 100% 50%, calc(100% - var(--notch)) 100%, 0 100%, var(--notch) 50%);
+  transition: background-color var(--dur) var(--ease-out);
+}
+
+.chevron:first-child {
+  padding-left: var(--space-5);
+  clip-path: polygon(0 0, calc(100% - var(--notch)) 0, 100% 50%, calc(100% - var(--notch)) 100%, 0 100%);
+}
+
+.chevron:hover {
+  background: var(--line);
+}
+
+.chevron[aria-selected='true'] {
+  background: var(--ink);
+  color: var(--ink-on-dark);
+}
+
+/* clip-path cuts off the outline, so focus draws inside the shape. */
+.chevron:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--action);
+}
+
+.chevron[aria-selected='true']:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--ink-on-dark);
+}
+
+.chevron-name {
+  font-size: var(--size-body);
+  font-weight: 700;
+}
+
+.chevron-count {
+  margin-left: var(--space-2);
+  font-weight: 600;
+}
+
+.chevron-verb {
+  font-size: var(--size-xs);
+  color: var(--ink-3);
+}
+
+.chevron[aria-selected='true'] .chevron-verb {
+  color: var(--ink-on-dark-2);
+}

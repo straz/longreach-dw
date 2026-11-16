@@ -1,0 +1,46 @@
+.spark {
+  display: block;
+  overflow: visible;
+}
+
+.spark-bad {
+  fill: var(--attention-soft);
+  opacity: 0.55;
+}
+
+.spark-zone {
+  fill: var(--attention-soft);
+}
+
+.spark-threshold {
+  stroke: var(--ink-3);
+  stroke-width: 1;
+  stroke-dasharray: 2 2;
+}
+
+.spark-line {
+  fill: none;
+  stroke: var(--ink-2);
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.spark-last {
+  fill: var(--ink-2);
+  stroke: var(--surface);
+  stroke-width: 1.5;
+}
+
+.spark.tone-moved .spark-last {
+  fill: var(--attention);
+}
+
+.spark.tone-weak .spark-last {
+  fill: var(--weak);
+}
+
+.spark-empty {
+  font-size: var(--size-xs);
+  color: var(--ink-3);
+}

@@ -1,0 +1,252 @@
+.bpanel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border-left: 1px solid var(--line);
+  background: var(--surface);
+  animation: bpanel-in var(--dur) var(--ease-out);
+}
+
+@keyframes bpanel-in {
+  from {
+    opacity: 0;
+    transform: translateX(12px);
+  }
+}
+
+.bpanel-head {
+  padding: var(--space-4) var(--space-5) var(--space-3);
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.bpanel-titlerow {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.bpanel-title {
+  flex: 1;
+  font-family: var(--serif);
+  font-size: var(--size-md);
+  font-weight: 600;
+  line-height: 1.3;
+  text-wrap: balance;
+}
+
+.bpanel-close {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: var(--radius);
+  background: none;
+  color: var(--ink-3);
+}
+
+.bpanel-close:hover {
+  background: var(--canvas);
+  color: var(--ink);
+}
+
+.bpanel-status {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}
+
+.bpanel-kind {
+  font-size: var(--size-xs);
+  color: var(--ink-3);
+}
+
+.bpanel-falsifier {
+  margin-top: var(--space-2);
+  font-size: var(--size-xs);
+  color: var(--ink-3);
+}
+
+.bpanel-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 var(--space-5) var(--space-5);
+}
+
+.bsec {
+  padding-top: var(--space-4);
+}
+
+.bsec-title {
+  margin-bottom: var(--space-2);
+}
+
+.bsec-text,
+.bsec-list {
+  font-size: var(--size-sm);
+  color: var(--ink-2);
+}
+
+.bsec-list li + li {
+  margin-top: var(--space-1);
+}
+
+.bsec-why.is-flag {
+  margin-top: var(--space-4);
+  padding: var(--space-3);
+  border-radius: var(--radius);
+  background: var(--attention-soft);
+}
+
+.bsec-why.is-flag .bsec-title,
+.bsec-why.is-flag .bsec-list {
+  color: var(--attention-ink);
+}
+
+.brests li {
+  display: grid;
+  gap: 1px;
+  padding: 6px 0;
+  border-top: 1px solid var(--line-soft);
+  font-size: var(--size-sm);
+}
+
+.brests li:first-child {
+  border-top: 0;
+}
+
+.brests a {
+  color: var(--ink);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.brests a:hover {
+  text-decoration: underline;
+}
+
+.brests li:not(.is-flagged) a {
+  font-weight: 400;
+}
+
+.brests-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  font-size: var(--size-xs);
+  color: var(--ink-3);
+}
+
+.brests-meta .is-avoidable {
+  color: var(--attention-ink);
+  font-weight: 600;
+}
+
+.brests-meta .is-window {
+  color: var(--window);
+  font-weight: 600;
+}
+
+.bev-group + .bev-group {
+  margin-top: var(--space-3);
+}
+
+.bev-group-title {
+  margin-bottom: var(--space-1);
+  font-size: var(--size-xs);
+  font-weight: 600;
+  color: var(--ink-2);
+}
+
+.bev {
+  display: grid;
+  grid-template-columns: 5.5rem minmax(0, 1fr);
+  column-gap: var(--space-3);
+  row-gap: 2px;
+  padding: 6px 0;
+  border-top: 1px solid var(--line-soft);
+  font-size: var(--size-sm);
+}
+
+.bev-lead {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.bev-text {
+  color: var(--ink-2);
+}
+
+.bev-claim {
+  display: block;
+  font-size: var(--size-xs);
+  color: var(--ink-3);
+}
+
+.bev-prov,
+.bev-actions {
+  grid-column: 2;
+  font-size: var(--size-xs);
+  color: var(--ink-3);
+}
+
+.bev-actions {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+}
+
+.bev.is-agent.is-open {
+  margin: var(--space-1) 0;
+  padding: var(--space-2);
+  border: 1px dashed var(--agent);
+  border-radius: var(--radius);
+}
+
+.bev-next {
+  margin-top: var(--space-2);
+  font-size: var(--size-xs);
+  color: var(--window);
+  font-weight: 600;
+}
+
+.bpanel-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-5);
+  border-top: 1px solid var(--line);
+}
+
+.bpanel-foot .write-error {
+  flex-basis: 100%;
+  margin: 0;
+}
+
+.bpanel-done {
+  margin-right: auto;
+  font-size: var(--size-sm);
+  color: var(--ink-3);
+}
+
+/* Narrow: the panel slides over the main pane instead of taking a column. */
+@media (max-width: 999px) {
+  .bpanel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 30;
+    width: min(25rem, 100vw);
+    box-shadow: var(--shadow-sheet);
+  }
+}

@@ -1,0 +1,90 @@
+.asof {
+  position: relative;
+}
+
+.asof-button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  height: var(--control-h);
+  padding: 0 var(--space-3);
+  border: 1px solid var(--line-on-dark);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--ink-on-dark);
+  font-size: var(--size-sm);
+  font-weight: 600;
+  transition: border-color var(--dur) var(--ease-out);
+}
+
+.asof-button:hover,
+.asof-button[aria-expanded='true'] {
+  border-color: var(--ink-on-dark-2);
+}
+
+.asof-caret {
+  width: 10px;
+  height: 6px;
+}
+
+.asof-panel {
+  position: absolute;
+  top: calc(100% + var(--space-2));
+  right: 0;
+  z-index: 20;
+  width: 22rem;
+  padding: var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: var(--shadow-popover);
+}
+
+.asof-help {
+  font-size: var(--size-sm);
+  color: var(--ink-2);
+  margin-bottom: var(--space-3);
+}
+
+.asof-slider {
+  width: 100%;
+  accent-color: var(--ink);
+}
+
+.asof-ends {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--size-xs);
+  color: var(--ink-3);
+  margin-bottom: var(--space-3);
+}
+
+.asof-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--size-sm);
+}
+
+.asof-row input {
+  height: var(--control-h);
+  padding: 0 var(--space-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.asof-reset {
+  margin-left: auto;
+  height: var(--control-h);
+  padding: 0 var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  font-size: var(--size-sm);
+}
+
+.asof-reset:disabled {
+  color: var(--ink-3);
+  cursor: default;
+}

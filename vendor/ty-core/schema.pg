@@ -1,0 +1,515 @@
+// Copy of tyapi spikes/ty-core/schema.pg at 1db845d. Update: copy the
+// file, change this line, run `pnpm gen:model`.
+// ===================================================================
+// ty-core: parties, provenance, commitments, decisions, state changes
+// ===================================================================
+
+node Party @description("Someone who can be bound by, owed, or accountable for a commitment: a person, an organization, a team, a group, or a software agent acting for one of them.") {
+    slug: String @key
+    kind: enum(person, organization, team, agent, group) @description("group: a constituency such as enrolled students or a client base")
+    name: String @index
+    active: Bool?
+    ontology_term: String? @index @description("CURIE of the most specific class in a reference ontology (a book) this is an instance of, such as fibo-fbc-fct-fse:CommercialBank. Markup only: the book supplies the hierarchy")
+}
+
+node Actor @description("An identity that writes this graph (an Omnigraph principal), human or agent. Commit history names actors; ActsFor names the party each one acts for.") {
+    slug: String @key
+    kind: enum(human, agent)
+    name: String
+    model: String? @description("For agents: the model and prompt version behind its writes")
+}
+
+node Source @description("Raw material as captured: a meeting, document, contract, filing, email, dataset or web page. Never rewritten by interpretation.") {
+    slug: String @key
+    kind: enum(meeting, document, contract, filing, email, thread, dataset, web, other)
+    title: String
+    occurred_at: DateTime? @description("In the future for an expected report")
+    uri: String?
+    synthetic: Bool? @description("true: fictional demo data, never to be presented as real")
+}
+
+node Span @description("An addressable piece of a source: a transcript segment, a paragraph, a contract clause.") {
+    slug: String @key
+    text: String
+    locator: String?
+}
+
+node Claim @description("One statement someone made, extracted from a source: an observation, a forecast, a statement of intent, an analysis. Evidence is claims linked to beliefs.") {
+    slug: String @key
+    kind: enum(observation, forecast, intent, analysis, opinion, other)
+    statement: String @index
+    quote: String?
+    observed_at: DateTime? @description("When the stated fact was true in the world")
+    recorded_at: DateTime @description("When the graph learned it")
+    status: enum(unverified, verified, rejected) @index
+    metric: String? @index @description("For a quantitative observation: the metric it measures, matching Belief.metric")
+    value: F64?
+    unit: String?
+}
+
+node Commitment @description("A continuing undertaking that binds resources, authority, actions or obligations to a course of action over time. A decision makes a choice; a commitment carries its consequences.") {
+    slug: String @key
+    title: String @index
+    statement: String
+    scale: enum(strategic, portfolio, program, operational, task)
+    origin: enum(declared, inferred) @description("inferred: found by analysing actions or documents, not stated by its owner")
+    recognition: enum(unconfirmed, confirmed, disputed) @description("Whether the bound party acknowledges the commitment; declared commitments are confirmed")
+    state: enum(proposed, active, suspended, fulfilled, released, breached, revoked, expired, superseded) @index
+    committed_at: DateTime?
+    horizon_at: DateTime? @description("When the undertaking is expected to end")
+    revisit_at: DateTime? @index
+    reversibility: enum(reversible, costly, irreversible)?
+    watched: Bool @description("Whether the owner watches it: its assumptions and dependencies are checked against new evidence")
+    ontology_term: String? @index @description("CURIE of the most specific class in a reference ontology (a book) this is an instance of, such as fibo-fbc-fct-fse:CommercialBank. Markup only: the book supplies the hierarchy")
+}
+
+node Decision @description("The selection of a course of action at a point in time. Decisions create, amend, renew, suspend, revoke or release commitments.") {
+    slug: String @key
+    statement: String
+    kind: enum(commit, amend, renew, defer, decline, suspend, revoke, release, exercise, other)
+    decided_at: DateTime
+    rationale: String?
+}
+
+node Transition @description("One recorded change of a commitment's state: when, why, and on whose decision. A commitment's state mirrors its latest transition.") {
+    slug: String @key
+    from_state: enum(none, proposed, active, suspended, fulfilled, released, breached, revoked, expired, superseded)
+    to_state: enum(proposed, active, suspended, fulfilled, released, breached, revoked, expired, superseded)
+    at: DateTime
+    reason: String?
+}
+
+node Review @description("A scheduled or prompted reconsideration of a commitment, and its outcome. A review can recommend; only a decision changes state.") {
+    slug: String @key
+    scheduled_for: DateTime
+    held_at: DateTime?
+    kind: enum(scheduled, prompted, reconsideration) @description("scheduled: on the calendar; prompted: by evidence; reconsideration: a brief's decision meeting")
+    outcome: enum(pending, affirm, amend, reverse, close, escalate, defer)
+    notes: String?
+}
+
+node GraphPolicy @instruction("A rule this graph must satisfy. Read active policies before writing; run their check queries and fix what breaks.") {
+    slug: String @key
+    name: String
+    statement: String
+    severity: enum(error, warning, info) @index
+    check_query: String?
+    status: enum(active, draft, retired) @index
+}
+
+edge ActsFor: Actor -> Party @card(0..1) {
+    @key(@src, @dst)
+}
+edge MemberOf: Party -> Party {
+    role: String?
+    since: DateTime?
+    until: DateTime?
+    @key(@src, @dst)
+}
+edge SpanOf: Span -> Source @card(1..1) {
+    @key(@src, @dst)
+}
+edge ClaimFrom: Claim -> Source @card(1..1) {
+    @key(@src, @dst)
+}
+edge QuotedFrom: Claim -> Span {
+    @key(@src, @dst)
+}
+edge ClaimedBy: Claim -> Party {
+    @key(@src, @dst)
+}
+edge ExtractedBy: Claim -> Actor @card(0..1) {
+    @key(@src, @dst)
+}
+
+edge Commits: Party -> Commitment {
+    @key(@src, @dst)
+}
+edge OwnedBy: Commitment -> Party @card(0..1) {
+    @key(@src, @dst)
+}
+edge Owes: Commitment -> Party {
+    role: enum(beneficiary, counterparty, regulator, internal, other)
+    @key(@src, @dst)
+}
+edge Entails: Commitment -> Commitment {
+    @key(@src, @dst)
+}
+edge DependsOn: Commitment -> Commitment {
+    kind: enum(requires, funds, precedes, assumes, other)
+    watched: Bool? @description("true: the owner watches this dependency; none or false: not watched")
+    @key(@src, @dst)
+}
+edge ConflictsWith: Commitment -> Commitment {
+    kind: enum(resource, obligation, incentive, timing, other)
+    @key(@src, @dst)
+}
+edge SupersededBy: Commitment -> Commitment @card(0..1) {
+    @key(@src, @dst)
+}
+edge CommitmentDerivedFrom: Commitment -> Commitment @card(0..1) {
+    @key(@src, @dst)
+}
+
+edge DecidedBy: Decision -> Party {
+    @key(@src, @dst)
+}
+edge Creates: Decision -> Commitment {
+    @key(@src, @dst)
+}
+edge TransitionOf: Transition -> Commitment @card(1..1) {
+    @key(@src, @dst)
+}
+edge EnactedBy: Transition -> Decision @card(0..1) {
+    @key(@src, @dst)
+}
+edge RecordedBy: Transition -> Actor @card(0..1) {
+    @key(@src, @dst)
+}
+edge ReviewOf: Review -> Commitment @card(1..) @description("The commitments a review reconsiders: one, or a reconsideration brief's bundle") {
+    @key(@src, @dst)
+}
+edge ResultedIn: Review -> Decision {
+    @key(@src, @dst)
+}
+edge GroundsCommitment: Claim -> Commitment {
+    field: enum(promise, capital, owner, rationale, assumptions, success_criteria, dependencies)? @description("The commitment's field this claim grounds, for field-level verification; none when it grounds the whole commitment")
+    @key(@src, @dst)
+}
+edge GroundsDecision: Claim -> Decision {
+    field: enum(promise, capital, owner, rationale, assumptions, success_criteria, dependencies)? @description("The field this claim grounds; none when it grounds the whole decision")
+    @key(@src, @dst)
+}
+edge RecordedIn: Commitment -> Source {
+    external_id: String?
+    @key(@src, @dst)
+}
+
+// ===================================================================
+// ty-epistemics: what we believe, why, and what would prove it wrong
+// ===================================================================
+
+node Belief @description("A proposition a commitment relies on: an assumption, a prediction, a thesis, or a constraint believed true. Status is the evidence label: hypothesized, established or falsified.") {
+    slug: String @key
+    kind: enum(assumption, prediction, thesis, constraint)
+    statement: String @index
+    status: enum(hypothesized, established, falsified) @index
+    falsifier: String? @description("The observation that would prove it wrong")
+    horizon_at: DateTime? @description("For predictions: when it resolves")
+    metric: String?
+    comparator: enum(lt, le, eq, ge, gt)?
+    threshold: F64? @description("The line: a claim on the wrong side of it has crossed")
+    hard_threshold: F64? @description("The outer limit, threshold plus or minus a tolerance: a claim past it is a breach")
+    trend: enum(rising, falling)? @description("The belief holds while each new reading moves this way")
+}
+
+node Alternative @description("A course of action that was considered, chosen or not.") {
+    slug: String @key
+    statement: String
+    closes_at: DateTime? @description("When this alternative stops being available")
+    reversal_cost: F64?
+    incremental_value: F64? @description("What taking this path is worth against the current course")
+    uncertainty_low: F64?
+    uncertainty_high: F64?
+    unit: String? @description("The unit of reversal_cost, incremental_value and the uncertainty range")
+    authorization: String? @description("Slug of the mandate this path needs")
+}
+
+node Reason @description("An argument for or against an alternative.") {
+    slug: String @key
+    statement: String
+    polarity: enum(pro, con)
+    weight: enum(minor, major, decisive)?
+}
+
+node Question @description("Something not yet known that a decision or belief depends on.") {
+    slug: String @key
+    statement: String @index
+    status: enum(open, partial, resolved) @index
+    answer: String?
+}
+
+node Assessment @description("A dated confidence reading by one party, on a belief or on whether a commitment will be met. Confidence is a time series, not a field.") {
+    slug: String @key
+    value: F64
+    as_of: DateTime
+    basis: String?
+    @range(value, 0..1)
+}
+
+node Tripwire @description("A condition declared in advance that forces a review or ends a commitment. declared_at after the commitment's committed_at means the criterion was added later.") {
+    slug: String @key
+    condition: String
+    kind: enum(review, kill)
+    declared_at: DateTime
+    metric: String?
+    comparator: enum(lt, le, eq, ge, gt)?
+    threshold: F64?
+}
+
+edge RestsOn: Commitment -> Belief {
+    necessary: Bool? @description("true: the commitment fails if the belief fails")
+    watched: Bool? @description("true: the owner watches this assumption; none or false: not watched")
+    @key(@src, @dst)
+}
+edge Supports: Claim -> Belief {
+    weight: enum(weak, moderate, strong)?
+    judged_by: String @description("Slug of the actor who judged the link")
+    judged_at: DateTime?
+    note: String?
+    @key(@src, @dst, judged_by)
+}
+edge Contradicts: Claim -> Belief {
+    weight: enum(weak, moderate, strong)?
+    judged_by: String
+    judged_at: DateTime?
+    note: String?
+    @key(@src, @dst, judged_by)
+}
+edge InformsBelief: Claim -> Belief {
+    judged_by: String
+    judged_at: DateTime?
+    note: String?
+    @key(@src, @dst, judged_by)
+}
+edge BeliefRestsOn: Belief -> Belief {
+    @key(@src, @dst)
+}
+edge BeliefDerivedFrom: Belief -> Belief @card(0..1) {
+    @key(@src, @dst)
+}
+edge Considered: Decision -> Alternative {
+    @key(@src, @dst)
+}
+edge Chose: Decision -> Alternative @card(0..1) {
+    @key(@src, @dst)
+}
+edge ReasonFor: Reason -> Alternative @card(1..1) {
+    @key(@src, @dst)
+}
+edge ReasonCites: Reason -> Belief {
+    @key(@src, @dst)
+}
+edge AssessesBelief: Assessment -> Belief @card(0..1) {
+    @key(@src, @dst)
+}
+edge AssessesCommitment: Assessment -> Commitment @card(0..1) {
+    @key(@src, @dst)
+}
+edge AssessedBy: Assessment -> Party @card(1..1) {
+    @key(@src, @dst)
+}
+edge Raises: Decision -> Question {
+    @key(@src, @dst)
+}
+edge Informs: Claim -> Question {
+    @key(@src, @dst)
+}
+edge GuardedBy: Commitment -> Tripwire {
+    @key(@src, @dst)
+}
+edge Watches: Tripwire -> Belief {
+    @key(@src, @dst)
+}
+edge Tripped: Claim -> Tripwire {
+    at: DateTime
+    @key(@src, @dst)
+}
+edge Prompted: Tripwire -> Review {
+    @key(@src, @dst)
+}
+edge WillInform: Source -> Belief {
+    @key(@src, @dst)
+}
+
+// ===================================================================
+// ty-economics: what is at stake
+// ===================================================================
+
+node Resource @description("Something a commitment ties up: capital, time, talent, capacity, an asset, attention.") {
+    slug: String @key
+    kind: enum(capital, time, talent, capacity, asset, attention, other)
+    name: String @index
+    unit: String?
+    ontology_term: String? @index @description("CURIE of the most specific class in a reference ontology (a book) this is an instance of, such as fibo-fbc-fct-fse:CommercialBank. Markup only: the book supplies the hierarchy")
+}
+
+node Exposure @description("A dated reading of what a commitment has cost or puts at stake: sunk, committed but not yet spent, still avoidable, or at risk if it fails.") {
+    slug: String @key
+    kind: enum(sunk, committed, avoidable, at_risk, authorized) @description("authorized: the amount a decision authorized, a program's headline")
+    amount: F64
+    unit: String
+    as_of: DateTime
+    irreversible_by: DateTime? @description("When the remaining avoidable amount stops being avoidable")
+}
+
+edge Allocates: Commitment -> Resource {
+    amount: F64?
+    unit: String?
+    starts: DateTime?
+    ends: DateTime?
+    @key(@src, @dst)
+}
+edge ExposureOf: Exposure -> Commitment @card(1..1) {
+    @key(@src, @dst)
+}
+
+node Risk @description("A rated risk borne by a party in a commitment, driven by beliefs: one row of a risk register.") {
+    slug: String @key
+    kind: enum(pricing, funding, counterparty, renewal, concentration, construction, demand, balance_sheet, spillover, returns, obsolescence, regulatory, other)
+    level: I32
+    previous_level: I32?
+    changed_at: DateTime?
+    @range(level, 1..5)
+    @range(previous_level, 1..5)
+}
+
+edge RiskOf: Risk -> Commitment @card(1..1) {
+    @key(@src, @dst)
+}
+edge RiskBorneBy: Risk -> Party @card(0..1) {
+    @key(@src, @dst)
+}
+edge DrivenBy: Risk -> Belief {
+    @key(@src, @dst)
+}
+
+// ===================================================================
+// ty-governance: who may commit or reconsider
+// ===================================================================
+
+node Mandate @description("Authority held by a party to act on commitments, within a scope and limit. Evidence may justify reconsideration; only a mandate authorizes it.") {
+    slug: String @key
+    power: enum(propose, commit, approve, reconsider, suspend, revoke, execute, monitor)
+    scope: String
+    limit_amount: F64?
+    unit: String?
+    valid_from: DateTime?
+    valid_until: DateTime?
+}
+
+node Contract @description("A legally enforceable agreement. One way a commitment may be formalized; many commitments have none.") {
+    slug: String @key
+    title: String
+    effective_at: DateTime?
+    ends_at: DateTime?
+    uri: String?
+    ontology_term: String? @index @description("CURIE of the most specific class in a reference ontology (a book) this is an instance of, such as fibo-fbc-fct-fse:CommercialBank. Markup only: the book supplies the hierarchy")
+}
+
+edge HeldBy: Mandate -> Party @card(1..1) {
+    @key(@src, @dst)
+}
+edge GrantedBy: Mandate -> Party @card(0..1) {
+    @key(@src, @dst)
+}
+edge DelegatedFrom: Mandate -> Mandate @card(0..1) {
+    @key(@src, @dst)
+}
+edge CoversCommitment: Mandate -> Commitment {
+    @key(@src, @dst)
+}
+edge ExercisedUnder: Decision -> Mandate {
+    @key(@src, @dst)
+}
+edge AccountableTo: Commitment -> Party {
+    @key(@src, @dst)
+}
+edge FormalizedBy: Commitment -> Contract {
+    @key(@src, @dst)
+}
+edge ContractParty: Contract -> Party {
+    role: String?
+    @key(@src, @dst)
+}
+edge ApprovedBy: Decision -> Party {
+    at: DateTime
+    under: String? @description("Slug of the mandate the approval was given under")
+    @key(@src, @dst)
+}
+
+// ===================================================================
+// ty-options: what else becomes possible
+// ===================================================================
+
+node Opportunity @description("A real option: a future course of action that commitments open or close: expand, defer, stage, switch, abandon, redeploy, or enter something adjacent.") {
+    slug: String @key
+    title: String @index
+    kind: enum(expand, defer, stage, switch, abandon, redeploy, adjacent, other)
+    status: enum(latent, identified, evaluating, pursued, exercised, expired, declined) @index
+    opens_at: DateTime?
+    closes_at: DateTime? @index
+    value_estimate: F64?
+    exercise_cost: F64?
+    unit: String?
+    ontology_term: String? @index @description("CURIE of the most specific class in a reference ontology (a book) this is an instance of, such as fibo-fbc-fct-fse:CommercialBank. Markup only: the book supplies the hierarchy")
+}
+
+node Goal @description("A desired future state that commitments serve.") {
+    slug: String @key
+    statement: String
+    target_at: DateTime?
+}
+
+node Outcome @description("What changed as a consequence of a commitment, intended or not.") {
+    slug: String @key
+    statement: String
+    observed_at: DateTime?
+    intended: Bool?
+}
+
+edge Enables: Commitment -> Opportunity {
+    @key(@src, @dst)
+}
+edge Forecloses: Commitment -> Opportunity {
+    until: DateTime?
+    @key(@src, @dst)
+}
+edge Exercises: Commitment -> Opportunity @card(0..1) {
+    @key(@src, @dst)
+}
+edge Uses: Opportunity -> Resource {
+    @key(@src, @dst)
+}
+edge Serves: Commitment -> Goal {
+    @key(@src, @dst)
+}
+edge Produced: Commitment -> Outcome {
+    @key(@src, @dst)
+}
+edge GroundsOpportunity: Claim -> Opportunity {
+    @key(@src, @dst)
+}
+edge OptionHeldBy: Opportunity -> Party @card(0..1) {
+    @key(@src, @dst)
+}
+
+// ===================================================================
+// investments (domain module): instruments held by commitments
+// ===================================================================
+
+node Instrument @description("Something a position holds: a note, a loan, an equity, a fund, a project stake, a power purchase agreement.") {
+    slug: String @key
+    name: String @index
+    kind: enum(bond, note, loan, equity, fund, project, ppa, other)
+    ontology_term: String? @index @description("CURIE of the most specific class in a reference ontology (a book) this is an instance of, such as fibo-fbc-fct-fse:CommercialBank. Markup only: the book supplies the hierarchy")
+}
+
+node Market @description("A market or sector that beliefs and parties are about.") {
+    slug: String @key
+    name: String @index
+}
+
+edge Holds: Commitment -> Instrument {
+    stance: enum(lend, own, hold, overweight, underweight, avoid)
+    @key(@src, @dst)
+}
+edge IssuedBy: Instrument -> Party @card(0..1) {
+    @key(@src, @dst)
+}
+edge BeliefAboutMarket: Belief -> Market {
+    @key(@src, @dst)
+}
+edge PartyInMarket: Party -> Market {
+    @key(@src, @dst)
+}

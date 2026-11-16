@@ -1,0 +1,59 @@
+.trend-group + .trend-group {
+  margin-top: var(--space-5);
+}
+
+.trend-group .internal-mark {
+  margin-left: var(--space-1);
+}
+
+.trend-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(18.5rem, 1fr));
+  gap: var(--space-3);
+}
+
+.trend {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  text-align: left;
+  transition: border-color var(--dur) var(--ease-out);
+}
+
+.trend:hover {
+  border-color: var(--ink-3);
+}
+
+.trend.is-selected {
+  border-color: var(--attention);
+}
+
+.trend-name {
+  font-size: var(--size-sm);
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.trend-now {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  font-size: var(--size-sm);
+}
+
+.trend-now strong {
+  font-size: var(--size-md);
+}
+
+.trend-word {
+  font-size: var(--size-xs);
+  color: var(--ink-3);
+}
+
+.trend-foot {
+  font-size: var(--size-xs);
+  color: var(--ink-3);
+}

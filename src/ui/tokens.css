@@ -1,0 +1,85 @@
+/* The visual system's only source of colors, type sizes and spacing
+   (docs/PLAN.md §7.2). Everything else refers to these names. */
+
+@font-face {
+  font-family: 'Roboto Slab';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('./fonts/roboto-slab.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Source Sans 3';
+  font-style: normal;
+  font-weight: 200 900;
+  font-display: swap;
+  /* Latin subset only; every string in the demo is English. */
+  src: url('./fonts/source-sans-3.woff2') format('woff2');
+}
+
+:root {
+  /* Ink and ground, from the Longreach site. Text tokens are all at least
+     4.5:1 on --surface, --canvas and the soft tints. */
+  --ink: #1a2332;
+  --ink-2: #333d4a;
+  --ink-3: #5d6f84;
+  --ink-on-dark: #ffffff;
+  --ink-on-dark-2: #b8c4d4;
+  --line: #d4dce8;
+  --line-soft: #e8edf3;
+  --line-on-dark: #3a4658;
+  --canvas: #f8f9fa;
+  --surface: #ffffff;
+  --surface-muted: #e7ecf2;
+
+  /* Act here. Buttons, the selected row, focus. Never a status. */
+  --action: #2d6e2d;
+  --action-dark: #245824;
+  --action-soft: #eaf3ea;
+
+  /* An assumption has moved. Never on a button. */
+  --attention: #8a5712;
+  --attention-soft: #fbeedd;
+  --attention-ink: #6f450c;
+  --weak: #b9852c; /* marks only: 3.25:1, not for text */
+  --weak-text: #7a5a1c;
+
+  /* Dates that close, agent content, internal evidence. */
+  --window: #3d5a80;
+  --agent: #5a4a9e;
+  --internal: #2f6f73;
+
+  /* Type: Roboto Slab for page titles and a brief's headline only. */
+  --serif: 'Roboto Slab', Georgia, serif;
+  --sans: 'Source Sans 3', system-ui, sans-serif;
+  --size-xs: 0.75rem; /* 12 */
+  --size-sm: 0.8125rem; /* 13 */
+  --size-body: 0.9375rem; /* 15 */
+  --size-md: 1.125rem; /* 18 */
+  --size-lg: 1.375rem; /* 22 */
+  --size-xl: 1.75rem; /* 28 */
+
+  /* Space on a 4px step. */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --gutter: 1.5rem;
+
+  --control-h: 2rem; /* 32px */
+  --radius: 6px;
+  --navbar-h: 3.25rem; /* 52px */
+  --list-w: 17.5rem; /* 280px */
+  --spine-w: 16.875rem; /* 270px */
+
+  --shadow-sheet: -8px 0 24px rgb(26 35 50 / 0.08);
+  --shadow-popover: 0 8px 24px rgb(26 35 50 / 0.14);
+  --shadow-dialog: 0 24px 64px rgb(26 35 50 / 0.28);
+  --shadow-card-hover: 0 4px 14px rgb(26 35 50 / 0.08);
+  --backdrop: rgb(26 35 50 / 0.42);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur: 180ms;
+}

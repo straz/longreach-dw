@@ -1,0 +1,14 @@
+.ctab {
+  flex: 1;
+  display: grid;
+  grid-template-columns: var(--list-w) minmax(0, 1fr);
+  min-height: 0;
+}
+
+.ctab-main {
+  min-width: 0;
+  display: flex;
+}
+
+
+

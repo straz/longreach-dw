@@ -1,0 +1,258 @@
+.runway {
+  flex: 1;
+  min-width: 0;
+  padding: var(--space-5) var(--space-6) var(--space-6);
+  overflow-y: auto;
+}
+
+.runway-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-6);
+  margin-bottom: var(--space-5);
+}
+
+.runway-title {
+  font-family: var(--serif);
+  font-size: var(--size-xl);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin-bottom: var(--space-1);
+}
+
+.runway-lede {
+  max-width: 60ch;
+  color: var(--ink-2);
+}
+
+.runway-lede strong {
+  color: var(--attention);
+}
+
+.runway-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: var(--size-xs);
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+
+.runway-legend li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.legend-bar {
+  display: inline-block;
+  width: 18px;
+  height: 5px;
+  border-radius: 3px;
+  background: var(--line);
+}
+
+.legend-bar.is-moved {
+  background: var(--attention);
+}
+
+.runway-grid {
+  --name-w: 17rem;
+  --num-w: 4.5rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.runway-row {
+  display: grid;
+  grid-template-columns: var(--name-w) var(--num-w) minmax(0, 1fr);
+  align-items: center;
+  min-height: 2.5rem;
+  padding: 0 var(--space-4);
+  border-top: 1px solid var(--line-soft);
+  color: inherit;
+  text-decoration: none;
+}
+
+.runway-row:first-child {
+  border-top: 0;
+}
+
+a.runway-row {
+  transition: background-color var(--dur) var(--ease-out);
+}
+
+a.runway-row:hover {
+  background: var(--canvas);
+}
+
+a.runway-row:hover .runway-title-cell {
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
+
+.runway-axis {
+  min-height: 2.25rem;
+  font-size: var(--size-xs);
+  font-weight: 600;
+  color: var(--ink-3);
+  background: var(--canvas);
+}
+
+.runway-name {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+  padding-right: var(--space-3);
+}
+
+.runway-glyph {
+  display: flex;
+  width: 12px;
+  flex: none;
+}
+
+.runway-title-cell {
+  font-size: var(--size-sm);
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.runway-num {
+  text-align: right;
+  padding-right: var(--space-4);
+  font-size: var(--size-sm);
+  color: var(--ink-2);
+}
+
+.runway-axis .runway-num {
+  color: var(--ink-3);
+}
+
+.runway-track {
+  position: relative;
+  align-self: stretch;
+  display: block;
+  margin-right: var(--space-5);
+}
+
+.runway-axis .runway-track {
+  display: flex;
+  align-items: center;
+}
+
+.runway-tick,
+.runway-today {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  white-space: nowrap;
+}
+
+.runway-today {
+  transform: translate(0, -50%);
+  color: var(--ink);
+}
+
+.runway-gridline {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--line-soft);
+}
+
+.runway-bar {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  height: 6px;
+  margin-top: -3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--line);
+}
+
+.runway-row.is-moved .runway-bar {
+  background: var(--attention);
+  opacity: 0.85;
+}
+
+/* The as-of line: every bar starts here. */
+.runway-row .runway-track::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--ink);
+}
+
+.runway-diamond {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.runway-label {
+  position: absolute;
+  top: 50%;
+  transform: translate(12px, -50%);
+  font-size: var(--size-sm);
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+
+.runway-label.is-flipped {
+  transform: translate(-12px, -50%);
+}
+
+.runway-label strong {
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.runway-row.is-moved .runway-label strong {
+  color: var(--attention);
+}
+
+.runway-none {
+  position: absolute;
+  left: var(--space-3);
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: var(--size-xs);
+  color: var(--ink-3);
+}
+
+.runway-foot {
+  margin-top: var(--space-3);
+  font-size: var(--size-xs);
+  color: var(--ink-3);
+}
+
+.runway-skel {
+  display: block;
+  height: 0.8rem;
+  border-radius: 3px;
+  background: var(--surface-muted);
+}
+
+.runway-skel.is-lede {
+  width: 28rem;
+  height: 1rem;
+  margin-top: var(--space-2);
+}
+
+.runway-skel.is-bar {
+  position: absolute;
+  top: 50%;
+  height: 6px;
+  margin-top: -3px;
+}

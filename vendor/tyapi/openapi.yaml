@@ -1,0 +1,7561 @@
+# tyapi's API description (`python -m gateway.openapi`) at 1db845d plus its working tree.
+# Update with `pnpm api:pull`, then `pnpm gen:api`.
+openapi: 3.1.0
+info:
+  title: Longreach API
+  description: 'The Longreach API. Every route but `/v1/healthz` needs a Longreach API key as
+
+    `Authorization: Bearer lr_…`. The data routes under `/v1/graphs` need a `Graphs-Http-Api: 0.14`
+
+    header and answer with the same header. `/v1/mcp` serves the data routes to MCP clients. Every date
+
+    the API gives is an ISO-8601 instant in UTC, such as `2027-03-31T10:00Z`. It takes that, an instant with
+
+    its offset, or a calendar day (`2027-03-31`, its midnight UTC); a time without its zone is refused, never
+
+    assumed. A web app on an allowed origin signs in at `/auth/login` instead of
+
+    using a key, and sends the session cookie; its changes name it in `X-Longreach-Client`.'
+  version: '1'
+paths:
+  /v1/api-keys:
+    post:
+      summary: Create an API key for the caller
+      operationId: create_api_key_v1_api_keys_post
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  /v1/api-keys/{prefix}:
+    delete:
+      summary: Revoke one of the caller's API keys
+      operationId: revoke_api_key_v1_api_keys__prefix__delete
+      parameters:
+      - name: prefix
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Prefix
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/books:
+    get:
+      summary: The books the caller can read
+      operationId: list_books_v1_books_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+    post:
+      summary: Create a source book in an org the caller administers
+      operationId: create_book_v1_books_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewBook'
+        required: true
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/books/{book}/versions:
+    get:
+      summary: A book's published versions
+      operationId: list_versions_v1_books__book__versions_get
+      parameters:
+      - name: book
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Book
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    post:
+      summary: Name the head of a book's main as a version; publishers only
+      operationId: publish_version_v1_books__book__versions_post
+      parameters:
+      - name: book
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Book
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewVersion'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/projects/{graph}:
+    get:
+      summary: A project the caller can read
+      operationId: get_project_v1_projects__graph__get
+      parameters:
+      - name: graph
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Graph
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/projects/{graph}/logo:
+    get:
+      summary: The logo of a project's org
+      operationId: project_logo_v1_projects__graph__logo_get
+      parameters:
+      - name: graph
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Graph
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/projects/{org}/{project}/reset:
+    post:
+      summary: Rebuild a demo project from its seed; project admins only
+      operationId: reset_project_v1_projects__org___project__reset_post
+      parameters:
+      - name: org
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Org
+      - name: project
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Project
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/projects/{org}/{project}/kind-of:
+    post:
+      summary: Run a stored read over a class and all its subclasses
+      operationId: kind_of_v1_projects__org___project__kind_of_post
+      parameters:
+      - name: org
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Org
+      - name: project
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Project
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KindOfIn'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/demos:
+    get:
+      summary: The Decision Watch demos the caller can open, with each one's persona and clock
+      operationId: list_demos_v1_demos_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DemosOut'
+  /v1/projects/{org}/{project}/demo:
+    get:
+      summary: A demo's persona, frame, briefs, sample documents and indicators
+      operationId: get_demo_v1_projects__org___project__demo_get
+      parameters:
+      - name: org
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Org
+      - name: project
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Project
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DemoOut'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/projects/{org}/{project}/sandbox:
+    get:
+      summary: 'The caller''s sandbox of a demo: their own branch, and whether it is started'
+      operationId: get_sandbox_v1_projects__org___project__sandbox_get
+      parameters:
+      - name: org
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Org
+      - name: project
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Project
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SandboxOut'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    post:
+      summary: Start the caller's sandbox of a demo, from its seed
+      operationId: start_sandbox_v1_projects__org___project__sandbox_post
+      parameters:
+      - name: org
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Org
+      - name: project
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Project
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SandboxOut'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      summary: 'Start over: delete the caller''s sandbox and their changes'
+      operationId: delete_sandbox_v1_projects__org___project__sandbox_delete
+      parameters:
+      - name: org
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Org
+      - name: project
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Project
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SandboxOut'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/projects/{org}/{project}/imports:
+    post:
+      summary: Record a sample document's commitment, its fields unverified
+      operationId: import_document_v1_projects__org___project__imports_post
+      parameters:
+      - name: org
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Org
+      - name: project
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Project
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ImportIn'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WriteOut'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/projects/{org}/{project}/commitments:
+    post:
+      summary: Start a commitment with every field missing
+      operationId: start_blank_v1_projects__org___project__commitments_post
+      parameters:
+      - name: org
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Org
+      - name: project
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Project
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WriteOut'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/projects/{org}/{project}/commitments/{slug}/fields/{field}/accept:
+    post:
+      summary: Accept a field's extracted value
+      operationId: accept_field_v1_projects__org___project__commitments__slug__fields__field__accept_post
+      parameters:
+      - name: org
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Org
+      - name: project
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Project
+      - name: slug
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Slug
+      - name: field
+        in: path
+        required: true
+        schema:
+          enum:
+          - promise
+          - capital
+          - owner
+          - rationale
+          - assumptions
+          - success_criteria
+          - dependencies
+          type: string
+          title: Field
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WriteOut'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/projects/{org}/{project}/commitments/{slug}/fields/{field}/replace:
+    post:
+      summary: State a field's value as its owner
+      operationId: replace_field_v1_projects__org___project__commitments__slug__fields__field__replace_post
+      parameters:
+      - name: org
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Org
+      - name: project
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Project
+      - name: slug
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Slug
+      - name: field
+        in: path
+        required: true
+        schema:
+          enum:
+          - promise
+          - capital
+          - owner
+          - rationale
+          - assumptions
+          - success_criteria
+          - dependencies
+          type: string
+          title: Field
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReplaceIn'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WriteOut'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/projects/{org}/{project}/commitments/{slug}/activate:
+    post:
+      summary: Make a verified commitment active
+      operationId: activate_v1_projects__org___project__commitments__slug__activate_post
+      parameters:
+      - name: org
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Org
+      - name: project
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Project
+      - name: slug
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Slug
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WriteOut'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/projects/{org}/{project}/commitments/{slug}/watch:
+    put:
+      summary: Watch a commitment, or stop
+      operationId: watch_v1_projects__org___project__commitments__slug__watch_put
+      parameters:
+      - name: org
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Org
+      - name: project
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Project
+      - name: slug
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Slug
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WatchIn'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WriteOut'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/projects/{org}/{project}/judgments:
+    post:
+      summary: Judge how a claim bears on a belief
+      operationId: judge_v1_projects__org___project__judgments_post
+      parameters:
+      - name: org
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Org
+      - name: project
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Project
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JudgeIn'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WriteOut'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/projects/{org}/{project}/reviews:
+    post:
+      summary: Mark a Watch flag reviewed
+      operationId: review_flag_v1_projects__org___project__reviews_post
+      parameters:
+      - name: org
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Org
+      - name: project
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Project
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReviewIn'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WriteOut'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/projects/{org}/{project}/decisions:
+    post:
+      summary: Record a reconsideration brief's decision
+      operationId: record_decision_v1_projects__org___project__decisions_post
+      parameters:
+      - name: org
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Org
+      - name: project
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Project
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DecisionIn'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WriteOut'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/projects/{org}/{project}/decisions/{decision}/approve:
+    post:
+      summary: Approve a decision sent for approval
+      operationId: approve_decision_v1_projects__org___project__decisions__decision__approve_post
+      parameters:
+      - name: org
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Org
+      - name: project
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Project
+      - name: decision
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Decision
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WriteOut'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/books/{book}/grants:
+    put:
+      summary: Grant a role on a book; org admins only
+      operationId: put_book_grant_v1_books__book__grants_put
+      parameters:
+      - name: book
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Book
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GrantIn'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      summary: Remove a grant on a book; org admins only
+      operationId: delete_book_grant_v1_books__book__grants_delete
+      parameters:
+      - name: book
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Book
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GrantIn'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/projects/{org}/{project}/grants:
+    put:
+      summary: Grant a role on a project; project admins only
+      operationId: put_project_grant_v1_projects__org___project__grants_put
+      parameters:
+      - name: org
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Org
+      - name: project
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Project
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GrantIn'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      summary: Remove a grant on a project; project admins only
+      operationId: delete_project_grant_v1_projects__org___project__grants_delete
+      parameters:
+      - name: org
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Org
+      - name: project
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Project
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GrantIn'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /auth/methods:
+    get:
+      summary: How this gateway signs browsers in
+      operationId: methods_auth_methods_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Methods'
+  /auth/login:
+    get:
+      summary: 'Sign a browser in, then send it to next: a page of the admin app or of an allowed app'
+      operationId: login_auth_login_get
+      parameters:
+      - name: next
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Where to go once signed in; the admin app by default
+          title: Next
+        description: Where to go once signed in; the admin app by default
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /auth/logout:
+    post:
+      summary: End the browser's session
+      operationId: logout_auth_logout_post
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SignedOut'
+  /auth/me:
+    get:
+      summary: Who the browser's session is signed in as, with their orgs and graphs
+      operationId: whoami_auth_me_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Me'
+  /v1/models:
+    get:
+      summary: The models projects are built from
+      operationId: list_models_v1_models_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  /v1/models/{model}:
+    get:
+      summary: One model's schema
+      operationId: get_model_v1_models__model__get
+      parameters:
+      - name: model
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Model
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/mcp:
+    post:
+      summary: 'MCP (Streamable HTTP, JSON answers, no sessions): the data routes as tools'
+      operationId: mcp_v1_mcp_post
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  /v1/healthz:
+    get:
+      summary: Whether the service can serve graph requests; needs no key
+      operationId: healthz_v1_healthz_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+      security: []
+  /v1/graphs/discovery:
+    get:
+      summary: The ids of the graphs the caller can read
+      operationId: discover_graphs_v1_graphs_discovery_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  /v1/graphs:
+    get:
+      summary: The graphs the caller can read, with each one's state and address
+      operationId: list_graphs_v1_graphs_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  /v1/graphs/{graph}/schema:
+    get:
+      tags:
+      - Graphs
+      operationId: get_graphs_schema
+      parameters:
+      - name: graph
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: Graphs-Http-Api
+        in: header
+        required: true
+        schema:
+          type: string
+          enum:
+          - '0.14'
+      responses:
+        '200':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SchemaOutput'
+        '400':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '401':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '403':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '404':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '405':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '412':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '429':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '500':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '503':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+      summary: The graph's schema
+      description: 'Readers of the graph: book readers, project `read` members and above.'
+  /v1/graphs/{graph}/queries:
+    get:
+      tags:
+      - Graphs
+      operationId: get_graphs_queries
+      parameters:
+      - name: graph
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: Graphs-Http-Api
+        in: header
+        required: true
+        schema:
+          type: string
+          enum:
+          - '0.14'
+      responses:
+        '200':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueriesCatalogOutput'
+        '400':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '401':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '403':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '404':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '405':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '412':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '429':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '500':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '503':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+      summary: The graph's stored queries
+      description: 'Readers of the graph: book readers, project `read` members and above.'
+  /v1/graphs/{graph}/queries/{query_name}:
+    post:
+      tags:
+      - Graphs
+      operationId: post_graphs_queries_query_name
+      parameters:
+      - name: graph
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: query_name
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: Graphs-Http-Api
+        in: header
+        required: true
+        schema:
+          type: string
+          enum:
+          - '0.14'
+      - &id001
+        name: version
+        in: query
+        required: false
+        schema:
+          type: string
+        description: A book's published version label, such as `2026Q2`. Reads the book as of that version; send neither `branch`
+          nor `snapshot` with it.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              oneOf:
+              - type: 'null'
+              - $ref: '#/components/schemas/InvokeStoredQueryRequest'
+      responses:
+        '200':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvokeStoredQueryOutput'
+        '400':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '401':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '403':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '404':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '405':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '408':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '409':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '412':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '413':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '424':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '429':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '500':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '503':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+      summary: Run a stored query; a stored mutation needs a writer
+      description: 'Readers of the graph: book readers, project `read` members and above.'
+  /v1/graphs/{graph}/query:
+    post:
+      tags:
+      - Graphs
+      operationId: post_graphs_query
+      parameters:
+      - name: graph
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: Graphs-Http-Api
+        in: header
+        required: true
+        schema:
+          type: string
+          enum:
+          - '0.14'
+      - *id001
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QueryRequest'
+        required: true
+      responses:
+        '200':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadOutput'
+        '400':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '401':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '403':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '404':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '405':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '408':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '409':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '412':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '413':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '424':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '429':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '500':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '503':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+      summary: Run a read query; limited in concurrency and time per caller
+      description: 'Readers of the graph: book readers, project `read` members and above.'
+  /v1/graphs/{graph}/snapshot:
+    get:
+      tags:
+      - Graphs
+      operationId: get_graphs_snapshot
+      parameters:
+      - name: graph
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: branch
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: Graphs-Http-Api
+        in: header
+        required: true
+        schema:
+          type: string
+          enum:
+          - '0.14'
+      responses:
+        '200':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SnapshotOutput'
+        '400':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '401':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '403':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '404':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '405':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '412':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '429':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '500':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '503':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+      summary: The graph's tables at a branch or commit
+      description: 'Readers of the graph: book readers, project `read` members and above.'
+  /v1/graphs/{graph}/commits:
+    get:
+      tags:
+      - Graphs
+      operationId: get_graphs_commits
+      parameters:
+      - name: graph
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: branch
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: listing
+        in: query
+        required: false
+        schema:
+          oneOf:
+          - $ref: '#/components/schemas/CommitListing'
+          default: history
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 1000
+          minimum: 1
+      - name: page_token
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: Graphs-Http-Api
+        in: header
+        required: true
+        schema:
+          type: string
+          enum:
+          - '0.14'
+      responses:
+        '200':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommitListOutput'
+        '400':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '401':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '403':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '404':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '405':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '412':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '413':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '429':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '500':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '503':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+      summary: Commit history
+      description: 'Readers of the graph: book readers, project `read` members and above.'
+  /v1/graphs/{graph}/commits/{commit_id}:
+    get:
+      tags:
+      - Graphs
+      operationId: get_graphs_commits_commit_id
+      parameters:
+      - name: graph
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: commit_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: Graphs-Http-Api
+        in: header
+        required: true
+        schema:
+          type: string
+          enum:
+          - '0.14'
+      responses:
+        '200':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommitOutput'
+        '400':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '401':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '403':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '404':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '405':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '412':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '429':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '500':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '503':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+      summary: One commit
+      description: 'Readers of the graph: book readers, project `read` members and above.'
+  /v1/graphs/{graph}/commits/{commit_id}/changes:
+    get:
+      tags:
+      - Graphs
+      operationId: get_graphs_commits_commit_id_changes
+      parameters:
+      - name: graph
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: commit_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: page_token
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          default: 1000
+          maximum: 8192
+          minimum: 1
+      - name: kind
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityKind'
+      - name: type
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+      - name: op
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChangeOp'
+      - name: set
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+      - name: Graphs-Http-Api
+        in: header
+        required: true
+        schema:
+          type: string
+          enum:
+          - '0.14'
+      responses:
+        '200':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommitChangesOutput'
+        '400':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeErrorOutput'
+        '401':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeErrorOutput'
+        '404':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeErrorOutput'
+        '405':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeErrorOutput'
+        '409':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeErrorOutput'
+        '410':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeErrorOutput'
+        '412':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeErrorOutput'
+        '413':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeErrorOutput'
+        '429':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeErrorOutput'
+        '500':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeErrorOutput'
+        '503':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeErrorOutput'
+      summary: What one commit changed
+      description: 'Readers of the graph: book readers, project `read` members and above.'
+  /v1/graphs/{graph}/diff:
+    get:
+      tags:
+      - Graphs
+      operationId: get_graphs_diff
+      parameters:
+      - name: graph
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: from
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: to
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: page_token
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          default: 1000
+          maximum: 8192
+          minimum: 1
+      - name: kind
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityKind'
+      - name: type
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+      - name: op
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChangeOp'
+      - name: Graphs-Http-Api
+        in: header
+        required: true
+        schema:
+          type: string
+          enum:
+          - '0.14'
+      responses:
+        '200':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiffOutput'
+        '400':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeErrorOutput'
+        '401':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeErrorOutput'
+        '404':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeErrorOutput'
+        '405':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeErrorOutput'
+        '409':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeErrorOutput'
+        '410':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeErrorOutput'
+        '412':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeErrorOutput'
+        '413':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeErrorOutput'
+        '429':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeErrorOutput'
+        '500':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeErrorOutput'
+        '503':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeErrorOutput'
+      summary: Net changes between two branches or commits
+      description: 'Readers of the graph: book readers, project `read` members and above.'
+  /v1/graphs/{graph}/changes:
+    get:
+      tags:
+      - Graphs
+      operationId: get_graphs_changes
+      parameters:
+      - name: graph
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: branch
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: cursor
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: start
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: page_token
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          default: 1000
+          maximum: 8192
+          minimum: 1
+      - name: kind
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityKind'
+      - name: type
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+      - name: op
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChangeOp'
+      - name: set
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+      - name: Graphs-Http-Api
+        in: header
+        required: true
+        schema:
+          type: string
+          enum:
+          - '0.14'
+      responses:
+        '200':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeFeedOutput'
+        '400':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeErrorOutput'
+        '401':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeErrorOutput'
+        '403':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeErrorOutput'
+        '404':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeErrorOutput'
+        '405':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeErrorOutput'
+        '409':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeErrorOutput'
+        '410':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeErrorOutput'
+        '412':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeErrorOutput'
+        '413':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeErrorOutput'
+        '429':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeErrorOutput'
+        '500':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeErrorOutput'
+        '503':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeErrorOutput'
+      summary: Poll the change feed
+      description: 'Readers of the graph: book readers, project `read` members and above.'
+  /v1/graphs/{graph}/blob:
+    get:
+      tags:
+      - Graphs
+      operationId: get_graphs_blob
+      parameters:
+      - name: graph
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: entity
+        in: query
+        required: true
+        schema:
+          $ref: '#/components/schemas/EntityKind'
+      - name: type
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: id
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: property
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: branch
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: snapshot
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: Graphs-Http-Api
+        in: header
+        required: true
+        schema:
+          type: string
+          enum:
+          - '0.14'
+      responses:
+        '200':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '206':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '302':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+        '304':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+        '400':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '401':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '403':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '404':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '405':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '412':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '416':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '429':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '500':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '503':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+      summary: Read a blob value
+      description: 'Readers of the graph: book readers, project `read` members and above.'
+  /v1/graphs/{graph}/export:
+    post:
+      tags:
+      - Graphs
+      operationId: post_graphs_export
+      parameters:
+      - name: graph
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: Graphs-Http-Api
+        in: header
+        required: true
+        schema:
+          type: string
+          enum:
+          - '0.14'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExportRequest'
+        required: true
+      responses:
+        '200':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/x-ndjson: {}
+        '400':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '401':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '403':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '404':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '405':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '408':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '409':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '412':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '413':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '415':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '429':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '500':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '503':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+      summary: Stream a branch's nodes and edges as NDJSON
+      description: 'Readers of the graph: book readers, project `read` members and above.'
+  /v1/graphs/{graph}/branches:
+    get:
+      tags:
+      - Graphs
+      operationId: get_graphs_branches
+      parameters:
+      - name: graph
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: detailed
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: Graphs-Http-Api
+        in: header
+        required: true
+        schema:
+          type: string
+          enum:
+          - '0.14'
+      responses:
+        '200':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BranchListOutput'
+        '400':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '401':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '403':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '404':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '405':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '412':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '429':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '500':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '503':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+      summary: The graph's branches
+      description: 'Readers of the graph: book readers, project `read` members and above.'
+    post:
+      tags:
+      - Graphs
+      operationId: post_graphs_branches
+      parameters:
+      - name: graph
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: Graphs-Http-Api
+        in: header
+        required: true
+        schema:
+          type: string
+          enum:
+          - '0.14'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BranchCreateRequest'
+        required: true
+      responses:
+        '200':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BranchCreateOutput'
+        '400':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '401':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '403':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '404':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '405':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '408':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '409':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '410':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '412':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '413':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '429':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '500':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '503':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+      summary: Create a branch
+      description: A book's maintainers, on its branches other than `main`, which changes only by merge. A project changes
+        only through its routes under `/v1/projects/{org}/{project}`.
+  /v1/graphs/{graph}/branches/diff:
+    get:
+      tags:
+      - Graphs
+      operationId: get_graphs_branches_diff
+      parameters:
+      - name: graph
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: source
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: target
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: page_token
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          default: 1000
+          maximum: 8192
+          minimum: 1
+      - name: kind
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityKind'
+      - name: type
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+      - name: op
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChangeOp'
+      - name: Graphs-Http-Api
+        in: header
+        required: true
+        schema:
+          type: string
+          enum:
+          - '0.14'
+      responses:
+        '200':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiffOutput'
+        '400':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeErrorOutput'
+        '401':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeErrorOutput'
+        '403':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeErrorOutput'
+        '404':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeErrorOutput'
+        '405':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeErrorOutput'
+        '409':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeErrorOutput'
+        '410':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeErrorOutput'
+        '412':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeErrorOutput'
+        '413':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeErrorOutput'
+        '429':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeErrorOutput'
+        '500':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeErrorOutput'
+        '503':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeErrorOutput'
+      summary: Net changes between two branches
+      description: 'Readers of the graph: book readers, project `read` members and above.'
+  /v1/graphs/{graph}/branches/merge-base:
+    get:
+      tags:
+      - Graphs
+      operationId: get_graphs_branches_merge_base
+      parameters:
+      - name: graph
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: source
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: target
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: Graphs-Http-Api
+        in: header
+        required: true
+        schema:
+          type: string
+          enum:
+          - '0.14'
+      responses:
+        '200':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MergeBaseOutput'
+        '400':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeErrorOutput'
+        '401':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeErrorOutput'
+        '403':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeErrorOutput'
+        '404':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeErrorOutput'
+        '405':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeErrorOutput'
+        '412':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeErrorOutput'
+        '429':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeErrorOutput'
+        '500':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeErrorOutput'
+        '503':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeErrorOutput'
+      summary: The commit two branches share
+      description: 'Readers of the graph: book readers, project `read` members and above.'
+  /v1/graphs/{graph}/mutate:
+    post:
+      tags:
+      - Graphs
+      operationId: post_graphs_mutate
+      parameters:
+      - name: graph
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: Graphs-Http-Api
+        in: header
+        required: true
+        schema:
+          type: string
+          enum:
+          - '0.14'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangeRequest'
+        required: true
+      responses:
+        '200':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeOutput'
+        '400':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '401':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '403':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '404':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '405':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '408':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '409':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '412':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '413':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '424':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '429':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '500':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '503':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+      summary: Run a mutation
+      description: A book's maintainers, on its branches other than `main`, which changes only by merge. A project changes
+        only through its routes under `/v1/projects/{org}/{project}`.
+  /v1/graphs/{graph}/load:
+    post:
+      tags:
+      - Graphs
+      operationId: post_graphs_load
+      parameters:
+      - name: graph
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: Graphs-Http-Api
+        in: header
+        required: true
+        schema:
+          type: string
+          enum:
+          - '0.14'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IngestRequest'
+        required: true
+      responses:
+        '200':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IngestOutput'
+        '400':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '401':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '403':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '404':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '405':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '408':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '409':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '412':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '413':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '424':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '429':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '500':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '503':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+      summary: Load a JSON batch
+      description: A book's maintainers, on its branches other than `main`, which changes only by merge. A project changes
+        only through its routes under `/v1/projects/{org}/{project}`.
+  /v1/graphs/{graph}/load/ndjson:
+    post:
+      tags:
+      - Graphs
+      operationId: post_graphs_load_ndjson
+      parameters:
+      - name: graph
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: branch
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: from
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: mode
+        in: query
+        required: false
+        schema:
+          $ref: '#/components/schemas/LoadMode'
+      - name: Graphs-Http-Api
+        in: header
+        required: true
+        schema:
+          type: string
+          enum:
+          - '0.14'
+      requestBody:
+        content:
+          application/x-ndjson:
+            schema:
+              type: string
+        required: true
+      responses:
+        '200':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GraphBatchLoadOutput'
+        '400':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '401':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '403':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '404':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '405':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '408':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '409':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '412':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '413':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '415':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '424':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '429':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '500':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '503':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+      summary: Load an NDJSON batch
+      description: A book's maintainers, on its branches other than `main`, which changes only by merge. A project changes
+        only through its routes under `/v1/projects/{org}/{project}`.
+  /v1/graphs/{graph}/branches/{branch_name}:
+    delete:
+      tags:
+      - Graphs
+      operationId: delete_graphs_branches_branch_name
+      parameters:
+      - name: graph
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: branch_name
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: Graphs-Http-Api
+        in: header
+        required: true
+        schema:
+          type: string
+          enum:
+          - '0.14'
+      responses:
+        '200':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BranchDeleteOutput'
+        '400':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '401':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '403':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '404':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '405':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '412':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '429':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '500':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '503':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+      summary: Delete a branch
+      description: A book's maintainers, on its branches other than `main`, which changes only by merge. A project changes
+        only through its routes under `/v1/projects/{org}/{project}`.
+  /v1/graphs/{graph}/branches/merge:
+    post:
+      tags:
+      - Graphs
+      operationId: post_graphs_branches_merge
+      parameters:
+      - name: graph
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: Graphs-Http-Api
+        in: header
+        required: true
+        schema:
+          type: string
+          enum:
+          - '0.14'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BranchMergeRequest'
+        required: true
+      responses:
+        '200':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BranchMergeOutput'
+        '400':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '401':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '403':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '404':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '405':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '408':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '409':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '412':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '413':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '424':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '429':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '500':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+        '503':
+          headers:
+            Graphs-Http-Api:
+              schema:
+                type: string
+                enum:
+                - '0.14'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorOutput'
+      summary: Merge one branch into another
+      description: A book's maintainers, into any branch but `main`; its publishers, into `main`. Not on a project.
+components:
+  schemas:
+    Assumptions:
+      properties:
+        text:
+          type: string
+          title: Text
+        span:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Span
+          description: In a sample document, the marked passage the value was read from
+        field:
+          type: string
+          const: assumptions
+          title: Field
+        beliefs:
+          items:
+            $ref: '#/components/schemas/BeliefRef'
+          type: array
+          title: Beliefs
+      type: object
+      required:
+      - text
+      - field
+      - beliefs
+      title: Assumptions
+    Authorization:
+      properties:
+        statement:
+          type: string
+          title: Statement
+        decided_at:
+          type: string
+          title: Decided At
+          description: 'An ISO-8601 date: given as an instant in UTC; taken as that, as an instant with its offset, or as
+            a calendar day, which is its midnight UTC. A time with no zone is refused'
+          examples:
+          - 2027-03-31T10:00Z
+          - '2027-03-31'
+        by:
+          type: string
+          maxLength: 200
+          minLength: 1
+          title: By
+        under:
+          type: string
+          maxLength: 200
+          minLength: 1
+          title: Under
+      type: object
+      required:
+      - statement
+      - decided_at
+      - by
+      - under
+      title: Authorization
+    AvailablePath:
+      properties:
+        available:
+          type: boolean
+          const: true
+          title: Available
+          default: true
+        means:
+          type: string
+          title: Means
+        mandate:
+          type: string
+          maxLength: 200
+          minLength: 1
+          title: Mandate
+          description: The mandate a decision on this path is made under
+        incremental:
+          type: number
+          title: Incremental
+        incremental_note:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Incremental Note
+        avoided:
+          type: number
+          title: Avoided
+        deferred:
+          type: number
+          title: Deferred
+        uncertainty:
+          type: string
+          title: Uncertainty
+        narrows:
+          anyOf:
+          - $ref: '#/components/schemas/Narrows'
+          - type: 'null'
+        deadline:
+          anyOf:
+          - type: string
+            description: 'An ISO-8601 date: given as an instant in UTC; taken as that, as an instant with its offset, or as
+              a calendar day, which is its midnight UTC. A time with no zone is refused'
+            examples:
+            - 2027-03-31T10:00Z
+            - '2027-03-31'
+          - type: 'null'
+          title: Deadline
+        reasons:
+          items:
+            $ref: '#/components/schemas/Reason'
+          type: array
+          title: Reasons
+          default: []
+        effects:
+          $ref: '#/components/schemas/Effects'
+          default:
+            transitions: []
+            readings: []
+            exercises: []
+      type: object
+      required:
+      - means
+      - mandate
+      - incremental
+      - avoided
+      - deferred
+      - uncertainty
+      title: AvailablePath
+    BeliefRef:
+      properties:
+        belief:
+          type: string
+          maxLength: 200
+          minLength: 1
+          title: Belief
+        necessary:
+          type: boolean
+          title: Necessary
+      type: object
+      required:
+      - belief
+      - necessary
+      title: BeliefRef
+    Brief:
+      properties:
+        slug:
+          type: string
+          maxLength: 200
+          minLength: 1
+          title: Slug
+        title:
+          type: string
+          title: Title
+        commitments:
+          items:
+            type: string
+            maxLength: 200
+            minLength: 1
+          type: array
+          title: Commitments
+          description: The commitments the brief reconsiders
+        related:
+          items:
+            type: string
+            maxLength: 200
+            minLength: 1
+          type: array
+          title: Related
+          default: []
+        beliefs:
+          items:
+            type: string
+            maxLength: 200
+            minLength: 1
+          type: array
+          title: Beliefs
+        review:
+          anyOf:
+          - type: string
+            maxLength: 200
+            minLength: 1
+          - type: 'null'
+          title: Review
+          description: The seeded review that decided it
+        supersedes:
+          anyOf:
+          - type: string
+            maxLength: 200
+            minLength: 1
+          - type: 'null'
+          title: Supersedes
+          description: A brief this one opens after, once that one's revisit date arrives
+        paths:
+          additionalProperties:
+            anyOf:
+            - $ref: '#/components/schemas/AvailablePath'
+            - $ref: '#/components/schemas/UnavailablePath'
+          propertyNames:
+            enum:
+            - continue
+            - change
+            - delay
+            - exit
+          type: object
+          title: Paths
+          default: {}
+      type: object
+      required:
+      - slug
+      - title
+      - commitments
+      - beliefs
+      title: Brief
+    Capital:
+      properties:
+        text:
+          type: string
+          title: Text
+        span:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Span
+          description: In a sample document, the marked passage the value was read from
+        field:
+          type: string
+          const: capital
+          title: Field
+        amount:
+          type: number
+          title: Amount
+        until:
+          anyOf:
+          - type: string
+            description: 'An ISO-8601 date: given as an instant in UTC; taken as that, as an instant with its offset, or as
+              a calendar day, which is its midnight UTC. A time with no zone is refused'
+            examples:
+            - 2027-03-31T10:00Z
+            - '2027-03-31'
+          - type: 'null'
+          title: Until
+      type: object
+      required:
+      - text
+      - field
+      - amount
+      title: Capital
+    DecisionIn:
+      properties:
+        brief:
+          type: string
+          maxLength: 200
+          minLength: 1
+          title: Brief
+        path:
+          type: string
+          enum:
+          - continue
+          - change
+          - delay
+          - exit
+          title: Path
+        rationale:
+          type: string
+          title: Rationale
+        conditions:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Conditions
+        revisit_at:
+          anyOf:
+          - type: string
+            description: 'An ISO-8601 date: given as an instant in UTC; taken as that, as an instant with its offset, or as
+              a calendar day, which is its midnight UTC. A time with no zone is refused'
+            examples:
+            - 2027-03-31T10:00Z
+            - '2027-03-31'
+          - type: 'null'
+          title: Revisit At
+          description: Overrides the path's revisit date
+        approval:
+          type: string
+          enum:
+          - own
+          - agreed
+          - request
+          title: Approval
+          description: 'own: under the persona''s mandate; agreed: with the mandate holder''s agreement; request: sent to
+            the holder for approval'
+      type: object
+      required:
+      - brief
+      - path
+      - rationale
+      - approval
+      title: DecisionIn
+    DemoListing:
+      properties:
+        graph:
+          type: string
+          title: Graph
+        org:
+          type: string
+          title: Org
+        org_name:
+          type: string
+          title: Org Name
+        project:
+          type: string
+          title: Project
+        name:
+          type: string
+          title: Name
+        persona:
+          $ref: '#/components/schemas/Persona'
+        frame:
+          $ref: '#/components/schemas/Frame'
+        briefs:
+          type: integer
+          title: Briefs
+          description: How many reconsideration briefs it has; none for a demo with records only
+        documents:
+          type: integer
+          title: Documents
+          description: How many sample documents it offers to import
+      type: object
+      required:
+      - graph
+      - org
+      - org_name
+      - project
+      - name
+      - persona
+      - frame
+      - briefs
+      - documents
+      title: DemoListing
+    DemoOut:
+      properties:
+        graph:
+          type: string
+          title: Graph
+        org:
+          type: string
+          title: Org
+        project:
+          type: string
+          title: Project
+        name:
+          type: string
+          title: Name
+        party:
+          type: string
+          title: Party
+          description: The org's party in the graph, which its commitments bind
+        persona:
+          $ref: '#/components/schemas/Persona'
+        frame:
+          $ref: '#/components/schemas/Frame'
+        briefs:
+          items:
+            $ref: '#/components/schemas/Brief'
+          type: array
+          title: Briefs
+          description: Each reconsideration brief, with its paths
+        documents:
+          items:
+            $ref: '#/components/schemas/Document'
+          type: array
+          title: Documents
+          description: The sample documents, with their extracted fields
+        indicators:
+          additionalProperties:
+            $ref: '#/components/schemas/Indicator'
+          type: object
+          title: Indicators
+          description: How each metric is named and shown, by metric
+      type: object
+      required:
+      - graph
+      - org
+      - project
+      - name
+      - party
+      - persona
+      - frame
+      - briefs
+      - documents
+      - indicators
+      title: DemoOut
+    DemosOut:
+      properties:
+        demos:
+          items:
+            $ref: '#/components/schemas/DemoListing'
+          type: array
+          title: Demos
+          description: The demos the caller can open, by name
+      type: object
+      required:
+      - demos
+      title: DemosOut
+    Dependencies:
+      properties:
+        text:
+          type: string
+          title: Text
+        span:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Span
+          description: In a sample document, the marked passage the value was read from
+        field:
+          type: string
+          const: dependencies
+          title: Field
+        'on':
+          items:
+            $ref: '#/components/schemas/DependencyRef'
+          type: array
+          title: 'On'
+      type: object
+      required:
+      - text
+      - field
+      - 'on'
+      title: Dependencies
+    DependencyRef:
+      properties:
+        commitment:
+          type: string
+          maxLength: 200
+          minLength: 1
+          title: Commitment
+        kind:
+          type: string
+          enum:
+          - requires
+          - funds
+          - precedes
+          - assumes
+          - other
+          title: Kind
+      type: object
+      required:
+      - commitment
+      - kind
+      title: DependencyRef
+    Document:
+      properties:
+        slug:
+          type: string
+          maxLength: 200
+          minLength: 1
+          title: Slug
+        sample:
+          type: boolean
+          title: Sample
+          description: Offered for import; the others are already recorded
+        kind:
+          type: string
+          enum:
+          - meeting
+          - document
+          - contract
+          - filing
+          - email
+          - thread
+          - dataset
+          - web
+          - other
+          title: Kind
+        label:
+          type: string
+          title: Label
+        filename:
+          type: string
+          title: Filename
+        title:
+          type: string
+          title: Title
+        occurred_at:
+          type: string
+          title: Occurred At
+          description: 'An ISO-8601 date: given as an instant in UTC; taken as that, as an instant with its offset, or as
+            a calendar day, which is its midnight UTC. A time with no zone is refused'
+          examples:
+          - 2027-03-31T10:00Z
+          - '2027-03-31'
+        commitment:
+          $ref: '#/components/schemas/DocumentCommitment'
+        text:
+          type: string
+          title: Text
+          description: The document, its passages marked [[span]]...[[/]]
+        fields:
+          items:
+            oneOf:
+            - $ref: '#/components/schemas/Promise'
+            - $ref: '#/components/schemas/Capital'
+            - $ref: '#/components/schemas/Owner'
+            - $ref: '#/components/schemas/Rationale'
+            - $ref: '#/components/schemas/Assumptions'
+            - $ref: '#/components/schemas/SuccessCriteria'
+            - $ref: '#/components/schemas/Dependencies'
+            discriminator:
+              propertyName: field
+              mapping:
+                assumptions: '#/components/schemas/Assumptions'
+                capital: '#/components/schemas/Capital'
+                dependencies: '#/components/schemas/Dependencies'
+                owner: '#/components/schemas/Owner'
+                promise: '#/components/schemas/Promise'
+                rationale: '#/components/schemas/Rationale'
+                success_criteria: '#/components/schemas/SuccessCriteria'
+          type: array
+          title: Fields
+      type: object
+      required:
+      - slug
+      - sample
+      - kind
+      - label
+      - filename
+      - title
+      - occurred_at
+      - commitment
+      - text
+      - fields
+      title: Document
+    DocumentCommitment:
+      properties:
+        slug:
+          type: string
+          maxLength: 200
+          minLength: 1
+          title: Slug
+        scale:
+          type: string
+          enum:
+          - strategic
+          - portfolio
+          - program
+          - operational
+          - task
+          title: Scale
+        horizon_at:
+          anyOf:
+          - type: string
+            description: 'An ISO-8601 date: given as an instant in UTC; taken as that, as an instant with its offset, or as
+              a calendar day, which is its midnight UTC. A time with no zone is refused'
+            examples:
+            - 2027-03-31T10:00Z
+            - '2027-03-31'
+          - type: 'null'
+          title: Horizon At
+        counterparty:
+          anyOf:
+          - type: string
+            maxLength: 200
+            minLength: 1
+          - type: 'null'
+          title: Counterparty
+      type: object
+      required:
+      - slug
+      - scale
+      title: DocumentCommitment
+    Effects:
+      properties:
+        revisit_at:
+          anyOf:
+          - type: string
+            description: 'An ISO-8601 date: given as an instant in UTC; taken as that, as an instant with its offset, or as
+              a calendar day, which is its midnight UTC. A time with no zone is refused'
+            examples:
+            - 2027-03-31T10:00Z
+            - '2027-03-31'
+          - type: 'null'
+          title: Revisit At
+        transitions:
+          items:
+            $ref: '#/components/schemas/TransitionTo'
+          type: array
+          title: Transitions
+          default: []
+        readings:
+          items:
+            $ref: '#/components/schemas/ReadingChange'
+          type: array
+          title: Readings
+          description: Exposure readings at the decision; kinds left out keep their value
+          default: []
+        exercises:
+          items:
+            type: string
+            maxLength: 200
+            minLength: 1
+          type: array
+          title: Exercises
+          description: Options the path exercises
+          default: []
+      type: object
+      title: Effects
+    Frame:
+      properties:
+        clock:
+          type: string
+          title: Clock
+          description: 'An ISO-8601 date: given as an instant in UTC; taken as that, as an instant with its offset, or as
+            a calendar day, which is its midnight UTC. A time with no zone is refused'
+          examples:
+          - 2027-03-31T10:00Z
+          - '2027-03-31'
+        timeline_start:
+          type: string
+          title: Timeline Start
+          description: 'An ISO-8601 date: given as an instant in UTC; taken as that, as an instant with its offset, or as
+            a calendar day, which is its midnight UTC. A time with no zone is refused'
+          examples:
+          - 2027-03-31T10:00Z
+          - '2027-03-31'
+        money_unit:
+          type: string
+          title: Money Unit
+        footer:
+          type: string
+          title: Footer
+      type: object
+      required:
+      - clock
+      - timeline_start
+      - money_unit
+      - footer
+      title: Frame
+    GrantIn:
+      properties:
+        team:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Team
+        org:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Org
+        role:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Role
+      type: object
+      title: GrantIn
+      description: Exactly one grantee, a team of the graph's own org or any org; a role to put, none to delete.
+    GraphAccess:
+      properties:
+        kind:
+          type: string
+          enum:
+          - book
+          - project
+          title: Kind
+        graph_id:
+          type: string
+          title: Graph Id
+        role:
+          type: string
+          title: Role
+      type: object
+      required:
+      - kind
+      - graph_id
+      - role
+      title: GraphAccess
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    ImportIn:
+      properties:
+        document:
+          type: string
+          maxLength: 200
+          minLength: 1
+          title: Document
+          description: A sample document's slug, from GET .../demo
+      type: object
+      required:
+      - document
+      title: ImportIn
+    Indicator:
+      properties:
+        name:
+          type: string
+          title: Name
+        unit:
+          type: string
+          title: Unit
+        decimals:
+          type: integer
+          title: Decimals
+        group:
+          type: string
+          title: Group
+        kind:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Kind
+        prefix:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Prefix
+        suffix:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Suffix
+      type: object
+      required:
+      - name
+      - unit
+      - decimals
+      - group
+      title: Indicator
+    JudgeIn:
+      properties:
+        claim:
+          type: string
+          maxLength: 200
+          minLength: 1
+          title: Claim
+        belief:
+          type: string
+          maxLength: 200
+          minLength: 1
+          title: Belief
+        stance:
+          type: string
+          enum:
+          - supports
+          - weakens
+          - contradicts
+          - informs
+          title: Stance
+        note:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Note
+      type: object
+      required:
+      - claim
+      - belief
+      - stance
+      title: JudgeIn
+    KindOfIn:
+      properties:
+        class:
+          type: string
+          title: Class
+          description: A class's CURIE in a book the project links
+        query:
+          type: string
+          title: Query
+          description: One of the project's stored reads that takes $terms
+        params:
+          additionalProperties: true
+          type: object
+          title: Params
+          default: {}
+      type: object
+      required:
+      - class
+      - query
+      title: KindOfIn
+      description: '"Any kind of X": a class, and the project''s stored read to run with it and its subclasses as $terms.'
+    Me:
+      properties:
+        principal_id:
+          type: string
+          title: Principal Id
+        kind:
+          type: string
+          enum:
+          - human
+          - automation
+          title: Kind
+        email:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Email
+        display_name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Display Name
+        service_account:
+          anyOf:
+          - $ref: '#/components/schemas/ServiceAccount'
+          - type: 'null'
+          description: Set when a pod admin views as a service account
+        pod_admin:
+          type: boolean
+          title: Pod Admin
+        acting_as:
+          anyOf:
+          - $ref: '#/components/schemas/Who'
+          - type: 'null'
+          description: Whom a pod admin is viewing as, read-only
+        orgs:
+          items:
+            $ref: '#/components/schemas/Membership'
+          type: array
+          title: Orgs
+        graphs:
+          items:
+            $ref: '#/components/schemas/GraphAccess'
+          type: array
+          title: Graphs
+      type: object
+      required:
+      - principal_id
+      - kind
+      - email
+      - display_name
+      - pod_admin
+      - acting_as
+      - orgs
+      - graphs
+      title: Me
+      description: Who is signed in; orgs and graphs are those of whoever the session's requests are checked as.
+    Membership:
+      properties:
+        org:
+          type: string
+          title: Org
+        name:
+          type: string
+          title: Name
+        role:
+          type: string
+          title: Role
+          description: owner, admin or member; service account for one
+        teams:
+          items:
+            type: string
+          type: array
+          title: Teams
+      type: object
+      required:
+      - org
+      - name
+      - role
+      - teams
+      title: Membership
+    Methods:
+      properties:
+        mock:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Mock
+          description: The email the laptop's mock signs every browser in as; never in the pilot
+        google:
+          type: boolean
+          title: Google
+      type: object
+      required:
+      - mock
+      - google
+      title: Methods
+    Narrows:
+      properties:
+        source:
+          type: string
+          title: Source
+        date:
+          type: string
+          title: Date
+          description: 'An ISO-8601 date: given as an instant in UTC; taken as that, as an instant with its offset, or as
+            a calendar day, which is its midnight UTC. A time with no zone is refused'
+          examples:
+          - 2027-03-31T10:00Z
+          - '2027-03-31'
+      type: object
+      required:
+      - source
+      - date
+      title: Narrows
+    NewBook:
+      properties:
+        org:
+          type: string
+          title: Org
+          description: The org's slug; the caller must be its owner or admin
+        slug:
+          type: string
+          pattern: ^[a-z0-9][a-z0-9-]{0,39}$
+          title: Slug
+        visibility:
+          type: string
+          enum:
+          - private
+          - org
+          - shared
+          - public
+          title: Visibility
+      type: object
+      required:
+      - org
+      - slug
+      - visibility
+      title: NewBook
+    NewVersion:
+      properties:
+        label:
+          type: string
+          pattern: ^[A-Za-z0-9][A-Za-z0-9._-]{0,39}$
+          title: Label
+          description: The upstream release, such as 2026Q2
+        reasoner:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Reasoner
+          description: Such as HermiT via ROBOT 1.9.11
+      type: object
+      required:
+      - label
+      title: NewVersion
+    Owner:
+      properties:
+        text:
+          type: string
+          title: Text
+        span:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Span
+          description: In a sample document, the marked passage the value was read from
+        field:
+          type: string
+          const: owner
+          title: Field
+        party:
+          type: string
+          maxLength: 200
+          minLength: 1
+          title: Party
+      type: object
+      required:
+      - text
+      - field
+      - party
+      title: Owner
+    Persona:
+      properties:
+        party:
+          type: string
+          title: Party
+        actor:
+          type: string
+          title: Actor
+        name:
+          type: string
+          title: Name
+        title:
+          type: string
+          title: Title
+      type: object
+      required:
+      - party
+      - actor
+      - name
+      - title
+      title: Persona
+    Promise:
+      properties:
+        text:
+          type: string
+          title: Text
+        span:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Span
+          description: In a sample document, the marked passage the value was read from
+        field:
+          type: string
+          const: promise
+          title: Field
+        title:
+          type: string
+          title: Title
+      type: object
+      required:
+      - text
+      - field
+      - title
+      title: Promise
+    Rationale:
+      properties:
+        text:
+          type: string
+          title: Text
+        span:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Span
+          description: In a sample document, the marked passage the value was read from
+        field:
+          type: string
+          const: rationale
+          title: Field
+        decision:
+          $ref: '#/components/schemas/Authorization'
+      type: object
+      required:
+      - text
+      - field
+      - decision
+      title: Rationale
+    ReadingChange:
+      properties:
+        commitment:
+          type: string
+          maxLength: 200
+          minLength: 1
+          title: Commitment
+        committed:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Committed
+        avoidable:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Avoidable
+        until:
+          anyOf:
+          - type: string
+            description: 'An ISO-8601 date: given as an instant in UTC; taken as that, as an instant with its offset, or as
+              a calendar day, which is its midnight UTC. A time with no zone is refused'
+            examples:
+            - 2027-03-31T10:00Z
+            - '2027-03-31'
+          - type: 'null'
+          title: Until
+      type: object
+      required:
+      - commitment
+      title: ReadingChange
+    Reason:
+      properties:
+        statement:
+          type: string
+          title: Statement
+        polarity:
+          type: string
+          enum:
+          - pro
+          - con
+          title: Polarity
+      type: object
+      required:
+      - statement
+      - polarity
+      title: Reason
+    ReplaceIn:
+      properties:
+        value:
+          oneOf:
+          - $ref: '#/components/schemas/Promise'
+          - $ref: '#/components/schemas/Capital'
+          - $ref: '#/components/schemas/Owner'
+          - $ref: '#/components/schemas/Rationale'
+          - $ref: '#/components/schemas/Assumptions'
+          - $ref: '#/components/schemas/SuccessCriteria'
+          - $ref: '#/components/schemas/Dependencies'
+          title: Value
+          discriminator:
+            propertyName: field
+            mapping:
+              assumptions: '#/components/schemas/Assumptions'
+              capital: '#/components/schemas/Capital'
+              dependencies: '#/components/schemas/Dependencies'
+              owner: '#/components/schemas/Owner'
+              promise: '#/components/schemas/Promise'
+              rationale: '#/components/schemas/Rationale'
+              success_criteria: '#/components/schemas/SuccessCriteria'
+      type: object
+      required:
+      - value
+      title: ReplaceIn
+    ReviewIn:
+      properties:
+        commitments:
+          items:
+            type: string
+            maxLength: 200
+            minLength: 1
+          type: array
+          minItems: 1
+          title: Commitments
+        key:
+          type: string
+          maxLength: 200
+          minLength: 1
+          title: Key
+          description: What the flag is about, a belief or tripwire slug; it names the review
+        subject:
+          type: string
+          title: Subject
+          description: The flag in words, for the review's notes
+      type: object
+      required:
+      - commitments
+      - key
+      - subject
+      title: ReviewIn
+    SandboxOut:
+      properties:
+        graph:
+          type: string
+          title: Graph
+        branch:
+          type: string
+          title: Branch
+          description: The caller's own branch of the demo. Writes go to it; send it as `branch` to read it
+        started:
+          type: boolean
+          title: Started
+          description: Whether the branch exists; until it does, there is only main, the seed
+      type: object
+      required:
+      - graph
+      - branch
+      - started
+      title: SandboxOut
+    ServiceAccount:
+      properties:
+        org:
+          type: string
+          title: Org
+        name:
+          type: string
+          title: Name
+        purpose:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Purpose
+      type: object
+      required:
+      - org
+      - name
+      title: ServiceAccount
+    SignedOut:
+      properties:
+        signed_out:
+          type: boolean
+          const: true
+          title: Signed Out
+      type: object
+      required:
+      - signed_out
+      title: SignedOut
+    SuccessCriteria:
+      properties:
+        text:
+          type: string
+          title: Text
+        span:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Span
+          description: In a sample document, the marked passage the value was read from
+        field:
+          type: string
+          const: success_criteria
+          title: Field
+        target_at:
+          anyOf:
+          - type: string
+            description: 'An ISO-8601 date: given as an instant in UTC; taken as that, as an instant with its offset, or as
+              a calendar day, which is its midnight UTC. A time with no zone is refused'
+            examples:
+            - 2027-03-31T10:00Z
+            - '2027-03-31'
+          - type: 'null'
+          title: Target At
+      type: object
+      required:
+      - text
+      - field
+      title: SuccessCriteria
+    TransitionTo:
+      properties:
+        commitment:
+          type: string
+          maxLength: 200
+          minLength: 1
+          title: Commitment
+        to:
+          type: string
+          title: To
+      type: object
+      required:
+      - commitment
+      - to
+      title: TransitionTo
+    UnavailablePath:
+      properties:
+        available:
+          type: boolean
+          const: false
+          title: Available
+        why:
+          type: string
+          title: Why
+      type: object
+      required:
+      - available
+      - why
+      title: UnavailablePath
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+        input:
+          title: Input
+        ctx:
+          type: object
+          title: Context
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
+    WatchIn:
+      properties:
+        watched:
+          type: boolean
+          title: Watched
+      type: object
+      required:
+      - watched
+      title: WatchIn
+    Who:
+      properties:
+        principal_id:
+          type: string
+          title: Principal Id
+        kind:
+          type: string
+          enum:
+          - human
+          - automation
+          title: Kind
+        email:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Email
+        display_name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Display Name
+        service_account:
+          anyOf:
+          - $ref: '#/components/schemas/ServiceAccount'
+          - type: 'null'
+          description: Set when a pod admin views as a service account
+      type: object
+      required:
+      - principal_id
+      - kind
+      - email
+      - display_name
+      title: Who
+    WriteOut:
+      properties:
+        graph:
+          type: string
+          title: Graph
+        branch:
+          type: string
+          title: Branch
+          description: The caller's sandbox, where the records were written
+        written:
+          type: integer
+          title: Written
+          description: How many records the write loaded
+        graph_commit_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Graph Commit Id
+        commitment:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Commitment
+        decision:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Decision
+      type: object
+      required:
+      - graph
+      - branch
+      - written
+      - graph_commit_id
+      title: WriteOut
+    Applicability:
+      type: string
+      enum:
+      - machine_applicable
+      - needs_review
+    BlobPreconditionFailureOutput:
+      type: object
+      properties:
+        current_etag:
+          type:
+          - string
+          - 'null'
+    BlobRangeOutput:
+      type: object
+      required:
+      - start
+      - end
+      - length
+      properties:
+        end:
+          type: integer
+          format: int64
+          minimum: 0
+        length:
+          type: integer
+          format: int64
+          minimum: 0
+        start:
+          type: integer
+          format: int64
+          minimum: 0
+    BranchCreateOutput:
+      type: object
+      required:
+      - uri
+      - from
+      - name
+      - from_commit_id
+      properties:
+        actor_id:
+          type:
+          - string
+          - 'null'
+        from:
+          type: string
+        from_commit_id:
+          type: string
+        name:
+          type: string
+        uri:
+          type: string
+    BranchCreateRequest:
+      type: object
+      required:
+      - name
+      properties:
+        from:
+          type:
+          - string
+          - 'null'
+        from_commit:
+          type:
+          - string
+          - 'null'
+        name:
+          type: string
+    BranchDeleteOutput:
+      type: object
+      required:
+      - uri
+      - name
+      properties:
+        actor_id:
+          type:
+          - string
+          - 'null'
+        name:
+          type: string
+        uri:
+          type: string
+    BranchDetailOutput:
+      type: object
+      required:
+      - name
+      - head
+      - updated_at
+      properties:
+        created_at:
+          type:
+          - integer
+          - 'null'
+          format: int64
+        from:
+          type:
+          - string
+          - 'null'
+        from_commit_id:
+          type:
+          - string
+          - 'null'
+        head:
+          $ref: '#/components/schemas/CommitOutput'
+        name:
+          type: string
+        updated_at:
+          type: integer
+          format: int64
+    BranchListOutput:
+      type: object
+      required:
+      - branches
+      properties:
+        branches:
+          type: array
+          items:
+            type: string
+        details:
+          type:
+          - array
+          - 'null'
+          items:
+            $ref: '#/components/schemas/BranchDetailOutput'
+    BranchMergeOutcome:
+      type: string
+      enum:
+      - already_up_to_date
+      - fast_forward
+      - merged
+    BranchMergeOutput:
+      type: object
+      required:
+      - source
+      - target
+      - outcome
+      - commit
+      properties:
+        actor_id:
+          type:
+          - string
+          - 'null'
+        branch_delete_error_details:
+          oneOf:
+          - type: 'null'
+          - $ref: '#/components/schemas/ErrorOutput'
+        branch_deleted:
+          type:
+          - boolean
+          - 'null'
+        commit:
+          oneOf:
+          - type: 'null'
+          - $ref: '#/components/schemas/CommitOutput'
+        dry_run:
+          type: boolean
+        outcome:
+          $ref: '#/components/schemas/BranchMergeOutcome'
+        source:
+          type: string
+        target:
+          type: string
+    BranchMergeRequest:
+      type: object
+      required:
+      - source
+      properties:
+        as_commit:
+          type: boolean
+        delete_branch:
+          type: boolean
+        dry_run:
+          type: boolean
+        settings:
+          oneOf:
+          - type: 'null'
+          - $ref: '#/components/schemas/SettingsRequest'
+        source:
+          type: string
+        target:
+          type:
+          - string
+          - 'null'
+    BranchOutcomeOutput:
+      oneOf:
+      - type: object
+        required:
+        - from
+        - name
+        - from_commit_id
+        - kind
+        properties:
+          from:
+            type: string
+          from_commit_id:
+            type: string
+          kind:
+            type: string
+            enum:
+            - created
+          name:
+            type: string
+      - type: object
+        required:
+        - name
+        - kind
+        properties:
+          kind:
+            type: string
+            enum:
+            - deleted
+          name:
+            type: string
+      - type: object
+        required:
+        - source
+        - target
+        - merge
+        - kind
+        properties:
+          kind:
+            type: string
+            enum:
+            - merged
+          merge:
+            $ref: '#/components/schemas/BranchMergeOutcome'
+          source:
+            type: string
+          target:
+            type: string
+      - type: object
+        required:
+        - kind
+        properties:
+          kind:
+            type: string
+            enum:
+            - published
+      - type: object
+        required:
+        - graph_commit_id
+        - kind
+        properties:
+          graph_commit_id:
+            type: string
+          kind:
+            type: string
+            enum:
+            - dropped
+    BranchStartRefusalOutput:
+      type: object
+      required:
+      - reason
+      - graph_commit_id
+      properties:
+        branch:
+          type:
+          - string
+          - 'null'
+        graph_commit_id:
+          type: string
+        reason:
+          $ref: '#/components/schemas/BranchStartRefusalReason'
+        type_name:
+          type:
+          - string
+          - 'null'
+    BranchStartRefusalReason:
+      type: string
+      enum:
+      - not_retained
+      - schema_changed
+      - earlier_storage_format
+      - branch_deleted
+      - unpublished_commit
+      - unattached_snapshot
+      - unknown
+    ChangeBlockOutput:
+      type: object
+      required:
+      - cause
+      - changes
+      properties:
+        cause:
+          $ref: '#/components/schemas/ChangeCauseOutput'
+        changes:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityChangeOutput'
+    ChangeCauseOutput:
+      type: object
+      required:
+      - graph_commit_id
+      - authored_branch
+      - authored_at
+      properties:
+        actor_id:
+          type:
+          - string
+          - 'null'
+        authored_at:
+          type: integer
+          format: int64
+        authored_branch:
+          type: string
+        graph_commit_id:
+          type: string
+        merged_parent_commit_id:
+          type:
+          - string
+          - 'null'
+        parent_commit_id:
+          type:
+          - string
+          - 'null'
+    ChangeDiffRefusalOutput:
+      type: object
+      required:
+      - reason
+      - graph_commit_id
+      properties:
+        graph_commit_id:
+          type: string
+        reason:
+          $ref: '#/components/schemas/ChangeDiffRefusalReason'
+        type_name:
+          type:
+          - string
+          - 'null'
+    ChangeDiffRefusalReason:
+      type: string
+      enum:
+      - parentless_commit
+      - schema_boundary
+      - unknown
+    ChangeEndpointsOutput:
+      type: object
+      required:
+      - from
+      - to
+      properties:
+        from:
+          type: string
+        to:
+          type: string
+    ChangeErrorOutput:
+      type: object
+      required:
+      - error
+      - code
+      - disposition
+      properties:
+        change_diff_refusal:
+          oneOf:
+          - type: 'null'
+          - $ref: '#/components/schemas/ChangeDiffRefusalOutput'
+        change_feed_gap:
+          oneOf:
+          - type: 'null'
+          - $ref: '#/components/schemas/ChangeFeedGapOutput'
+        code:
+          $ref: '#/components/schemas/ErrorCode'
+        disposition:
+          $ref: '#/components/schemas/DispositionOutput'
+        error:
+          type: string
+        recovery_required:
+          oneOf:
+          - type: 'null'
+          - $ref: '#/components/schemas/RecoveryRequiredOutput'
+        resource_limit:
+          oneOf:
+          - type: 'null'
+          - $ref: '#/components/schemas/ResourceLimitOutput'
+    ChangeFeedGapOutput:
+      type: object
+      required:
+      - first_unreadable_commit_id
+      properties:
+        cursor:
+          type:
+          - string
+          - 'null'
+        first_unreadable_commit_id:
+          type: string
+    ChangeFeedOutput:
+      type: object
+      required:
+      - blocks
+      properties:
+        blocks:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChangeBlockOutput'
+        caught_up:
+          type:
+          - boolean
+          - 'null'
+        cursor:
+          type:
+          - string
+          - 'null'
+        next_page_token:
+          type:
+          - string
+          - 'null'
+    ChangeImageOutput:
+      type: object
+      required:
+      - properties
+      properties:
+        endpoints:
+          oneOf:
+          - type: 'null'
+          - $ref: '#/components/schemas/ChangeEndpointsOutput'
+        properties: {}
+    ChangeOp:
+      type: string
+      enum:
+      - insert
+      - update
+      - delete
+    ChangeOutput:
+      type: object
+      required:
+      - branch
+      - query_name
+      - affected_nodes
+      - affected_edges
+      - commit
+      properties:
+        actor_id:
+          type:
+          - string
+          - 'null'
+        affected_edges:
+          type: integer
+          minimum: 0
+        affected_nodes:
+          type: integer
+          minimum: 0
+        branch:
+          type: string
+        commit:
+          oneOf:
+          - type: 'null'
+          - $ref: '#/components/schemas/CommitOutput'
+        executed:
+          oneOf:
+          - type: 'null'
+          - $ref: '#/components/schemas/LoadExecutedOutput'
+        outcome:
+          oneOf:
+          - type: 'null'
+          - $ref: '#/components/schemas/BranchOutcomeOutput'
+        query_name:
+          type: string
+    ChangeRequest:
+      type: object
+      required:
+      - query
+      properties:
+        branch:
+          type:
+          - string
+          - 'null'
+        name:
+          type:
+          - string
+          - 'null'
+        params: {}
+        query:
+          type: string
+        settings:
+          oneOf:
+          - type: 'null'
+          - $ref: '#/components/schemas/SettingsRequest'
+      additionalProperties: false
+    ChangeTypeOutput:
+      type: object
+      required:
+      - id
+      - name
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+    CommitChangesOutput:
+      type: object
+      required:
+      - cause
+      - changes
+      properties:
+        cause:
+          $ref: '#/components/schemas/ChangeCauseOutput'
+        changes:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityChangeOutput'
+        next_page_token:
+          type:
+          - string
+          - 'null'
+    CommitKind:
+      type: string
+      enum:
+      - published
+      - unpublished
+      - unattached
+    CommitListOutput:
+      type: object
+      required:
+      - commits
+      properties:
+        commits:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommitOutput'
+        head_commit_id:
+          type:
+          - string
+          - 'null'
+        next_page_token:
+          type:
+          - string
+          - 'null'
+    CommitListing:
+      type: string
+      enum:
+      - history
+      - unpublished
+      - unattached
+    CommitOutput:
+      type: object
+      required:
+      - graph_commit_id
+      - graph_manifest_version
+      - created_at
+      - kind
+      properties:
+        actor_id:
+          type:
+          - string
+          - 'null'
+        created_at:
+          type: integer
+          format: int64
+        graph_branch:
+          type:
+          - string
+          - 'null'
+        graph_commit_id:
+          type: string
+        graph_manifest_version:
+          type: integer
+          format: int64
+          minimum: 0
+        kind:
+          $ref: '#/components/schemas/CommitKind'
+        merged_parent_commit_id:
+          type:
+          - string
+          - 'null'
+        parent_commit_id:
+          type:
+          - string
+          - 'null'
+        published:
+          type: boolean
+        root_commit_id:
+          type:
+          - string
+          - 'null'
+    DiagnosticOutput:
+      type: object
+      required:
+      - code
+      - expected
+      properties:
+        code:
+          type: string
+        expected:
+          type: string
+        expression:
+          type:
+          - string
+          - 'null'
+        fix:
+          type:
+          - string
+          - 'null'
+        position:
+          oneOf:
+          - type: 'null'
+          - $ref: '#/components/schemas/PositionOutput'
+        stage:
+          type:
+          - string
+          - 'null'
+        suggestion:
+          oneOf:
+          - type: 'null'
+          - $ref: '#/components/schemas/SuggestionOutput'
+    DiffOutput:
+      type: object
+      required:
+      - from_commit_id
+      - to_commit_id
+      - changes
+      properties:
+        base_commit_id:
+          type:
+          - string
+          - 'null'
+        changes:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityChangeOutput'
+        from_commit_id:
+          type: string
+        next_page_token:
+          type:
+          - string
+          - 'null'
+        to_commit_id:
+          type: string
+    DispositionAction:
+      type: string
+      enum:
+      - fix
+      - refresh
+      - retry
+      - recover
+      - reconcile
+    DispositionEffects:
+      type: string
+      enum:
+      - none
+      - partial
+      - unknown
+    DispositionOutput:
+      type: object
+      required:
+      - effects
+      - action
+      properties:
+        action:
+          $ref: '#/components/schemas/DispositionAction'
+        effects:
+          $ref: '#/components/schemas/DispositionEffects'
+    EntityChangeOutput:
+      type: object
+      required:
+      - kind
+      - type
+      - id
+      - op
+      properties:
+        after:
+          oneOf:
+          - type: 'null'
+          - $ref: '#/components/schemas/ChangeImageOutput'
+        before:
+          oneOf:
+          - type: 'null'
+          - $ref: '#/components/schemas/ChangeImageOutput'
+        id:
+          type: string
+        kind:
+          $ref: '#/components/schemas/EntityKind'
+        op:
+          $ref: '#/components/schemas/ChangeOp'
+        type:
+          $ref: '#/components/schemas/ChangeTypeOutput'
+    EntityKind:
+      type: string
+      enum:
+      - node
+      - edge
+    ErrorCode:
+      type: string
+      enum:
+      - unauthorized
+      - forbidden
+      - not_admitted
+      - bad_request
+      - api_contract_mismatch
+      - actor_mismatch
+      - outcome_unknown
+      - precondition_failed
+      - recovery_required
+      - external_blob_source
+      - change_feed_gap
+      - not_found
+      - method_not_allowed
+      - request_timeout
+      - conflict
+      - branch_start_refusal
+      - unattached_cannot_publish
+      - payload_too_large
+      - unsupported_media_type
+      - range_not_satisfiable
+      - too_many_requests
+      - service_unavailable
+      - graph_unavailable
+      - internal
+      - cancelled
+      - deadline_exceeded
+      - result_too_large
+    ErrorOutput:
+      type: object
+      required:
+      - error
+      - code
+      - disposition
+      properties:
+        blob_precondition_failure:
+          oneOf:
+          - type: 'null'
+          - $ref: '#/components/schemas/BlobPreconditionFailureOutput'
+        blob_range:
+          oneOf:
+          - type: 'null'
+          - $ref: '#/components/schemas/BlobRangeOutput'
+        branch_start_refusal:
+          oneOf:
+          - type: 'null'
+          - $ref: '#/components/schemas/BranchStartRefusalOutput'
+        change_diff_refusal:
+          oneOf:
+          - type: 'null'
+          - $ref: '#/components/schemas/ChangeDiffRefusalOutput'
+        change_feed_gap:
+          oneOf:
+          - type: 'null'
+          - $ref: '#/components/schemas/ChangeFeedGapOutput'
+        code:
+          $ref: '#/components/schemas/ErrorCode'
+        diagnostic:
+          oneOf:
+          - type: 'null'
+          - $ref: '#/components/schemas/DiagnosticOutput'
+        disposition:
+          $ref: '#/components/schemas/DispositionOutput'
+        error:
+          type: string
+        external_blob_source:
+          oneOf:
+          - type: 'null'
+          - $ref: '#/components/schemas/ExternalBlobSourceOutput'
+        full_text_index_rebuild_required:
+          oneOf:
+          - type: 'null'
+          - $ref: '#/components/schemas/FullTextIndexRebuildRequiredOutput'
+        full_text_index_required:
+          oneOf:
+          - type: 'null'
+          - $ref: '#/components/schemas/FullTextIndexRequiredOutput'
+        key_conflict:
+          oneOf:
+          - type: 'null'
+          - $ref: '#/components/schemas/KeyConflictOutput'
+        merge_conflicts:
+          type: array
+          items:
+            $ref: '#/components/schemas/MergeConflictOutput'
+        precondition_failure:
+          oneOf:
+          - type: 'null'
+          - $ref: '#/components/schemas/PreconditionFailureOutput'
+        published_dataset_version_conflict:
+          oneOf:
+          - type: 'null'
+          - $ref: '#/components/schemas/PublishedDatasetVersionConflictOutput'
+        read_set_conflict:
+          oneOf:
+          - type: 'null'
+          - $ref: '#/components/schemas/ReadSetConflictOutput'
+        recovery_required:
+          oneOf:
+          - type: 'null'
+          - $ref: '#/components/schemas/RecoveryRequiredOutput'
+        resource_limit:
+          oneOf:
+          - type: 'null'
+          - $ref: '#/components/schemas/ResourceLimitOutput'
+    ExportRequest:
+      type: object
+      properties:
+        branch:
+          type:
+          - string
+          - 'null'
+        type_names:
+          type: array
+          items:
+            type: string
+      additionalProperties: false
+    ExternalBlobSourceOutput:
+      type: object
+      required:
+      - uri
+      - reason
+      properties:
+        reason:
+          type: string
+        uri:
+          type: string
+    FullTextIndexRebuildRequiredOutput:
+      type: object
+      required:
+      - index
+      - reason
+      properties:
+        index:
+          type: string
+        reason:
+          type: string
+    FullTextIndexRequiredOutput:
+      type: object
+      required:
+      - index
+      properties:
+        index:
+          type: string
+    GraphBatchDeclarationOutput:
+      type: object
+      required:
+      - name
+      - entities_loaded
+      properties:
+        entities_loaded:
+          type: integer
+          minimum: 0
+        name:
+          type: string
+    GraphBatchLoadOutput:
+      type: object
+      required:
+      - branch
+      - branch_created
+      - mode
+      - nodes
+      - edges
+      - total_entities
+      - embedding_generation
+      properties:
+        actor_id:
+          type:
+          - string
+          - 'null'
+        base_branch:
+          type:
+          - string
+          - 'null'
+        branch:
+          type: string
+        branch_created:
+          type: boolean
+        commit:
+          oneOf:
+          - type: 'null'
+          - $ref: '#/components/schemas/CommitOutput'
+        edges:
+          type: array
+          items:
+            $ref: '#/components/schemas/GraphBatchDeclarationOutput'
+        embedding_generation:
+          oneOf:
+          - type: 'null'
+          - $ref: '#/components/schemas/LoadEmbeddingGeneration'
+        mode:
+          $ref: '#/components/schemas/LoadMode'
+        nodes:
+          type: array
+          items:
+            $ref: '#/components/schemas/GraphBatchDeclarationOutput'
+        total_entities:
+          type: integer
+          minimum: 0
+    IngestOutput:
+      type: object
+      required:
+      - uri
+      - branch
+      - branch_created
+      - mode
+      - nodes
+      - edges
+      - total_entities
+      - embedding_generation
+      properties:
+        actor_id:
+          type:
+          - string
+          - 'null'
+        base_branch:
+          type:
+          - string
+          - 'null'
+        branch:
+          type: string
+        branch_created:
+          type: boolean
+        commit:
+          oneOf:
+          - type: 'null'
+          - $ref: '#/components/schemas/CommitOutput'
+        edges:
+          type: array
+          items:
+            $ref: '#/components/schemas/GraphBatchDeclarationOutput'
+        embedding_generation:
+          oneOf:
+          - type: 'null'
+          - $ref: '#/components/schemas/LoadEmbeddingGeneration'
+        mode:
+          $ref: '#/components/schemas/LoadMode'
+        nodes:
+          type: array
+          items:
+            $ref: '#/components/schemas/GraphBatchDeclarationOutput'
+        total_entities:
+          type: integer
+          minimum: 0
+        uri:
+          type: string
+    IngestRequest:
+      type: object
+      required:
+      - data
+      properties:
+        branch:
+          type:
+          - string
+          - 'null'
+        data:
+          type: string
+        from:
+          type:
+          - string
+          - 'null'
+        mode:
+          oneOf:
+          - type: 'null'
+          - $ref: '#/components/schemas/LoadMode'
+    InvokeStoredQueryOutput:
+      oneOf:
+      - $ref: '#/components/schemas/ReadOutput'
+      - $ref: '#/components/schemas/ChangeOutput'
+    InvokeStoredQueryRequest:
+      type: object
+      properties:
+        branch:
+          type:
+          - string
+          - 'null'
+        expect_mutation:
+          type:
+          - boolean
+          - 'null'
+        params: {}
+        snapshot:
+          type:
+          - string
+          - 'null'
+    KeyConflictOutput:
+      type: object
+      required:
+      - entity_kind
+      - type_name
+      properties:
+        entity_id:
+          type:
+          - string
+          - 'null'
+        entity_kind:
+          $ref: '#/components/schemas/EntityKind'
+        type_name:
+          type: string
+    LoadEmbeddingGeneration:
+      type: string
+      enum:
+      - unsupported
+    LoadExecutedOutput:
+      type: object
+      required:
+      - partitions
+      - rows
+      - source_bytes
+      - operators
+      properties:
+        operators:
+          type: array
+          items:
+            $ref: '#/components/schemas/LoadOperatorExecutedOutput'
+        partitions:
+          type: integer
+          format: int32
+          minimum: 0
+        rows:
+          type: integer
+          format: int64
+          minimum: 0
+        source_bytes:
+          type: integer
+          format: int64
+          minimum: 0
+    LoadMode:
+      type: string
+      enum:
+      - overwrite
+      - append
+      - merge
+    LoadOperatorExecutedOutput:
+      type: object
+      required:
+      - id
+      - node
+      - operator
+      - rows
+      - elapsed_compute_ns
+      - wall_ns
+      properties:
+        elapsed_compute_ns:
+          type: integer
+          format: int64
+          minimum: 0
+        id:
+          type: integer
+          format: int64
+          minimum: 0
+        node:
+          type: string
+        operator:
+          type: string
+        partitions:
+          type: integer
+          format: int32
+          minimum: 0
+        rows:
+          type: integer
+          format: int64
+          minimum: 0
+        slices:
+          type: array
+          items:
+            $ref: '#/components/schemas/LoadSliceExecutedOutput'
+        wall_ns:
+          type: integer
+          format: int64
+          minimum: 0
+    LoadSliceExecutedOutput:
+      type: object
+      required:
+      - slice
+      - partition
+      - rows
+      - elapsed_compute_ns
+      - start_ns
+      - end_ns
+      properties:
+        elapsed_compute_ns:
+          type: integer
+          format: int64
+          minimum: 0
+        end_ns:
+          type: integer
+          format: int64
+          minimum: 0
+        partition:
+          type: integer
+          format: int32
+          minimum: 0
+        read_ns:
+          type: integer
+          format: int64
+          minimum: 0
+        rows:
+          type: integer
+          format: int64
+          minimum: 0
+        slice:
+          type: integer
+          format: int32
+          minimum: 0
+        start_ns:
+          type: integer
+          format: int64
+          minimum: 0
+    MergeBaseOutput:
+      type: object
+      required:
+      - source
+      - target
+      - source_commit_id
+      - target_commit_id
+      - merge_base
+      properties:
+        merge_base:
+          $ref: '#/components/schemas/CommitOutput'
+        source:
+          type: string
+        source_commit_id:
+          type: string
+        target:
+          type: string
+        target_commit_id:
+          type: string
+    MergeConflictKind:
+      type: string
+      enum:
+      - divergent_insert
+      - divergent_update
+      - delete_vs_update
+      - orphan_edge
+      - unique_violation
+      - cardinality_violation
+      - value_constraint_violation
+    MergeConflictOutput:
+      type: object
+      required:
+      - entity_kind
+      - type_name
+      - kind
+      - message
+      properties:
+        entity_id:
+          type:
+          - string
+          - 'null'
+        entity_kind:
+          $ref: '#/components/schemas/EntityKind'
+        kind:
+          $ref: '#/components/schemas/MergeConflictKind'
+        message:
+          type: string
+        type_name:
+          type: string
+    ParamDescriptor:
+      type: object
+      required:
+      - name
+      - kind
+      - nullable
+      properties:
+        item_kind:
+          oneOf:
+          - type: 'null'
+          - $ref: '#/components/schemas/ParamKind'
+        kind:
+          $ref: '#/components/schemas/ParamKind'
+        name:
+          type: string
+        nullable:
+          type: boolean
+        vector_dim:
+          type:
+          - integer
+          - 'null'
+          format: int32
+          minimum: 0
+    ParamKind:
+      type: string
+      enum:
+      - string
+      - bool
+      - int
+      - bigint
+      - float
+      - date
+      - datetime
+      - blob
+      - vector
+      - list
+    PositionOutput:
+      type: object
+      required:
+      - line
+      - column
+      - byte
+      properties:
+        byte:
+          type: integer
+          format: int32
+          minimum: 0
+        column:
+          type: integer
+          format: int32
+          minimum: 0
+        line:
+          type: integer
+          format: int32
+          minimum: 0
+    PreconditionFailureOutput:
+      type: object
+      required:
+      - expected
+      properties:
+        actual:
+          type:
+          - string
+          - 'null'
+        expected:
+          type: string
+    PublishedDatasetVersionConflictOutput:
+      type: object
+      required:
+      - entity_kind
+      - type_name
+      - expected_published_dataset_version
+      - actual_published_dataset_version
+      properties:
+        actual_published_dataset_version:
+          type: integer
+          format: int64
+          minimum: 0
+        entity_kind:
+          $ref: '#/components/schemas/EntityKind'
+        expected_published_dataset_version:
+          type: integer
+          format: int64
+          minimum: 0
+        type_name:
+          type: string
+    QueriesCatalogOutput:
+      type: object
+      required:
+      - queries
+      properties:
+        queries:
+          type: array
+          items:
+            $ref: '#/components/schemas/QueryCatalogEntry'
+    QueryCatalogEntry:
+      type: object
+      required:
+      - name
+      - tool_name
+      - mutation
+      - params
+      properties:
+        description:
+          type:
+          - string
+          - 'null'
+        instruction:
+          type:
+          - string
+          - 'null'
+        mutation:
+          type: boolean
+        name:
+          type: string
+        params:
+          type: array
+          items:
+            $ref: '#/components/schemas/ParamDescriptor'
+        tool_name:
+          type: string
+    QueryRequest:
+      type: object
+      required:
+      - query
+      properties:
+        branch:
+          type:
+          - string
+          - 'null'
+        name:
+          type:
+          - string
+          - 'null'
+        params: {}
+        query:
+          type: string
+        settings:
+          oneOf:
+          - type: 'null'
+          - $ref: '#/components/schemas/SettingsRequest'
+        snapshot:
+          type:
+          - string
+          - 'null'
+      additionalProperties: false
+    RankOrder:
+      type: string
+      enum:
+      - ascending
+      - descending
+    RankingOutput:
+      type: object
+      required:
+      - by
+      - order
+      - exhaustive
+      - score_columns
+      properties:
+        by:
+          $ref: '#/components/schemas/SearchFunction'
+        exhaustive:
+          type: boolean
+        order:
+          $ref: '#/components/schemas/RankOrder'
+        score_columns:
+          type: array
+          items:
+            type: string
+    ReadOutput:
+      type: object
+      required:
+      - query_name
+      - target
+      - row_count
+      - rows
+      properties:
+        columns:
+          type: array
+          items:
+            type: string
+        graph_commit_id:
+          type:
+          - string
+          - 'null'
+        page:
+          oneOf:
+          - type: 'null'
+          - $ref: '#/components/schemas/ReadPageOutput'
+        query_name:
+          type: string
+        ranking:
+          oneOf:
+          - type: 'null'
+          - $ref: '#/components/schemas/RankingOutput'
+        row_count:
+          type: integer
+          minimum: 0
+        rows: {}
+        target:
+          $ref: '#/components/schemas/ReadTargetOutput'
+    ReadPageOutput:
+      type: object
+      properties:
+        base_commit_id:
+          type:
+          - string
+          - 'null'
+        from_commit_id:
+          type:
+          - string
+          - 'null'
+        next_page_token:
+          type:
+          - string
+          - 'null'
+        to_commit_id:
+          type:
+          - string
+          - 'null'
+    ReadSetConflictOutput:
+      type: object
+      required:
+      - member
+      properties:
+        actual:
+          type:
+          - string
+          - 'null'
+        expected:
+          type:
+          - string
+          - 'null'
+        member:
+          type: string
+    ReadTargetOutput:
+      type: object
+      properties:
+        branch:
+          type:
+          - string
+          - 'null'
+        snapshot:
+          type:
+          - string
+          - 'null'
+    RecoveryRequiredOutput:
+      type: object
+      required:
+      - operation_id
+      properties:
+        operation_id:
+          type: string
+    ResourceLimitOutput:
+      type: object
+      required:
+      - resource
+      - limit
+      - actual
+      properties:
+        actual:
+          type: integer
+          format: int64
+          minimum: 0
+        limit:
+          type: integer
+          format: int64
+          minimum: 0
+        resource:
+          type: string
+    SchemaOutput:
+      type: object
+      required:
+      - schema_source
+      properties:
+        catalogue_source:
+          type:
+          - string
+          - 'null'
+        schema_source:
+          type: string
+        system_columns:
+          oneOf:
+          - type: 'null'
+          - $ref: '#/components/schemas/SystemColumnsOutput'
+    SearchFunction:
+      type: string
+      enum:
+      - nearest
+      - bm25
+      - rrf
+    SettingsRequest:
+      type: object
+      properties:
+        ann_nprobes:
+          type: integer
+          minimum: 0
+        change_lineage:
+          type: string
+          enum:
+          - 'off'
+          - 'on'
+          - verify
+        engine:
+          type: string
+          enum:
+          - v2
+        history_release_bytes:
+          type: integer
+          maximum: 262144
+          minimum: 1024
+        load_source_max_bytes:
+          type: integer
+          minimum: 1
+        merge_lineage:
+          type: string
+          enum:
+          - 'off'
+          - 'on'
+          - verify
+        query_memory_bytes:
+          type: integer
+          minimum: 1
+        traversal_work_limit:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 1
+        write_max_bytes:
+          type: integer
+          minimum: 1
+      additionalProperties: false
+    SnapshotDatasetOutput:
+      type: object
+      required:
+      - entity_kind
+      - type_name
+      - dataset_path
+      - published_dataset_version
+      - entity_count
+      properties:
+        dataset_path:
+          type: string
+        entity_count:
+          type: integer
+          format: int64
+          minimum: 0
+        entity_kind:
+          $ref: '#/components/schemas/EntityKind'
+        native_dataset_branch:
+          type:
+          - string
+          - 'null'
+        published_dataset_version:
+          type: integer
+          format: int64
+          minimum: 0
+        type_name:
+          type: string
+    SnapshotOutput:
+      type: object
+      required:
+      - graph_branch
+      - graph_manifest_version
+      - internal_schema_version
+      - datasets
+      properties:
+        datasets:
+          type: array
+          items:
+            $ref: '#/components/schemas/SnapshotDatasetOutput'
+        graph_branch:
+          type: string
+        graph_manifest_version:
+          type: integer
+          format: int64
+          minimum: 0
+        internal_schema_version:
+          type: integer
+          format: int32
+          minimum: 0
+    SuggestionOutput:
+      type: object
+      required:
+      - applicability
+      - edits
+      properties:
+        applicability:
+          $ref: '#/components/schemas/Applicability'
+        edits:
+          type: array
+          items:
+            $ref: '#/components/schemas/TextEditOutput'
+    SystemColumnsOutput:
+      type: object
+      required:
+      - id
+      - src
+      - dst
+      properties:
+        dst:
+          type: string
+        id:
+          type: string
+        src:
+          type: string
+    TextEditOutput:
+      type: object
+      required:
+      - start
+      - end
+      - replacement
+      properties:
+        end:
+          type: integer
+          minimum: 0
+        replacement:
+          type: string
+        start:
+          type: integer
+          minimum: 0
+  securitySchemes:
+    apiKey:
+      type: http
+      scheme: bearer
+      description: A Longreach API key, lr_…
+security:
+- apiKey: []

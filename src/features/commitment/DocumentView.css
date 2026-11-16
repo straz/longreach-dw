@@ -1,0 +1,49 @@
+.docview {
+  font-size: var(--size-sm);
+  line-height: 1.6;
+  color: var(--ink-2);
+}
+
+.docview p {
+  margin: 0 0 var(--space-3);
+}
+
+.docview-heading {
+  font-family: var(--serif);
+  color: var(--ink);
+  line-height: 1.25;
+  margin: var(--space-4) 0 var(--space-2);
+}
+
+h1.docview-heading {
+  font-size: var(--size-lg);
+  font-weight: 600;
+  margin-top: 0;
+}
+
+h2.docview-heading {
+  font-size: var(--size-body);
+  font-weight: 600;
+}
+
+.docview em {
+  color: var(--ink-3);
+}
+
+.docview-span {
+  background: none;
+  color: inherit;
+  border-radius: 2px;
+  transition: background-color 240ms var(--ease-out);
+}
+
+.docview-span.is-found {
+  background: var(--action-soft);
+  box-shadow: 0 1px 0 var(--action);
+  cursor: pointer;
+}
+
+.docview-span.is-focus {
+  background: var(--attention-soft);
+  box-shadow: 0 1px 0 var(--attention);
+}

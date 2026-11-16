@@ -1,0 +1,374 @@
+// Copy of tyapi spikes/ty-core/queries/decision_watch.gq at 1db845d plus its working tree (every query fully ordered). Update: copy the
+// file, change this line, run `pnpm gen:model`.
+// Stored queries Decision Watch (dw) reads, from test8's queries/decision_watch.gq (commit
+// 055fc0b; docs/18-dw-backend.md, W5). Each reads a whole graph slice in one call, so a screen
+// needs few round trips; the browser joins and derives. Every query's order ends in the columns that
+// identify a row, so rows that tie on a date always come back the same way.
+
+query commitments($as_of: DateTime?) @description("Every commitment with its lifecycle fields.") {
+    match {
+        $c: Commitment
+        $c.committed_at is null or $as_of is null or $c.committed_at <= $as_of
+    }
+    return { $c.slug as commitment, $c.title as title, $c.statement as statement, $c.scale as scale, $c.state as state, $c.origin as origin, $c.recognition as recognition, $c.committed_at as committed_at, $c.horizon_at as horizon_at, $c.revisit_at as revisit_at, $c.reversibility as reversibility, $c.watched as watched }
+    order { commitment asc }
+}
+
+query bound_parties($as_of: DateTime?) @description("Which party is bound by each commitment: ours, or another party's we depend on.") {
+    match {
+        $p: Party
+        $p commits $c
+        $c.committed_at is null or $as_of is null or $c.committed_at <= $as_of
+    }
+    return { $c.slug as commitment, $p.slug as party, $p.name as name }
+    order { commitment asc, party asc }
+}
+
+query recorded_in($as_of: DateTime?) @description("The document each commitment was recorded from.") {
+    match {
+        $c: Commitment
+        $c $r:recordedIn $s
+        $c.committed_at is null or $as_of is null or $c.committed_at <= $as_of
+    }
+    return { $c.slug as commitment, $s.slug as source, $s.title as title, $s.kind as kind, $s.occurred_at as occurred_at, $r.external_id as external_id }
+    order { commitment asc, source asc }
+}
+
+query owners($as_of: DateTime?) @description("Who owns each commitment.") {
+    match {
+        $c: Commitment
+        $c ownedBy $p
+        $c.committed_at is null or $as_of is null or $c.committed_at <= $as_of
+    }
+    return { $c.slug as commitment, $p.slug as party, $p.name as name }
+    order { commitment asc, party asc }
+}
+
+query counterparties($as_of: DateTime?) @description("Who each commitment is owed to, and in what role.") {
+    match {
+        $c: Commitment
+        $c $o:owes $p
+        $c.committed_at is null or $as_of is null or $c.committed_at <= $as_of
+    }
+    return { $c.slug as commitment, $p.slug as party, $p.name as name, $o.role as role }
+    order { commitment asc, party asc, role asc }
+}
+
+query exposures($as_of: DateTime?) @description("Every dated exposure reading, for the capital clock and the headline.") {
+    match {
+        $e: Exposure
+        $e exposureOf $c
+        $as_of is null or $e.as_of <= $as_of
+        $c.committed_at is null or $as_of is null or $c.committed_at <= $as_of
+    }
+    return { $c.slug as commitment, $e.slug as exposure, $e.kind as kind, $e.amount as amount, $e.unit as unit, $e.as_of as as_of, $e.irreversible_by as irreversible_by }
+    order { as_of asc, exposure asc }
+}
+
+query beliefs() @description("The belief library with its lines.") {
+    match {
+        $b: Belief
+    }
+    return { $b.slug as belief, $b.kind as kind, $b.statement as statement, $b.status as status, $b.falsifier as falsifier, $b.metric as metric, $b.comparator as comparator, $b.threshold as threshold, $b.hard_threshold as hard_threshold, $b.trend as trend, $b.horizon_at as horizon_at }
+    order { belief asc }
+}
+
+query rests_on($as_of: DateTime?) @description("Which commitments rest on which beliefs, and whether each is necessary.") {
+    match {
+        $c: Commitment
+        $c $r:restsOn $b
+        $c.committed_at is null or $as_of is null or $c.committed_at <= $as_of
+    }
+    return { $c.slug as commitment, $b.slug as belief, $r.necessary as necessary, $r.watched as watched }
+    order { commitment asc, belief asc }
+}
+
+query metric_claims($as_of: DateTime?) @description("Quantitative claims, with their source.") {
+    match {
+        $k: Claim
+        $k claimFrom $s
+        $k.metric is not null
+        $as_of is null or $k.recorded_at <= $as_of
+    }
+    return { $k.slug as claim, $k.metric as metric, $k.value as value, $k.unit as unit, $k.statement as statement, $k.quote as quote, $k.kind as kind, $k.status as status, $k.observed_at as observed_at, $k.recorded_at as recorded_at, $s.slug as source, $s.title as source_title, $s.kind as source_kind, $s.synthetic as synthetic }
+    order { observed_at asc, claim asc }
+}
+
+query supports_links($as_of: DateTime?) @description("Judged links from a claim that supports a belief.") {
+    match {
+        $k: Claim
+        $k $x:supports $b
+        $as_of is null or $k.recorded_at <= $as_of
+        $x.judged_at is null or $as_of is null or $x.judged_at <= $as_of
+    }
+    return { $k.slug as claim, $b.slug as belief, $x.weight as weight, $x.judged_by as judged_by, $x.judged_at as judged_at, $x.note as note }
+    order { claim asc, belief asc, judged_by asc }
+}
+
+query contradicts_links($as_of: DateTime?) @description("Judged links from a claim that contradicts a belief. Weight weak reads as weakening.") {
+    match {
+        $k: Claim
+        $k $x:contradicts $b
+        $as_of is null or $k.recorded_at <= $as_of
+        $x.judged_at is null or $as_of is null or $x.judged_at <= $as_of
+    }
+    return { $k.slug as claim, $b.slug as belief, $x.weight as weight, $x.judged_by as judged_by, $x.judged_at as judged_at, $x.note as note }
+    order { claim asc, belief asc, judged_by asc }
+}
+
+query informs_links($as_of: DateTime?) @description("Judged links from a claim that bears on a belief without taking a side.") {
+    match {
+        $k: Claim
+        $k $x:informsBelief $b
+        $as_of is null or $k.recorded_at <= $as_of
+        $x.judged_at is null or $as_of is null or $x.judged_at <= $as_of
+    }
+    return { $k.slug as claim, $b.slug as belief, $x.judged_by as judged_by, $x.judged_at as judged_at, $x.note as note }
+    order { claim asc, belief asc, judged_by asc }
+}
+
+query claims($as_of: DateTime?) @description("Every claim with its source, for evidence lists.") {
+    match {
+        $k: Claim
+        $k claimFrom $s
+        $as_of is null or $k.recorded_at <= $as_of
+    }
+    return { $k.slug as claim, $k.kind as kind, $k.statement as statement, $k.quote as quote, $k.status as status, $k.observed_at as observed_at, $k.recorded_at as recorded_at, $k.metric as metric, $k.value as value, $s.slug as source, $s.title as source_title, $s.kind as source_kind, $s.synthetic as synthetic }
+    order { recorded_at asc, claim asc }
+}
+
+query tripwires($as_of: DateTime?) @description("Tripwires and the commitments they guard.") {
+    match {
+        $c: Commitment
+        $c guardedBy $t
+        $c.committed_at is null or $as_of is null or $c.committed_at <= $as_of
+        $as_of is null or $t.declared_at <= $as_of
+    }
+    return { $c.slug as commitment, $t.slug as tripwire, $t.kind as kind, $t.condition as condition, $t.metric as metric, $t.comparator as comparator, $t.threshold as threshold, $t.declared_at as declared_at }
+    order { commitment asc, tripwire asc }
+}
+
+query options($as_of: DateTime?) @description("Options and windows each commitment opens.") {
+    match {
+        $c: Commitment
+        $c enables $o
+        $c.committed_at is null or $as_of is null or $c.committed_at <= $as_of
+    }
+    return { $c.slug as commitment, $o.slug as option, $o.title as title, $o.kind as kind, $o.status as status, $o.closes_at as closes_at, $o.exercise_cost as exercise_cost, $o.value_estimate as value, $o.unit as unit }
+    order { closes_at asc, option asc }
+}
+
+query depends_on($as_of: DateTime?) @description("Direct dependencies between commitments.") {
+    match {
+        $c: Commitment
+        $c $x:dependsOn $d
+        $c.committed_at is null or $as_of is null or $c.committed_at <= $as_of
+        $d.committed_at is null or $as_of is null or $d.committed_at <= $as_of
+    }
+    return { $c.slug as commitment, $d.slug as depends_on, $x.kind as kind, $x.watched as watched }
+    order { commitment asc, depends_on asc }
+}
+
+query entails($as_of: DateTime?) @description("Which commitments a program or decision entails.") {
+    match {
+        $a: Commitment
+        $a entails $b
+        $a.committed_at is null or $as_of is null or $a.committed_at <= $as_of
+        $b.committed_at is null or $as_of is null or $b.committed_at <= $as_of
+    }
+    return { $a.slug as parent, $b.slug as child }
+    order { parent asc, child asc }
+}
+
+query origins($as_of: DateTime?) @description("The decision that created each commitment.") {
+    match {
+        $d: Decision
+        $d creates $c
+        $as_of is null or $d.decided_at <= $as_of
+        $c.committed_at is null or $as_of is null or $c.committed_at <= $as_of
+    }
+    return { $c.slug as commitment, $d.slug as decision, $d.statement as statement, $d.kind as kind, $d.decided_at as decided_at, $d.rationale as rationale }
+    order { decided_at asc, decision asc, commitment asc }
+}
+
+query decision_mandates($as_of: DateTime?) @description("The mandate each decision was made under, and who holds it.") {
+    match {
+        $d: Decision
+        $d exercisedUnder $m
+        $m heldBy $p
+        $as_of is null or $d.decided_at <= $as_of
+    }
+    return { $d.slug as decision, $m.slug as mandate, $m.power as power, $m.limit_amount as limit_amount, $m.unit as unit, $p.slug as holder, $p.name as holder_name }
+    order { decision asc, mandate asc }
+}
+
+query alternatives($as_of: DateTime?) @description("Alternatives each decision considered, and which it chose.") {
+    match {
+        $d: Decision
+        $d considered $a
+        $as_of is null or $d.decided_at <= $as_of
+    }
+    return { $d.slug as decision, $a.slug as alternative, $a.statement as statement, $a.closes_at as closes_at, $a.incremental_value as incremental_value, $a.authorization as authorization }
+    order { decision asc, alternative asc }
+}
+
+query chosen($as_of: DateTime?) @description("The alternative each decision chose.") {
+    match {
+        $d: Decision
+        $d chose $a
+        $as_of is null or $d.decided_at <= $as_of
+    }
+    return { $d.slug as decision, $a.slug as alternative }
+    order { decision asc, alternative asc }
+}
+
+query reasons() @description("Reasons for and against each alternative.") {
+    match {
+        $r: Reason
+        $r reasonFor $a
+    }
+    return { $a.slug as alternative, $r.slug as reason, $r.statement as statement, $r.polarity as polarity, $r.weight as weight }
+    order { alternative asc, reason asc }
+}
+
+query transitions($as_of: DateTime?) @description("Every recorded change of state, with the decision behind it.") {
+    match {
+        $t: Transition
+        $t transitionOf $c
+        $as_of is null or $t.at <= $as_of
+        $c.committed_at is null or $as_of is null or $c.committed_at <= $as_of
+    }
+    return { $c.slug as commitment, $t.slug as transition, $t.from_state as from_state, $t.to_state as to_state, $t.at as at, $t.reason as reason }
+    order { at asc, transition asc }
+}
+
+query reviews($as_of: DateTime?) @description("Reviews of commitments: scheduled, prompted and reconsiderations.") {
+    match {
+        $r: Review
+        $r reviewOf $c
+        $as_of is null or $r.held_at <= $as_of or ($r.held_at is null and $r.scheduled_for <= $as_of)
+        $c.committed_at is null or $as_of is null or $c.committed_at <= $as_of
+    }
+    return { $r.slug as review, $c.slug as commitment, $r.kind as kind, $r.scheduled_for as scheduled_for, $r.held_at as held_at, $r.outcome as outcome, $r.notes as notes }
+    order { scheduled_for asc, review asc, commitment asc }
+}
+
+query mandates() @description("Every mandate and who holds it.") {
+    match {
+        $m: Mandate
+        $m heldBy $p
+    }
+    return { $m.slug as mandate, $m.power as power, $m.scope as scope, $m.limit_amount as limit_amount, $m.unit as unit, $p.slug as holder, $p.name as holder_name }
+    order { mandate asc, holder asc }
+}
+
+query actors() @description("Who writes the graph, human or agent, and for which party.") {
+    match {
+        $a: Actor
+        $a actsFor $p
+    }
+    return { $a.slug as actor, $a.kind as kind, $a.name as name, $p.slug as party }
+    order { actor asc }
+}
+
+query parties() @description("Every party.") {
+    match {
+        $p: Party
+    }
+    return { $p.slug as party, $p.kind as kind, $p.name as name }
+    order { party asc }
+}
+
+query risks($as_of: DateTime?) @description("Every rated risk, with the commitment it sits in.") {
+    match {
+        $r: Risk
+        $r riskOf $c
+        $c.committed_at is null or $as_of is null or $c.committed_at <= $as_of
+    }
+    return { $c.slug as commitment, $r.slug as risk, $r.kind as kind, $r.level as level, $r.previous_level as previous, $r.changed_at as changed_at }
+    order { commitment asc, risk asc }
+}
+
+query risk_drivers() @description("The beliefs that drive each risk.") {
+    match {
+        $r: Risk
+        $r drivenBy $b
+    }
+    return { $r.slug as risk, $b.slug as belief }
+    order { risk asc, belief asc }
+}
+
+query grounding_claims($as_of: DateTime?) @description("Claims that ground a commitment's fields: extracted from a document or entered by the owner.") {
+    match {
+        $k: Claim
+        $k $g:groundsCommitment $c
+        $k claimFrom $s
+        $as_of is null or $k.recorded_at <= $as_of
+        $c.committed_at is null or $as_of is null or $c.committed_at <= $as_of
+    }
+    return { $c.slug as commitment, $k.slug as claim, $g.field as field, $k.statement as statement, $k.quote as quote, $k.status as status, $k.kind as kind, $k.recorded_at as recorded_at, $k.value as value, $s.slug as source }
+    order { recorded_at asc, claim asc }
+}
+
+query claim_spans($as_of: DateTime?) @description("The passage of a source each claim quotes.") {
+    match {
+        $k: Claim
+        $k quotedFrom $p
+        $as_of is null or $k.recorded_at <= $as_of
+    }
+    return { $k.slug as claim, $p.slug as span, $p.text as text, $p.locator as locator }
+    order { claim asc, span asc }
+}
+
+query extracted_by($as_of: DateTime?) @description("Which agent extracted each claim.") {
+    match {
+        $k: Claim
+        $k extractedBy $a
+        $as_of is null or $k.recorded_at <= $as_of
+    }
+    return { $k.slug as claim, $a.slug as actor, $a.name as name }
+    order { claim asc, actor asc }
+}
+
+query claimed_by($as_of: DateTime?) @description("Who stated each claim.") {
+    match {
+        $k: Claim
+        $k claimedBy $p
+        $as_of is null or $k.recorded_at <= $as_of
+    }
+    return { $k.slug as claim, $p.slug as party, $p.name as name }
+    order { claim asc, party asc }
+}
+
+query goals($as_of: DateTime?) @description("Goals each commitment serves: its qualitative success criteria.") {
+    match {
+        $c: Commitment
+        $c serves $g
+        $c.committed_at is null or $as_of is null or $c.committed_at <= $as_of
+    }
+    return { $c.slug as commitment, $g.slug as goal, $g.statement as statement, $g.target_at as target_at }
+    order { commitment asc, goal asc }
+}
+
+query review_decisions($as_of: DateTime?) @description("The decision each review resulted in: how a reconsideration ended.") {
+    match {
+        $r: Review
+        $r resultedIn $d
+        $d decidedBy $p
+        $as_of is null or $r.held_at <= $as_of or ($r.held_at is null and $r.scheduled_for <= $as_of)
+        $as_of is null or $d.decided_at <= $as_of
+    }
+    return { $r.slug as review, $d.slug as decision, $d.statement as statement, $d.kind as kind, $d.decided_at as decided_at, $d.rationale as rationale, $p.slug as decided_by }
+    order { decided_at asc, review asc, decision asc }
+}
+
+query decision_approvals($as_of: DateTime?) @description("Every approval of every decision, so a decision under another holder's mandate shows as pending until approved.") {
+    match {
+        $d: Decision
+        $d $a:approvedBy $p
+        $as_of is null or $d.decided_at <= $as_of
+        $as_of is null or $a.at <= $as_of
+    }
+    return { $d.slug as decision, $p.slug as party, $a.at as at, $a.under as under }
+    order { at asc, decision asc, party asc }
+}

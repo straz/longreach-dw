@@ -1,0 +1,534 @@
+.brief {
+  max-width: 64rem;
+  padding: var(--space-5) var(--space-6) var(--space-6);
+}
+
+.brief-status {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  font-size: var(--size-sm);
+  color: var(--ink-3);
+}
+
+.brief-pill {
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: var(--size-xs);
+  font-weight: 700;
+  background: var(--surface-muted);
+  color: var(--ink-2);
+}
+
+.brief-pill.is-open {
+  background: var(--attention-soft);
+  color: var(--attention-ink);
+}
+
+.brief-pill.is-awaiting {
+  background: var(--surface-muted);
+  color: var(--agent);
+}
+
+.brief-id {
+  margin-left: auto;
+  font-weight: 700;
+}
+
+.brief-title {
+  margin-top: var(--space-2);
+  font-family: var(--serif);
+  font-size: var(--size-xl);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+.brief-lede {
+  max-width: 48rem;
+  margin-top: var(--space-3);
+  font-size: var(--size-body);
+  line-height: 1.55;
+  color: var(--ink-2);
+}
+
+.brief-recorded {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius);
+  background: var(--action-soft);
+  color: var(--action-dark);
+  font-size: var(--size-sm);
+}
+
+.brief-recorded code {
+  font-size: var(--size-xs);
+}
+
+.bsection {
+  margin-top: var(--space-6);
+}
+
+.bsection > .caps-label {
+  margin-bottom: var(--space-3);
+}
+
+/* Capital clock */
+.clock {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--size-sm);
+}
+
+.clock th,
+.clock td {
+  padding: 6px var(--space-3) 6px 0;
+  border-top: 1px solid var(--line-soft);
+  text-align: left;
+  font-weight: 400;
+  vertical-align: middle;
+}
+
+.clock tr:first-child th,
+.clock tr:first-child td {
+  border-top: 0;
+}
+
+.clock th {
+  width: 34%;
+}
+
+.clock th a {
+  color: var(--ink);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.clock th a:hover {
+  text-decoration: underline;
+}
+
+.clock-bar {
+  width: 26%;
+}
+
+.clock-num {
+  white-space: nowrap;
+  color: var(--ink-2);
+}
+
+.clock-num.is-avoidable {
+  color: var(--attention-ink);
+  font-weight: 600;
+}
+
+.clock-until {
+  white-space: nowrap;
+  color: var(--window);
+  font-weight: 600;
+}
+
+.clock-dates {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-5);
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--line);
+  font-size: var(--size-xs);
+  color: var(--ink-2);
+}
+
+.clock-dates li {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.clock-date {
+  font-weight: 700;
+}
+
+/* What moved */
+.moved-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(21rem, 1fr));
+  gap: var(--space-3);
+}
+
+.moved {
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.moved-title {
+  font-size: var(--size-sm);
+  font-weight: 600;
+}
+
+.moved-sub {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 2px 0 var(--space-2);
+  font-size: var(--size-xs);
+  color: var(--ink-3);
+}
+
+.moved-sub a {
+  margin-left: auto;
+}
+
+.moved-note {
+  font-size: var(--size-sm);
+  color: var(--ink-2);
+}
+
+/* Paths */
+.paths-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.paths {
+  width: 100%;
+  min-width: 46rem;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: var(--size-sm);
+}
+
+.paths th,
+.paths td {
+  padding: var(--space-2) var(--space-3);
+  border-top: 1px solid var(--line-soft);
+  border-left: 1px solid var(--line-soft);
+  text-align: left;
+  vertical-align: top;
+}
+
+.paths thead th {
+  border-top: 0;
+  font-size: var(--size-body);
+  font-weight: 700;
+}
+
+.paths thead th.is-unavailable {
+  color: var(--ink-3);
+}
+
+.paths-rowhead,
+.paths tbody th {
+  width: 9.5rem;
+  border-left: 0;
+  font-size: var(--size-xs);
+  font-weight: 600;
+  color: var(--ink-3);
+}
+
+.paths td small {
+  display: block;
+  font-size: var(--size-xs);
+  color: var(--ink-3);
+}
+
+.paths-means {
+  color: var(--ink);
+}
+
+.paths-na {
+  background: var(--canvas);
+  color: var(--ink-3);
+}
+
+.paths .is-gain {
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.paths .is-cost {
+  font-weight: 700;
+  color: var(--attention-ink);
+}
+
+.paths .is-mine {
+  font-weight: 700;
+  color: var(--action-dark);
+}
+
+.paths .is-other {
+  font-weight: 600;
+}
+
+.paths .is-window {
+  color: var(--window);
+  font-weight: 600;
+}
+
+/* For and against: a plus or minus before each reason. */
+.paths-reasons li {
+  position: relative;
+  padding-left: 0.9rem;
+  font-size: var(--size-xs);
+  color: var(--ink-2);
+}
+
+.paths-reasons li + li {
+  margin-top: 2px;
+}
+
+.paths-reasons li::before {
+  position: absolute;
+  left: 0;
+  font-weight: 700;
+}
+
+.paths-reasons li.is-pro::before {
+  content: '+';
+  color: var(--action-dark);
+}
+
+.paths-reasons li.is-con::before {
+  content: '−';
+  color: var(--attention-ink);
+}
+
+/* Record the decision */
+.record {
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.record-paths {
+  display: flex;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-4);
+  padding: 0;
+  border: 0;
+}
+
+.record-path {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  height: var(--control-h);
+  padding: 0 var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  font-size: var(--size-sm);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.record-path input {
+  accent-color: var(--action);
+}
+
+.record-path.is-on {
+  border-color: var(--action);
+  background: var(--action-soft);
+  color: var(--action-dark);
+}
+
+.record-field {
+  display: grid;
+  gap: var(--space-1);
+  max-width: 48rem;
+  margin-bottom: var(--space-3);
+  font-size: var(--size-xs);
+  font-weight: 600;
+  color: var(--ink-3);
+}
+
+.record-field.is-short {
+  max-width: 14rem;
+}
+
+.record-field textarea,
+.record-field input {
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  font-size: var(--size-sm);
+  font-weight: 400;
+  color: var(--ink);
+}
+
+.record-field textarea:focus,
+.record-field input:focus {
+  border-color: var(--ink-3);
+  outline: none;
+}
+
+.record-auth {
+  margin-top: var(--space-2);
+  font-size: var(--size-sm);
+  color: var(--ink-2);
+}
+
+.record-auth fieldset {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.record-auth legend {
+  margin-bottom: var(--space-1);
+}
+
+.record-auth input {
+  accent-color: var(--action);
+}
+
+.record-foot {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: var(--space-4);
+}
+
+.record-off {
+  margin-top: var(--space-6);
+  font-size: var(--size-sm);
+  color: var(--ink-3);
+}
+
+/* A recorded decision */
+.decision-head {
+  font-size: var(--size-sm);
+  color: var(--ink-2);
+}
+
+.decision-mandate {
+  font-weight: 600;
+}
+
+.decision-statement {
+  margin-top: var(--space-2);
+  font-weight: 600;
+}
+
+.decision-rationale,
+.decision-note {
+  max-width: 48rem;
+  margin-top: var(--space-2);
+  font-size: var(--size-sm);
+  color: var(--ink-2);
+}
+
+.alts {
+  margin-top: var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.alts > li {
+  display: grid;
+  grid-template-columns: 5rem minmax(0, 1fr);
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-top: 1px solid var(--line-soft);
+  font-size: var(--size-sm);
+}
+
+.alts > li:first-child {
+  border-top: 0;
+}
+
+.alts-mark {
+  font-size: var(--size-xs);
+  font-weight: 700;
+  color: var(--ink-3);
+}
+
+.alts > li.is-chosen .alts-mark {
+  color: var(--action-dark);
+}
+
+.alts-cash {
+  color: var(--ink-3);
+}
+
+.alts-reasons {
+  margin-top: 2px;
+  font-size: var(--size-xs);
+  color: var(--ink-3);
+}
+
+/* A decision waiting on another holder's approval. */
+.approve {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  max-width: 48rem;
+  margin-top: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  font-size: var(--size-sm);
+  color: var(--ink-2);
+}
+
+.approve p {
+  flex: 1 1 20rem;
+}
+
+.approve .write-error {
+  flex-basis: 100%;
+  margin: 0;
+}
+
+/* Print: the brief alone, as a page for the meeting. */
+@media print {
+  .navbar,
+  .chevrons,
+  .looking-back,
+  .blist,
+  .record,
+  .record-off,
+  .approve button,
+  .brief-recorded,
+  .shell-footer,
+  .moved-sub a {
+    display: none !important;
+  }
+
+  .shell,
+  .shell-panel,
+  .rtab,
+  .rtab-main {
+    display: block !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  .brief {
+    max-width: none;
+    padding: 0;
+  }
+
+  .bsection {
+    break-inside: avoid;
+  }
+
+  .paths {
+    min-width: 0;
+  }
+}

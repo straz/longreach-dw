@@ -1,0 +1,264 @@
+.verify {
+  margin-top: var(--space-4);
+}
+
+.verify-progress {
+  display: flex;
+  gap: 4px;
+  margin-bottom: var(--space-2);
+}
+
+.verify-progress span {
+  flex: 1;
+  height: 5px;
+  border-radius: 3px;
+  background: var(--line-soft);
+  transition: background-color 240ms var(--ease-out);
+}
+
+.verify-progress .is-pending {
+  background: var(--attention-soft);
+  box-shadow: inset 0 0 0 1px var(--weak);
+}
+
+.verify-progress .is-accepted {
+  background: var(--action);
+}
+
+.verify-lede {
+  color: var(--ink-2);
+  font-size: var(--size-sm);
+  margin-bottom: var(--space-4);
+}
+
+.vfields {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.vfield {
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  transition:
+    border-color var(--dur) var(--ease-out),
+    background-color var(--dur) var(--ease-out);
+}
+
+.vfield.is-accepted {
+  background: var(--canvas);
+  border-color: var(--line-soft);
+}
+
+.vfield.is-missing {
+  border-style: dashed;
+}
+
+.vfield.is-focused {
+  border-color: var(--attention);
+}
+
+.vfield-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 2px;
+}
+
+/* A verified field can still be corrected until the commitment is activated. */
+.vfield-correct {
+  margin-left: auto;
+  margin-right: var(--space-3);
+  height: auto;
+  font-weight: 400;
+  color: var(--ink-3);
+}
+
+.vfield-label {
+  font-size: var(--size-xs);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.vfield-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--size-xs);
+  font-weight: 700;
+}
+
+.vfield-status.is-accepted {
+  color: var(--action-dark);
+}
+
+.vfield-status.is-pending {
+  color: var(--weak-text);
+}
+
+.vfield-status.is-missing {
+  color: var(--ink-3);
+}
+
+.vfield-value {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: var(--size-body);
+}
+
+.vfield-quote {
+  display: block;
+  margin-top: var(--space-2);
+  padding: 0 0 0 var(--space-3);
+  border: 0;
+  border-left: 1px solid var(--line);
+  background: none;
+  text-align: left;
+  font-size: var(--size-sm);
+  font-style: italic;
+  color: var(--ink-3);
+}
+
+.vfield-quote:hover {
+  color: var(--ink-2);
+}
+
+.vfield-by {
+  margin-top: var(--space-1);
+  font-size: var(--size-xs);
+  color: var(--ink-3);
+}
+
+.vfield-actions {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+.btn-line.is-accept {
+  border-color: var(--action);
+  color: var(--action-dark);
+}
+
+.btn-line.is-accept:hover:not(:disabled) {
+  background: var(--action-soft);
+}
+
+.verify-foot {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+  padding: var(--space-3) 0;
+  border-top: 1px solid var(--line);
+  background: var(--canvas);
+  font-size: var(--size-sm);
+  color: var(--ink-2);
+}
+
+/* Editor */
+.feditor {
+  display: grid;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--line-soft);
+}
+
+.feditor-row {
+  display: flex;
+  gap: var(--space-4);
+}
+
+.feditor-label {
+  display: grid;
+  gap: 4px;
+  font-size: var(--size-xs);
+  font-weight: 700;
+  color: var(--ink-3);
+}
+
+.feditor input:not([type='checkbox']),
+.feditor textarea,
+.feditor select {
+  min-height: var(--control-h);
+  padding: 4px var(--space-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  font-size: var(--size-sm);
+  font-weight: 400;
+  color: var(--ink);
+}
+
+.feditor textarea {
+  resize: vertical;
+}
+
+.feditor-choices {
+  display: grid;
+  gap: 2px;
+  max-height: 16rem;
+  overflow-y: auto;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.feditor-choices legend {
+  margin-bottom: var(--space-2);
+  font-size: var(--size-xs);
+  font-weight: 700;
+  color: var(--ink-3);
+}
+
+.feditor-choice {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: 4px var(--space-2);
+  border-radius: var(--radius);
+  font-size: var(--size-sm);
+}
+
+.feditor-choice.is-on {
+  background: var(--action-soft);
+}
+
+.feditor-choice label {
+  display: flex;
+  gap: var(--space-2);
+  align-items: baseline;
+}
+
+.feditor-necessary {
+  flex: none;
+  font-size: var(--size-xs);
+  font-weight: 600;
+}
+
+.feditor input[type='checkbox'] {
+  accent-color: var(--action);
+}
+
+.feditor-actions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.vfield.is-loading {
+  display: grid;
+  gap: var(--space-2);
+}
+
+/* Activation held back: the mandate does not cover the amount. */
+.verify-blocked {
+  color: var(--attention-ink);
+}

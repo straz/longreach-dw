@@ -1,0 +1,30 @@
+.mark {
+  flex: none;
+  display: block;
+}
+
+.mark.is-window {
+  color: var(--window);
+}
+
+.mark.is-report {
+  color: var(--window);
+}
+
+.mark.is-evidence {
+  color: var(--ink-3);
+}
+
+.mark.is-evidence.tone-moved {
+  color: var(--attention);
+}
+
+.mark.is-evidence.tone-weak {
+  color: var(--weak);
+}
+
+.mark.is-decision,
+.mark.is-revisit,
+.mark.is-end {
+  color: var(--ink-2);
+}

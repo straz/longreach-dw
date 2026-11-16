@@ -1,0 +1,84 @@
+/* Buttons used across tabs and sheets: action (green, one per view),
+   line (outlined), quiet (text only). */
+
+.btn-action,
+.btn-quiet,
+.btn-line {
+  height: var(--control-h);
+  padding: 0 var(--space-4);
+  border-radius: var(--radius);
+  font-size: var(--size-sm);
+  font-weight: 600;
+  transition:
+    background-color var(--dur) var(--ease-out),
+    border-color var(--dur) var(--ease-out);
+}
+
+.btn-action {
+  border: 0;
+  background: var(--action);
+  color: var(--ink-on-dark);
+}
+
+.btn-action:hover:not(:disabled) {
+  background: var(--action-dark);
+}
+
+.btn-action:disabled {
+  background: var(--line);
+  color: var(--ink-3);
+  cursor: default;
+}
+
+.btn-quiet {
+  border: 0;
+  background: none;
+  color: var(--ink-2);
+  padding: 0 var(--space-2);
+}
+
+.btn-quiet:hover {
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
+
+.btn-line {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+}
+
+.btn-line:hover:not(:disabled) {
+  border-color: var(--ink-3);
+}
+
+.btn-line:disabled {
+  color: var(--ink-3);
+  cursor: default;
+}
+
+.btn-line.is-small,
+.btn-quiet.is-small {
+  height: 26px;
+  padding: 0 var(--space-3);
+  font-size: var(--size-xs);
+}
+
+/* A link styled as the action button. */
+.as-link {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+/* A button that reads as an inline link. */
+.btn-link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--window);
+  text-align: left;
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}

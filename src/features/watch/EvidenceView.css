@@ -1,0 +1,99 @@
+.ev-filters {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.ev-list {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.ev-row {
+  display: grid;
+  grid-template-columns: 4.5rem minmax(0, 1fr);
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-top: 1px solid var(--line-soft);
+}
+
+.ev-row:first-child {
+  border-top: 0;
+}
+
+.ev-date {
+  font-size: var(--size-sm);
+  font-weight: 600;
+  color: var(--ink-2);
+}
+
+.ev-text {
+  font-size: var(--size-sm);
+  color: var(--ink);
+}
+
+.ev-prov {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: 2px;
+  font-size: var(--size-xs);
+  color: var(--ink-3);
+}
+
+.ev-prov .synthetic-mark {
+  margin-left: 0;
+}
+
+.ev-bears {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.ev-bear {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  max-width: 100%;
+  padding: 2px var(--space-2);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--canvas);
+  font-size: var(--size-xs);
+  text-align: left;
+}
+
+.ev-bear:hover {
+  border-color: var(--ink-3);
+}
+
+.ev-bear.is-agent {
+  border-style: dashed;
+  border-color: var(--agent);
+  background: var(--surface);
+}
+
+.ev-bear.is-flagged {
+  background: var(--attention-soft);
+}
+
+.ev-bear.is-selected {
+  border-color: var(--ink);
+}
+
+.ev-bear-belief {
+  color: var(--ink-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 26rem;
+}
+
+.ev-bear-by {
+  color: var(--ink-3);
+  white-space: nowrap;
+}

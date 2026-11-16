@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" xmlns:xl="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" xmlns:dc="http://purl.org/dc/elements/1.1/" viewBox="-32.84516 -14.291016 79.63032 98.90039" width="79.63032" height="98.90039">
+  <defs/>
+  <g id="Canvas_1" stroke="none" stroke-opacity="1" stroke-dasharray="none" fill="none" fill-opacity="1">
+    <title>Canvas 1</title>
+    <g id="Canvas_1_Layer_3">
+      <title>Layer 3</title>
+      <g id="Graphic_49">
+        <circle cx="-22.26583" cy=".5917777" r="4.62983877670218" fill="white"/>
+      </g>
+      <g id="Graphic_48">
+        <circle cx="10.52765" cy="-9.661184" r="4.62983877670218" fill="white"/>
+      </g>
+      <g id="Graphic_47">
+        <circle cx="23.640173" cy="-1.8907746" r="4.62983877670218" fill="white"/>
+      </g>
+      <g id="Graphic_46">
+        <circle cx="34.128243" cy="22.963268" r="4.62983877670218" fill="white"/>
+      </g>
+      <g id="Graphic_45">
+        <circle cx="42.155325" cy="34.276653" r="4.62983877670218" fill="white"/>
+      </g>
+      <g id="Graphic_44">
+        <circle cx="23.640173" cy="71.14349" r="4.62983877670218" fill="white"/>
+      </g>
+      <g id="Graphic_43">
+        <circle cx="10.52765" cy="79.97954" r="4.62983877670218" fill="white"/>
+      </g>
+      <g id="Graphic_42">
+        <circle cx="-5.399916" cy="69.99786" r="4.62983877670218" fill="white"/>
+      </g>
+      <g id="Graphic_41">
+        <circle cx="-19.485566" cy="55.769616" r="4.62983877670219" fill="white"/>
+      </g>
+      <g id="Graphic_40">
+        <circle cx="-19.485566" cy="35.917544" r="4.62983877670218" fill="white"/>
+      </g>
+      <g id="Graphic_39">
+        <circle cx="5.7920894" cy="39.89422" r="4.62983877670218" fill="white"/>
+      </g>
+      <g id="Line_38">
+        <line x1="-18.741982" y1="56.379994" x2="-5.030559" y2="69.91335" stroke="white" stroke-linecap="butt" stroke-linejoin="miter" stroke-width="4.2736905"/>
+      </g>
+      <g id="Line_37">
+        <path d="M -22.12532 1.0000876 L -21.94725 10.471905 L -7.4449435 25.124458 L -7.523545 46.22998" stroke="white" stroke-linecap="square" stroke-linejoin="round" stroke-width="4.09562"/>
+      </g>
+      <g id="Line_36">
+        <path d="M -16.783208 38.483915 L 10.421921 64.64566 L 10.599991 79.42968" stroke="white" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="4.09562"/>
+      </g>
+      <g id="Line_35">
+        <path d="M 10.283499 -9.238963 L 10.421921 7.622082 L -6.637366 25.80544" stroke="white" stroke-linecap="square" stroke-linejoin="round" stroke-width="4.09562"/>
+      </g>
+      <g id="Line_34">
+        <path d="M 23.727817 -.24640544 L 23.632521 13.286948 L 13.09089 24.147853 L 22.633658 33.49029 L 22.397158 52.947964 L 11.689977 64.31595" stroke="white" stroke-linecap="square" stroke-linejoin="round" stroke-width="4.09562"/>
+      </g>
+      <g id="Line_33">
+        <line x1="6.0988436" y1="40.709795" x2="19.810267" y2="55.36096" stroke="white" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="4.09562"/>
+      </g>
+      <g id="Line_32">
+        <line x1="33.52169" y1="23.971174" x2="22.71852" y2="33.230837" stroke="white" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="4.09562"/>
+      </g>
+      <g id="Line_31">
+        <path d="M 42.158107 35.18961 L 34.66176 42.656745 L 34.64715 59.590826 L 25.09882 70.12272" stroke="white" stroke-linecap="square" stroke-linejoin="round" stroke-width="4.09562"/>
+      </g>
+    </g>
+  </g>
+</svg>

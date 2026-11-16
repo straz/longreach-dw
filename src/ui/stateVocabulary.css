@@ -1,0 +1,126 @@
+.state-glyph {
+  flex: none;
+}
+
+.state-glyph.is-contradicting {
+  color: var(--attention);
+}
+
+.state-glyph.is-weakening {
+  color: var(--weak);
+}
+
+.state-glyph.is-supported,
+.state-glyph.is-on_track {
+  color: var(--ink-3);
+}
+
+.state-glyph.is-untested {
+  color: var(--line);
+}
+
+.state-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: var(--size-sm);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.state-tag.is-contradicting {
+  color: var(--attention);
+}
+
+.state-tag.is-weakening {
+  color: var(--weak-text);
+}
+
+.state-tag.is-supported,
+.state-tag.is-on_track,
+.state-tag.is-untested {
+  color: var(--ink-3);
+  font-weight: 400;
+}
+
+/* A flag's lifecycle: new and reopened ask for attention; reviewed is quiet. */
+.lifecycle {
+  flex: none;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.lifecycle.is-new,
+.lifecycle.is-reopened {
+  background: var(--attention-soft);
+  color: var(--attention-ink);
+}
+
+.lifecycle.is-reviewed {
+  background: var(--surface-muted);
+  color: var(--ink-3);
+}
+
+/* Provenance marks (docs/PLAN.md §4.5). */
+.agent-mark,
+.synthetic-mark,
+.internal-mark,
+.ext-mark {
+  display: inline-block;
+  padding: 0 5px;
+  border-radius: 3px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+.agent-mark {
+  border: 1px dashed var(--agent);
+  color: var(--agent);
+}
+
+.synthetic-mark {
+  margin-left: var(--space-2);
+  border: 1px solid var(--line);
+  color: var(--ink-3);
+}
+
+.internal-mark {
+  border: 1px solid var(--internal);
+  color: var(--internal);
+}
+
+.ext-mark {
+  border: 1px solid var(--line);
+  color: var(--ink-2);
+}
+
+/* A stance word: contradicts in attention, weakens in weak text. */
+.bev-stance {
+  font-weight: 700;
+  font-size: var(--size-xs);
+  color: var(--ink-3);
+}
+
+.bev-stance.is-contradicts {
+  color: var(--attention);
+}
+
+.bev-stance.is-weakens {
+  color: var(--weak-text);
+}
+
+.tone-moved {
+  color: var(--attention);
+}
+
+.tone-weak {
+  color: var(--weak-text);
+}

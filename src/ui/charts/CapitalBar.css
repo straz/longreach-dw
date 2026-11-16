@@ -1,0 +1,29 @@
+.capbar {
+  display: flex;
+  width: 100%;
+  border-radius: 2px;
+  overflow: hidden;
+  background: var(--line-soft);
+}
+
+.capbar > span {
+  display: block;
+  height: 100%;
+  transition: width var(--dur) var(--ease-out);
+}
+
+.capbar-sunk {
+  background: var(--ink-3);
+}
+
+.capbar-unspent {
+  background: var(--line);
+}
+
+.capbar-avoidable {
+  background: var(--window);
+}
+
+.capbar.tone-moved .capbar-avoidable {
+  background: var(--attention);
+}

@@ -1,0 +1,19 @@
+/* The frame every tab shares, from test8's src/app/Shell.css. */
+.shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.shell-panel {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
+
+.shell-footer {
+  padding: var(--space-2) var(--gutter);
+  border-top: 1px solid var(--line);
+  font-size: var(--size-xs);
+  color: var(--ink-3);
+}

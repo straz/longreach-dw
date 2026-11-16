@@ -1,0 +1,245 @@
+.isheet-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 5vh var(--gutter);
+  background: var(--backdrop);
+  animation: isheet-fade var(--dur) var(--ease-out);
+}
+
+@keyframes isheet-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+.isheet {
+  display: flex;
+  flex-direction: column;
+  width: min(72rem, 100%);
+  max-height: 90vh;
+  border-radius: 10px;
+  background: var(--surface);
+  box-shadow: var(--shadow-dialog);
+  overflow: hidden;
+}
+
+.isheet.is-narrow {
+  width: min(52rem, 100%);
+}
+
+.isheet-head {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-5) var(--space-6) var(--space-4);
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.isheet-title {
+  font-family: var(--serif);
+  font-size: var(--size-lg);
+  font-weight: 600;
+}
+
+.isheet-sub {
+  margin-top: 2px;
+  max-width: 64ch;
+  font-size: var(--size-sm);
+  color: var(--ink-3);
+}
+
+.isheet-close {
+  flex: none;
+  width: 2rem;
+  height: 2rem;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: var(--radius);
+  background: none;
+  color: var(--ink-3);
+}
+
+.isheet-close:hover {
+  background: var(--canvas);
+  color: var(--ink);
+}
+
+.isheet-body {
+  padding: var(--space-5) var(--space-6);
+  overflow-y: auto;
+}
+
+.isheet-loading {
+  color: var(--ink-3);
+}
+
+.doc-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.doc-card {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  min-height: 7rem;
+  padding: var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  text-align: left;
+  transition:
+    border-color var(--dur) var(--ease-out),
+    box-shadow var(--dur) var(--ease-out);
+}
+
+.doc-card:hover {
+  border-color: var(--ink-3);
+  box-shadow: var(--shadow-card-hover);
+}
+
+.doc-kind {
+  font-size: var(--size-xs);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--window);
+}
+
+.doc-title {
+  font-family: var(--serif);
+  font-size: var(--size-md);
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.doc-file {
+  margin-top: auto;
+  font-size: var(--size-xs);
+  color: var(--ink-3);
+}
+
+.doc-imported {
+  font-size: var(--size-xs);
+  font-weight: 700;
+  color: var(--action-dark);
+}
+
+.isheet-note {
+  margin-top: var(--space-4);
+  font-size: var(--size-xs);
+  color: var(--ink-3);
+}
+
+.isheet-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  gap: var(--space-6);
+  min-height: 0;
+  flex: 1;
+}
+
+.isheet-doc {
+  padding: var(--space-5) var(--space-5);
+  border: 1px solid var(--line-soft);
+  border-radius: 8px;
+  background: var(--canvas);
+  overflow-y: auto;
+  max-height: 60vh;
+}
+
+.isheet-fields {
+  display: grid;
+  align-content: start;
+  gap: var(--space-1);
+  overflow-y: auto;
+  max-height: 60vh;
+}
+
+.ifield {
+  display: grid;
+  grid-template-columns: 9.5rem minmax(0, 1fr);
+  column-gap: var(--space-3);
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.ifield-label {
+  font-size: var(--size-xs);
+  font-weight: 700;
+  color: var(--ink-3);
+  padding-top: 2px;
+}
+
+.ifield-value {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: var(--size-sm);
+  animation: ifield-in 260ms var(--ease-out);
+}
+
+@keyframes ifield-in {
+  from {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+}
+
+.ifield-wait {
+  font-size: var(--size-sm);
+  color: var(--ink-3);
+}
+
+.ifield-inferred {
+  font-size: var(--size-xs);
+  color: var(--agent);
+}
+
+.isheet-foot {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-6);
+  border-top: 1px solid var(--line-soft);
+  background: var(--canvas);
+}
+
+.isheet-foot-note {
+  margin-left: auto;
+  font-size: var(--size-sm);
+  color: var(--ink-3);
+}
+
+.isheet-error {
+  padding: 0 var(--space-6) var(--space-3);
+  font-size: var(--size-sm);
+  color: var(--attention-ink);
+}
+
+/* Field values, shared with the verification sheet. */
+.fv-title {
+  display: block;
+}
+
+.fv-text {
+  color: var(--ink);
+}
+
+.fv-sub {
+  font-size: var(--size-xs);
+  color: var(--ink-3);
+}
+
+.fv-list {
+  display: grid;
+  gap: 2px;
+}
+

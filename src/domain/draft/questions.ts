@@ -1,13 +1,10 @@
 import type { Fields, Link } from '../../entities.ts'
 import { monthName } from '../format.ts'
+import { type Ref, refKey } from '../record.ts'
 
 // Prompting questions (docs/21-new-commitment.md, §4, N6, N7): each gap in the draft becomes a question, asked in
 // place and listed in the coach. A pure function over the draft's records; dw chooses which to show. Those a
 // GraphPolicy will check before a merge are to do (they block it); the rest are suggestions, which never block.
-
-/** A record of the draft, by type and slug. */
-export type Ref = { type: string; slug: string }
-export const refKey = (r: Ref) => `${r.type}/${r.slug}`
 
 /** The records around the commitment, each with its own fields and links. */
 export type Around = { record?: Fields; links: Link[] }
@@ -29,7 +26,7 @@ export type Ask = {
 }
 
 /** At most this many suggestions show at a time (§4). */
-export const SHOWN = 3
+const SHOWN = 3
 
 const has = (links: Link[], edge: string, direction: 'out' | 'in') => links.some((l) => l.edge === edge && l.direction === direction)
 const quoted = (text: unknown) => {

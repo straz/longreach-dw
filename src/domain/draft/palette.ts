@@ -1,4 +1,4 @@
-import type { EdgeType, Link, Model } from '../../entities.ts'
+import type { EdgeSpec, Link, Model } from '../../entities.ts'
 import { VERBS } from './verbs.ts'
 
 // The Add palette (docs/21-new-commitment.md, §3, N4): what can be added from a card, as verbs. Each item is one
@@ -25,7 +25,7 @@ export const itemKey = (i: Pick<Item, 'edge' | 'direction' | 'kind'>) => `${i.ed
 export function palette(model: Model, type: string, links: Link[] = []): Item[] {
   const nodes = new Map(model.nodes.map((n) => [n.name, n]))
   const items: Item[] = []
-  const offer = (edge: EdgeType, direction: 'out' | 'in') => {
+  const offer = (edge: EdgeSpec, direction: 'out' | 'in') => {
     const other = nodes.get(direction === 'out' ? edge.to : edge.from)
     const offers = direction === 'out' ? VERBS[edge.name]?.addOut : VERBS[edge.name]?.addIn
     if (!other?.writable || !edge.writable || !offers) return

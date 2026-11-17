@@ -389,7 +389,7 @@ export interface paths {
         };
         /** One record, every field, on a branch */
         get: operations["get_entity_v1_projects__org___project__entities__type_name___slug__get"];
-        /** Create or change one record, with links sent with it, in the caller's sandbox */
+        /** Create or change one record, with links sent with it, in the caller's sandbox or the update named */
         put: operations["put_entity_route_v1_projects__org___project__entities__type_name___slug__put"];
         post?: never;
         /** Delete a record and its links; one in main is retired instead */
@@ -441,10 +441,10 @@ export interface paths {
             cookie?: never;
         };
         get?: never;
-        /** Create or change one link in the caller's sandbox */
+        /** Create or change one link in the caller's sandbox or the update named */
         put: operations["put_edge_v1_projects__org___project__edges__type_name__put"];
         post?: never;
-        /** Delete one link from the caller's sandbox */
+        /** Delete one link from the caller's sandbox or the update named */
         delete: operations["delete_edge_v1_projects__org___project__edges__type_name__delete"];
         options?: never;
         head?: never;
@@ -462,6 +462,144 @@ export interface paths {
         put?: never;
         /** Records whose text is like the text sent, most relevant first */
         post: operations["search_v1_projects__org___project__search_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/projects/{org}/{project}/branches": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Open updates of the project, and the caller's sandbox, with how much each changes */
+        get: operations["list_updates_v1_projects__org___project__branches_get"];
+        put?: never;
+        /** Start an update of the caller's, from main */
+        post: operations["start_update_v1_projects__org___project__branches_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/projects/{org}/{project}/branches/{branch}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Discard an update and its changes (its author) */
+        delete: operations["discard_update_v1_projects__org___project__branches__branch__delete"];
+        options?: never;
+        head?: never;
+        /** Rename an update (its author) */
+        patch: operations["rename_update_v1_projects__org___project__branches__branch__patch"];
+        trace?: never;
+    };
+    "/v1/projects/{org}/{project}/branches/{branch}/changes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** What an update changes, per record, and who wrote it; since a cursor, only what came after */
+        get: operations["update_changes_v1_projects__org___project__branches__branch__changes_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/projects/{org}/{project}/branches/{branch}/revert": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Put records of an update back as they were where it started (its author) */
+        post: operations["revert_v1_projects__org___project__branches__branch__revert_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/projects/{org}/{project}/branches/{branch}/readiness": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Whether an update can merge into main, and each reason it cannot */
+        get: operations["get_readiness_v1_projects__org___project__branches__branch__readiness_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/projects/{org}/{project}/branches/{branch}/merge": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Merge an update into main (maintain); the update closes */
+        post: operations["merge_v1_projects__org___project__branches__branch__merge_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/projects/{org}/{project}/branches/{branch}/resolve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Resolve an update's conflicts with main, each record as the author confirms it */
+        post: operations["resolve_v1_projects__org___project__branches__branch__resolve_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/merge-queue": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Open updates of every project the caller maintains, oldest first, with their readiness */
+        get: operations["merge_queue_v1_merge_queue_get"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -631,7 +769,7 @@ export interface paths {
             cookie?: never;
         };
         /** Whether the service can serve graph requests; needs no key */
-        get: operations["healthz_v1_healthz_head"];
+        get: operations["healthz_v1_healthz_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1219,6 +1357,112 @@ export interface components {
             /** Until */
             until?: string | null;
         };
+        /** Change */
+        Change: {
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "node" | "edge";
+            /** Type */
+            type: string;
+            /** Id */
+            id: string;
+            /**
+             * Op
+             * @description Against main where the update started; unchanged only with since: written, then put back
+             * @enum {string}
+             */
+            op: "added" | "changed" | "removed" | "unchanged";
+            /**
+             * From
+             * @description A link's source
+             */
+            from?: string | null;
+            /**
+             * To
+             * @description A link's target
+             */
+            to?: string | null;
+            /**
+             * Before
+             * @description The record where the update started; null when added
+             */
+            before?: {
+                [key: string]: unknown;
+            } | null;
+            /**
+             * After
+             * @description The record now; null when removed
+             */
+            after?: {
+                [key: string]: unknown;
+            } | null;
+            /**
+             * Written By
+             * @description The principals who wrote it on this update, first to last
+             */
+            written_by: string[];
+        };
+        /** ChangesOut */
+        ChangesOut: {
+            /** Graph */
+            graph: string;
+            /** Branch */
+            branch: string;
+            /** Changes */
+            changes: components["schemas"]["Change"][];
+            /**
+             * Cursor
+             * @description Send as since to get only what is written after this answer
+             */
+            cursor: string;
+        };
+        /** Conflict */
+        Conflict: {
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "node" | "edge";
+            /** Type */
+            type: string;
+            /** Id */
+            id: string;
+            /**
+             * Conflict
+             * @description The engine's kind of conflict: divergent_update, delete_vs_update, ...
+             */
+            conflict: string;
+            /** Message */
+            message: string;
+            /**
+             * Main
+             * @description The record on main now; null when main deleted it. A link's has from and to
+             */
+            main: {
+                [key: string]: unknown;
+            } | null;
+            /**
+             * Branch
+             * @description The record on the update; null when the update deleted it
+             */
+            branch: {
+                [key: string]: unknown;
+            } | null;
+            /**
+             * Fields
+             * @description Each field changed on either side since the update began
+             */
+            fields: components["schemas"]["FieldChange"][];
+            /**
+             * Proposed
+             * @description Main's version with the update's own changes laid over it; fields both sides changed keep main's value. Null when either side deleted it: the user chooses between main and branch
+             */
+            proposed: {
+                [key: string]: unknown;
+            } | null;
+        };
         /** DecisionIn */
         DecisionIn: {
             /** Brief */
@@ -1360,6 +1604,15 @@ export interface components {
              * @enum {string}
              */
             kind: "requires" | "funds" | "precedes" | "assumes" | "other";
+        };
+        /** DiscardOut */
+        DiscardOut: {
+            /** Graph */
+            graph: string;
+            /** Branch */
+            branch: string;
+            /** Discarded */
+            discarded: boolean;
         };
         /** Document */
         Document: {
@@ -1512,7 +1765,7 @@ export interface components {
             graph: string;
             /**
              * Branch
-             * @description The caller's sandbox, where it was written
+             * @description Where it was written: the update named, or the caller's sandbox
              */
             branch: string;
             /** Type */
@@ -1532,6 +1785,26 @@ export interface components {
             record: {
                 [key: string]: unknown;
             };
+        };
+        /** FieldChange */
+        FieldChange: {
+            /** Name */
+            name: string;
+            /**
+             * Was
+             * @description Its value when the update began
+             */
+            was: unknown;
+            /** Main */
+            main: unknown;
+            /** Update */
+            update: unknown;
+            /**
+             * Changed By
+             * @description both: changed on each side, differently; the user chooses
+             * @enum {string}
+             */
+            changed_by: "main" | "update" | "both";
         };
         /** FieldOut */
         FieldOut: {
@@ -1811,6 +2084,32 @@ export interface components {
             /** Teams */
             teams: string[];
         };
+        /** MergeOut */
+        MergeOut: {
+            /** Graph */
+            graph: string;
+            /** Branch */
+            branch: string;
+            /** Name */
+            name: string;
+            /**
+             * Outcome
+             * @description The engine's: fast_forward or merged
+             */
+            outcome: string;
+            /** Graph Commit Id */
+            graph_commit_id: string | null;
+            /** Changes */
+            changes: number;
+        };
+        /** MergeQueueOut */
+        MergeQueueOut: {
+            /**
+             * Updates
+             * @description Open updates of every project the caller maintains, oldest first
+             */
+            updates: components["schemas"]["QueuedUpdate"][];
+        };
         /** Methods */
         Methods: {
             /**
@@ -1854,6 +2153,14 @@ export interface components {
              * @enum {string}
              */
             visibility: "private" | "org" | "shared" | "public";
+        };
+        /** NewUpdateIn */
+        NewUpdateIn: {
+            /**
+             * Name
+             * @default New update
+             */
+            name: string;
         };
         /** NewVersion */
         NewVersion: {
@@ -1926,6 +2233,27 @@ export interface components {
             /** Title */
             title: string;
         };
+        /** PolicyCheck */
+        PolicyCheck: {
+            /** Policy */
+            policy: string;
+            /** Name */
+            name: string;
+            /** Statement */
+            statement: string;
+            /**
+             * Severity
+             * @description error blocks the merge; warning and info do not
+             */
+            severity: string;
+            /**
+             * Rows
+             * @description What breaks it on the update and not on main: the check query's rows
+             */
+            rows: {
+                [key: string]: unknown;
+            }[];
+        };
         /** Promise */
         Promise: {
             /** Text */
@@ -1943,6 +2271,26 @@ export interface components {
             /** Title */
             title: string;
         };
+        /** QueuedUpdate */
+        QueuedUpdate: {
+            /** Org */
+            org: string;
+            /** Project */
+            project: string;
+            /** Graph */
+            graph: string;
+            /** Branch */
+            branch: string;
+            /** Name */
+            name: string;
+            /** Author */
+            author: string;
+            /** Author Name */
+            author_name: string | null;
+            /** Created At */
+            created_at: string;
+            readiness: components["schemas"]["ReadinessOut"];
+        };
         /** Rationale */
         Rationale: {
             /** Text */
@@ -1958,6 +2306,37 @@ export interface components {
              */
             field: "rationale";
             decision: components["schemas"]["Authorization"];
+        };
+        /** ReadinessOut */
+        ReadinessOut: {
+            /** Graph */
+            graph: string;
+            /** Branch */
+            branch: string;
+            /**
+             * Ready
+             * @description Whether the caller can merge it now
+             */
+            ready: boolean;
+            /**
+             * Can Merge
+             * @description Whether the caller may merge into main: maintain or admin
+             */
+            can_merge: boolean;
+            /**
+             * Reasons
+             * @description Why it is not ready, in words; empty when it is
+             */
+            reasons: string[];
+            /** Changes */
+            changes: number;
+            /** Conflicts */
+            conflicts: components["schemas"]["Conflict"][];
+            /**
+             * Policies
+             * @description Policies the update breaks, errors first
+             */
+            policies: components["schemas"]["PolicyCheck"][];
         };
         /** ReadingChange */
         ReadingChange: {
@@ -1995,10 +2374,93 @@ export interface components {
                 [key: string]: unknown;
             };
         };
+        /** RecordRef */
+        RecordRef: {
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "node" | "edge";
+            /** Type */
+            type: string;
+            /**
+             * Id
+             * @description A record's key; a link's, as GET .../changes gives it
+             */
+            id: string;
+        };
+        /** RenameIn */
+        RenameIn: {
+            /** Name */
+            name: string;
+        };
         /** ReplaceIn */
         ReplaceIn: {
             /** Value */
             value: components["schemas"]["Promise"] | components["schemas"]["Capital"] | components["schemas"]["Owner"] | components["schemas"]["Rationale"] | components["schemas"]["Assumptions"] | components["schemas"]["SuccessCriteria"] | components["schemas"]["Dependencies"];
+        };
+        /** Resolution */
+        Resolution: {
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "node" | "edge";
+            /** Type */
+            type: string;
+            /** Id */
+            id: string;
+            /**
+             * Record
+             * @description The record as it should be on the update, every field (a link's with from and to); null to let it go
+             */
+            record: {
+                [key: string]: unknown;
+            } | null;
+        };
+        /** ResolveIn */
+        ResolveIn: {
+            /**
+             * Records
+             * @description Every conflict of the update, each as the user confirmed it
+             */
+            records: components["schemas"]["Resolution"][];
+            /**
+             * Confirm
+             * @description Letting a record go also removes the links added to it on the update: refused, naming them, until confirmed
+             * @default false
+             */
+            confirm: boolean;
+        };
+        /** ResolveOut */
+        ResolveOut: {
+            /** Graph */
+            graph: string;
+            /** Branch */
+            branch: string;
+            /** Resolved */
+            resolved: number;
+            /** Graph Commit Id */
+            graph_commit_id: string | null;
+        };
+        /** RevertIn */
+        RevertIn: {
+            /** Records */
+            records: components["schemas"]["RecordRef"][];
+        };
+        /** RevertOut */
+        RevertOut: {
+            /** Graph */
+            graph: string;
+            /** Branch */
+            branch: string;
+            /**
+             * Reverted
+             * @description Records put back, a removed record's removed links among them
+             */
+            reverted: number;
+            /** Graph Commit Id */
+            graph_commit_id: string | null;
         };
         /** ReviewIn */
         ReviewIn: {
@@ -2113,6 +2575,55 @@ export interface components {
             /** Why */
             why: string;
         };
+        /** UpdateOut */
+        UpdateOut: {
+            /**
+             * Branch
+             * @description Send it as `branch` to read or write the update
+             */
+            branch: string;
+            /** Name */
+            name: string;
+            /**
+             * Author
+             * @description The author's principal id
+             */
+            author: string;
+            /** Author Name */
+            author_name: string | null;
+            /**
+             * Mine
+             * @description Whether the caller is its author, and so may write, rename and discard it
+             */
+            mine: boolean;
+            /**
+             * Sandbox
+             * @description The caller's sandbox of a demo: where writes naming no update go
+             */
+            sandbox: boolean;
+            /** Created At */
+            created_at: string | null;
+            /**
+             * Changed At
+             * @description When it was last written; null until it is
+             */
+            changed_at: string | null;
+            /**
+             * Changes
+             * @description How many records it changes
+             */
+            changes: number;
+        };
+        /** UpdatesOut */
+        UpdatesOut: {
+            /** Graph */
+            graph: string;
+            /**
+             * Updates
+             * @description Open updates, the most recently changed first
+             */
+            updates: components["schemas"]["UpdateOut"][];
+        };
         /** ValidationError */
         ValidationError: {
             /** Location */
@@ -2153,7 +2664,7 @@ export interface components {
             graph: string;
             /**
              * Branch
-             * @description The caller's sandbox, where the records were written
+             * @description Where the records were written: the update named, or the caller's sandbox
              */
             branch: string;
             /**
@@ -3145,7 +3656,10 @@ export interface operations {
     };
     import_document_v1_projects__org___project__imports_post: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description The caller's update to write (GET .../branches); their sandbox when left out */
+                branch?: string | null;
+            };
             header?: never;
             path: {
                 org: string;
@@ -3181,7 +3695,10 @@ export interface operations {
     };
     start_blank_v1_projects__org___project__commitments_post: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description The caller's update to write (GET .../branches); their sandbox when left out */
+                branch?: string | null;
+            };
             header?: never;
             path: {
                 org: string;
@@ -3213,7 +3730,10 @@ export interface operations {
     };
     accept_field_v1_projects__org___project__commitments__slug__fields__field__accept_post: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description The caller's update to write (GET .../branches); their sandbox when left out */
+                branch?: string | null;
+            };
             header?: never;
             path: {
                 org: string;
@@ -3247,7 +3767,10 @@ export interface operations {
     };
     replace_field_v1_projects__org___project__commitments__slug__fields__field__replace_post: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description The caller's update to write (GET .../branches); their sandbox when left out */
+                branch?: string | null;
+            };
             header?: never;
             path: {
                 org: string;
@@ -3285,7 +3808,10 @@ export interface operations {
     };
     activate_v1_projects__org___project__commitments__slug__activate_post: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description The caller's update to write (GET .../branches); their sandbox when left out */
+                branch?: string | null;
+            };
             header?: never;
             path: {
                 org: string;
@@ -3318,7 +3844,10 @@ export interface operations {
     };
     watch_v1_projects__org___project__commitments__slug__watch_put: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description The caller's update to write (GET .../branches); their sandbox when left out */
+                branch?: string | null;
+            };
             header?: never;
             path: {
                 org: string;
@@ -3355,7 +3884,10 @@ export interface operations {
     };
     judge_v1_projects__org___project__judgments_post: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description The caller's update to write (GET .../branches); their sandbox when left out */
+                branch?: string | null;
+            };
             header?: never;
             path: {
                 org: string;
@@ -3391,7 +3923,10 @@ export interface operations {
     };
     review_flag_v1_projects__org___project__reviews_post: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description The caller's update to write (GET .../branches); their sandbox when left out */
+                branch?: string | null;
+            };
             header?: never;
             path: {
                 org: string;
@@ -3427,7 +3962,10 @@ export interface operations {
     };
     record_decision_v1_projects__org___project__decisions_post: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description The caller's update to write (GET .../branches); their sandbox when left out */
+                branch?: string | null;
+            };
             header?: never;
             path: {
                 org: string;
@@ -3463,7 +4001,10 @@ export interface operations {
     };
     approve_decision_v1_projects__org___project__decisions__decision__approve_post: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description The caller's update to write (GET .../branches); their sandbox when left out */
+                branch?: string | null;
+            };
             header?: never;
             path: {
                 org: string;
@@ -3529,7 +4070,7 @@ export interface operations {
     get_entity_v1_projects__org___project__entities__type_name___slug__get: {
         parameters: {
             query?: {
-                /** @description The caller's sandbox, or main until it is started */
+                /** @description A branch of the project; the caller's sandbox, or main until it is started */
                 branch?: string | null;
             };
             header?: never;
@@ -3565,7 +4106,10 @@ export interface operations {
     };
     put_entity_route_v1_projects__org___project__entities__type_name___slug__put: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description The caller's update to write (GET .../branches); their sandbox when left out */
+                branch?: string | null;
+            };
             header?: never;
             path: {
                 org: string;
@@ -3603,7 +4147,10 @@ export interface operations {
     };
     delete_entity_v1_projects__org___project__entities__type_name___slug__delete: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description The caller's update to write (GET .../branches); their sandbox when left out */
+                branch?: string | null;
+            };
             header?: never;
             path: {
                 org: string;
@@ -3638,7 +4185,7 @@ export interface operations {
     get_links_v1_projects__org___project__entities__type_name___slug__links_get: {
         parameters: {
             query?: {
-                /** @description The caller's sandbox, or main until it is started */
+                /** @description A branch of the project; the caller's sandbox, or main until it is started */
                 branch?: string | null;
             };
             header?: never;
@@ -3674,7 +4221,10 @@ export interface operations {
     };
     create_entity_v1_projects__org___project__entities__type_name__post: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description The caller's update to write (GET .../branches); their sandbox when left out */
+                branch?: string | null;
+            };
             header?: never;
             path: {
                 org: string;
@@ -3711,7 +4261,10 @@ export interface operations {
     };
     put_edge_v1_projects__org___project__edges__type_name__put: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description The caller's update to write (GET .../branches); their sandbox when left out */
+                branch?: string | null;
+            };
             header?: never;
             path: {
                 org: string;
@@ -3753,6 +4306,8 @@ export interface operations {
                 to: string;
                 /** @description For a judgment: whose; the persona's when left out */
                 judged_by?: string | null;
+                /** @description The caller's update to write (GET .../branches); their sandbox when left out */
+                branch?: string | null;
             };
             header?: never;
             path: {
@@ -3816,6 +4371,343 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_updates_v1_projects__org___project__branches_get: {
+        parameters: {
+            query?: {
+                /** @description me: only the caller's */
+                author?: "me" | null;
+            };
+            header?: never;
+            path: {
+                org: string;
+                project: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UpdatesOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    start_update_v1_projects__org___project__branches_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                project: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NewUpdateIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UpdateOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    discard_update_v1_projects__org___project__branches__branch__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                project: string;
+                branch: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DiscardOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    rename_update_v1_projects__org___project__branches__branch__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                project: string;
+                branch: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RenameIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UpdateOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_changes_v1_projects__org___project__branches__branch__changes_get: {
+        parameters: {
+            query?: {
+                /** @description A cursor from an earlier answer */
+                since?: string | null;
+            };
+            header?: never;
+            path: {
+                org: string;
+                project: string;
+                branch: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChangesOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    revert_v1_projects__org___project__branches__branch__revert_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                project: string;
+                branch: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RevertIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RevertOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_readiness_v1_projects__org___project__branches__branch__readiness_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                project: string;
+                branch: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReadinessOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    merge_v1_projects__org___project__branches__branch__merge_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                project: string;
+                branch: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MergeOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    resolve_v1_projects__org___project__branches__branch__resolve_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                project: string;
+                branch: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResolveIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ResolveOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    merge_queue_v1_merge_queue_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MergeQueueOut"];
                 };
             };
         };
@@ -4125,7 +5017,7 @@ export interface operations {
             };
         };
     };
-    healthz_v1_healthz_head: {
+    healthz_v1_healthz_get: {
         parameters: {
             query?: never;
             header?: never;

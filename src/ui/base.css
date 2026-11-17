@@ -97,3 +97,12 @@ a {
   text-transform: uppercase;
   color: var(--ink-3);
 }
+
+/* A record pending in the visitor's update (features/updates/): in the navbar and on the drafting page's cards. */
+.update-dot {
+  flex: none;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--update);
+}

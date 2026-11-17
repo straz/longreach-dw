@@ -3,6 +3,7 @@ import type { Field } from './domain/fields.ts'
 import type { PathKey } from './domain/briefs.ts'
 import type { FieldProposal } from './gateway/documents.ts'
 import type { IsoDate } from './model/generated.ts'
+import { type Project, branchQuery, where } from './project.ts'
 import { toApi } from './wire.ts'
 
 // Decision Watch's writes (docs/PLAN.md §2: no planners here). Each is one of tyapi's domain routes, which reads
@@ -11,41 +12,38 @@ import { toApi } from './wire.ts'
 // demo's answers. The screens work in calendar days; a day in a body goes out as its midnight in UTC, the form a
 // calendar day is stored in (tyapi W14; src/wire.ts).
 
-/** The demo a write goes to. */
-export type Project = { org: string; project: string }
 export type Written = Schemas['WriteOut']
 export type Approval = Schemas['DecisionIn']['approval']
 
-const where = (p: Project) => ({ org: p.org, project: p.project })
 
 export const importDocument = (p: Project, document: string) =>
-  answer(client.POST('/v1/projects/{org}/{project}/imports', { params: { path: where(p) }, body: { document } }))
+  answer(client.POST('/v1/projects/{org}/{project}/imports', { params: { path: where(p), query: branchQuery(p) }, body: { document } }))
 
 /** A blank draft; the gateway picks its slug, which the answer names. */
-export const startBlank = (p: Project) => answer(client.POST('/v1/projects/{org}/{project}/commitments', { params: { path: where(p) } }))
+export const startBlank = (p: Project) => answer(client.POST('/v1/projects/{org}/{project}/commitments', { params: { path: where(p), query: branchQuery(p) } }))
 
 export const acceptField = (p: Project, { slug, field }: { slug: string; field: Field }) =>
-  answer(client.POST('/v1/projects/{org}/{project}/commitments/{slug}/fields/{field}/accept', { params: { path: { ...where(p), slug, field } } }))
+  answer(client.POST('/v1/projects/{org}/{project}/commitments/{slug}/fields/{field}/accept', { params: { path: { ...where(p), slug, field }, query: branchQuery(p) } }))
 
 export const replaceField = (p: Project, { slug, value }: { slug: string; value: FieldProposal }) =>
   answer(
     client.POST('/v1/projects/{org}/{project}/commitments/{slug}/fields/{field}/replace', {
-      params: { path: { ...where(p), slug, field: value.field } },
+      params: { path: { ...where(p), slug, field: value.field }, query: branchQuery(p) },
       body: { value: toApi(value) },
     }),
   )
 
 export const activateCommitment = (p: Project, slug: string) =>
-  answer(client.POST('/v1/projects/{org}/{project}/commitments/{slug}/activate', { params: { path: { ...where(p), slug } } }))
+  answer(client.POST('/v1/projects/{org}/{project}/commitments/{slug}/activate', { params: { path: { ...where(p), slug }, query: branchQuery(p) } }))
 
 export const setWatched = (p: Project, { slug, watched }: { slug: string; watched: boolean }) =>
-  answer(client.PUT('/v1/projects/{org}/{project}/commitments/{slug}/watch', { params: { path: { ...where(p), slug } }, body: { watched } }))
+  answer(client.PUT('/v1/projects/{org}/{project}/commitments/{slug}/watch', { params: { path: { ...where(p), slug }, query: branchQuery(p) }, body: { watched } }))
 
 export const judge = (p: Project, judgment: Schemas['JudgeIn']) =>
-  answer(client.POST('/v1/projects/{org}/{project}/judgments', { params: { path: where(p) }, body: judgment }))
+  answer(client.POST('/v1/projects/{org}/{project}/judgments', { params: { path: where(p), query: branchQuery(p) }, body: judgment }))
 
 export const reviewFlag = (p: Project, review: Schemas['ReviewIn']) =>
-  answer(client.POST('/v1/projects/{org}/{project}/reviews', { params: { path: where(p) }, body: review }))
+  answer(client.POST('/v1/projects/{org}/{project}/reviews', { params: { path: where(p), query: branchQuery(p) }, body: review }))
 
 export type RecordInput = {
   brief: string
@@ -60,7 +58,7 @@ export type RecordInput = {
 export const recordDecision = (p: Project, { revisitAt, conditions, ...input }: RecordInput) =>
   answer(
     client.POST('/v1/projects/{org}/{project}/decisions', {
-      params: { path: where(p) },
+      params: { path: where(p), query: branchQuery(p) },
       body: toApi({ ...input, conditions: conditions || undefined, revisit_at: revisitAt }),
     }),
   )
@@ -77,4 +75,4 @@ export async function startOver(p: Project) {
 
 /** Approve a decision sent for approval; the gateway reads its brief and path from the decision. */
 export const approveDecision = (p: Project, decision: string) =>
-  answer(client.POST('/v1/projects/{org}/{project}/decisions/{decision}/approve', { params: { path: { ...where(p), decision } } }))
+  answer(client.POST('/v1/projects/{org}/{project}/decisions/{decision}/approve', { params: { path: { ...where(p), decision }, query: branchQuery(p) } }))

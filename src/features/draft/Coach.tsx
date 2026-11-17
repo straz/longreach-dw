@@ -1,6 +1,6 @@
-import { type Ask, questions, refKey, shown } from '../../domain/draft/questions.ts'
 import { cardLabel } from '../../domain/draft/outline.ts'
-import { itemKey, palette } from '../../domain/draft/palette.ts'
+import { type Ask, questions, shown } from '../../domain/draft/questions.ts'
+import { refKey } from '../../domain/record.ts'
 import { useDraftState } from './context.ts'
 
 // The coach (docs/21-new-commitment.md, §2c, §4, N7): what is not done, in three kinds shown apart. Unsaved
@@ -8,7 +8,7 @@ import { useDraftState } from './context.ts'
 // at a time, each answered in place or marked not applicable.
 
 export default function Coach({ dismissed, dismiss }: { dismissed: ReadonlySet<string>; dismiss: (id: string) => void }) {
-  const { draft, today, unsaved, model, addCard, linksOf, setEditing, readOnly } = useDraftState()
+  const { draft, today, unsaved, addByKey, setEditing, readOnly } = useDraftState()
   const asks = questions(draft, today)
   const { todo, suggested, more } = shown(asks, dismissed)
   const mine = unsaved.cards
@@ -19,9 +19,7 @@ export default function Coach({ dismissed, dismiss }: { dismissed: ReadonlySet<s
       document.getElementById(`card-${refKey(a.focus)}`)?.scrollIntoView({ block: 'center', behavior: 'smooth' })
       return
     }
-    const key = a.answer.item
-    const item = palette(model, a.focus.type, linksOf(a.focus)).find((i) => itemKey(i) === key)
-    if (item) addCard(a.focus, item)
+    addByKey(a.focus, a.answer.item)
   }
   return (
     <aside className="coach" aria-label="What is not done">

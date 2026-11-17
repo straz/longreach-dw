@@ -5,6 +5,8 @@ import type { Link } from '../../entities.ts'
 
 export type SectionId = 'why' | 'rests' | 'depends' | 'change' | 'possible' | 'authority'
 
+export type Facet = 'blue' | 'teal' | 'amber' | 'green' | 'red'
+
 export type Section = {
   id: SectionId
   title: string
@@ -14,7 +16,7 @@ export type Section = {
   links: string[]
   /** What its ＋ adds first, an item of the commitment's palette (palette.ts itemKey). */
   add: string
-  facet: 'blue' | 'teal' | 'amber' | 'green' | 'red'
+  facet: Facet
 }
 
 export const SECTIONS: Section[] = [
@@ -27,7 +29,7 @@ export const SECTIONS: Section[] = [
 ]
 
 /** The links of the commitment sentence: who commits, who owns it, whom it is owed to. */
-export const SENTENCE = ['Commits:in', 'OwnedBy:out', 'Owes:out']
+const SENTENCE = ['Commits:in', 'OwnedBy:out', 'Owes:out']
 
 const at = (l: Pick<Link, 'edge' | 'direction'>) => `${l.edge}:${l.direction}`
 
@@ -59,3 +61,16 @@ export function stableOrder(previous: string[], now: string[]): string[] {
   const seen = new Set(kept)
   return [...kept, ...now.filter((k) => !seen.has(k))]
 }
+
+/** The types whose own links the outline shows under their cards. */
+export const NESTED: ReadonlySet<string> = new Set(['Belief', 'Risk', 'Decision', 'Tripwire'])
+
+const FACETS: Record<string, Facet> = {
+  Belief: 'teal', Claim: 'teal', Tripwire: 'teal', Source: 'teal', Question: 'teal',
+  Risk: 'amber', Resource: 'amber', Exposure: 'amber',
+  Opportunity: 'green', Goal: 'green',
+  Mandate: 'red', Contract: 'red',
+}
+
+/** The facet a record type's cards are marked with (§2c). */
+export const facetOf = (type: string): Facet => FACETS[type] ?? 'blue'

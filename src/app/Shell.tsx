@@ -10,6 +10,8 @@ import { useScrollMemory } from '../features/shared/useScrollMemory.ts'
 import { usePortfolio } from '../features/shared/usePortfolio.ts'
 import { DwGateway } from '../gateway/dw.ts'
 import { GatewayProvider } from '../gateway/react.tsx'
+import { UpdateContext, useChosenBranch } from '../features/updates/useUpdates.ts'
+import { MAIN } from '../project.ts'
 import { startSandbox } from '../writes.ts'
 import { Card, Problem } from './Card.tsx'
 import Chevrons, { PANEL_ID, tabId } from './Chevrons.tsx'
@@ -59,12 +61,13 @@ function OpenDemo({ listing, demos }: { listing: DemoListing; demos: DemoListing
       try {
         return (await startSandbox(listing)).branch
       } catch (e) {
-        if (e instanceof ApiError && e.status === 403) return 'main'
+        if (e instanceof ApiError && e.status === 403) return MAIN
         throw e
       }
     },
   })
-  const branch = sandbox.data
+  // The update the visitor works in, if they chose one and it is still open (tyapi docs/20, P5); else the sandbox.
+  const { branch, choice } = useChosenBranch(listing, sandbox.data)
   const gateway = useMemo(() => (branch ? new DwGateway({ ...listing, branch }) : undefined), [listing, branch])
 
   if (sandbox.error) return <Problem what={`open your copy of ${listing.org_name}`} error={sandbox.error} onRetry={() => void sandbox.refetch()} />
@@ -73,7 +76,9 @@ function OpenDemo({ listing, demos }: { listing: DemoListing; demos: DemoListing
   return (
     <DemoProvider demo={content.data}>
       <GatewayProvider client={gateway}>
-        <Frame listing={listing} demos={demos} />
+        <UpdateContext value={choice}>
+          <Frame listing={listing} demos={demos} />
+        </UpdateContext>
       </GatewayProvider>
     </DemoProvider>
   )

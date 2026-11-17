@@ -1,4 +1,4 @@
-# tyapi's API description (`python -m gateway.openapi`) at 09eb0e2 plus its working tree.
+# tyapi's API description (`python -m gateway.openapi`) at c21c31f plus its working tree.
 # Update with `pnpm api:pull`, then `pnpm gen:api`.
 openapi: 3.1.0
 info:
@@ -389,6 +389,16 @@ paths:
         schema:
           type: string
           title: Project
+      - name: branch
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: The caller's update to write (GET .../branches); their sandbox when left out
+          title: Branch
+        description: The caller's update to write (GET .../branches); their sandbox when left out
       requestBody:
         required: true
         content:
@@ -425,6 +435,16 @@ paths:
         schema:
           type: string
           title: Project
+      - name: branch
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: The caller's update to write (GET .../branches); their sandbox when left out
+          title: Branch
+        description: The caller's update to write (GET .../branches); their sandbox when left out
       responses:
         '200':
           description: Successful Response
@@ -475,6 +495,16 @@ paths:
           - dependencies
           type: string
           title: Field
+      - name: branch
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: The caller's update to write (GET .../branches); their sandbox when left out
+          title: Branch
+        description: The caller's update to write (GET .../branches); their sandbox when left out
       responses:
         '200':
           description: Successful Response
@@ -525,6 +555,16 @@ paths:
           - dependencies
           type: string
           title: Field
+      - name: branch
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: The caller's update to write (GET .../branches); their sandbox when left out
+          title: Branch
+        description: The caller's update to write (GET .../branches); their sandbox when left out
       requestBody:
         required: true
         content:
@@ -567,6 +607,16 @@ paths:
         schema:
           type: string
           title: Slug
+      - name: branch
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: The caller's update to write (GET .../branches); their sandbox when left out
+          title: Branch
+        description: The caller's update to write (GET .../branches); their sandbox when left out
       responses:
         '200':
           description: Successful Response
@@ -603,6 +653,16 @@ paths:
         schema:
           type: string
           title: Slug
+      - name: branch
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: The caller's update to write (GET .../branches); their sandbox when left out
+          title: Branch
+        description: The caller's update to write (GET .../branches); their sandbox when left out
       requestBody:
         required: true
         content:
@@ -639,6 +699,16 @@ paths:
         schema:
           type: string
           title: Project
+      - name: branch
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: The caller's update to write (GET .../branches); their sandbox when left out
+          title: Branch
+        description: The caller's update to write (GET .../branches); their sandbox when left out
       requestBody:
         required: true
         content:
@@ -675,6 +745,16 @@ paths:
         schema:
           type: string
           title: Project
+      - name: branch
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: The caller's update to write (GET .../branches); their sandbox when left out
+          title: Branch
+        description: The caller's update to write (GET .../branches); their sandbox when left out
       requestBody:
         required: true
         content:
@@ -711,6 +791,16 @@ paths:
         schema:
           type: string
           title: Project
+      - name: branch
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: The caller's update to write (GET .../branches); their sandbox when left out
+          title: Branch
+        description: The caller's update to write (GET .../branches); their sandbox when left out
       requestBody:
         required: true
         content:
@@ -753,6 +843,16 @@ paths:
         schema:
           type: string
           title: Decision
+      - name: branch
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: The caller's update to write (GET .../branches); their sandbox when left out
+          title: Branch
+        description: The caller's update to write (GET .../branches); their sandbox when left out
       responses:
         '200':
           description: Successful Response
@@ -832,9 +932,9 @@ paths:
           anyOf:
           - type: string
           - type: 'null'
-          description: The caller's sandbox, or main until it is started
+          description: A branch of the project; the caller's sandbox, or main until it is started
           title: Branch
-        description: The caller's sandbox, or main until it is started
+        description: A branch of the project; the caller's sandbox, or main until it is started
       responses:
         '200':
           description: Successful Response
@@ -849,7 +949,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
     put:
-      summary: Create or change one record, with links sent with it, in the caller's sandbox
+      summary: Create or change one record, with links sent with it, in the caller's sandbox or the update named
       operationId: put_entity_route_v1_projects__org___project__entities__type_name___slug__put
       parameters:
       - name: org
@@ -876,6 +976,16 @@ paths:
         schema:
           type: string
           title: Slug
+      - name: branch
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: The caller's update to write (GET .../branches); their sandbox when left out
+          title: Branch
+        description: The caller's update to write (GET .../branches); their sandbox when left out
       requestBody:
         required: true
         content:
@@ -923,6 +1033,16 @@ paths:
         schema:
           type: string
           title: Slug
+      - name: branch
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: The caller's update to write (GET .../branches); their sandbox when left out
+          title: Branch
+        description: The caller's update to write (GET .../branches); their sandbox when left out
       responses:
         '200':
           description: Successful Response
@@ -972,9 +1092,9 @@ paths:
           anyOf:
           - type: string
           - type: 'null'
-          description: The caller's sandbox, or main until it is started
+          description: A branch of the project; the caller's sandbox, or main until it is started
           title: Branch
-        description: The caller's sandbox, or main until it is started
+        description: A branch of the project; the caller's sandbox, or main until it is started
       responses:
         '200':
           description: Successful Response
@@ -1011,6 +1131,16 @@ paths:
         schema:
           type: string
           title: Type Name
+      - name: branch
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: The caller's update to write (GET .../branches); their sandbox when left out
+          title: Branch
+        description: The caller's update to write (GET .../branches); their sandbox when left out
       requestBody:
         required: true
         content:
@@ -1032,7 +1162,7 @@ paths:
                 $ref: '#/components/schemas/HTTPValidationError'
   /v1/projects/{org}/{project}/edges/{type_name}:
     put:
-      summary: Create or change one link in the caller's sandbox
+      summary: Create or change one link in the caller's sandbox or the update named
       operationId: put_edge_v1_projects__org___project__edges__type_name__put
       parameters:
       - name: org
@@ -1053,6 +1183,16 @@ paths:
         schema:
           type: string
           title: Type Name
+      - name: branch
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: The caller's update to write (GET .../branches); their sandbox when left out
+          title: Branch
+        description: The caller's update to write (GET .../branches); their sandbox when left out
       requestBody:
         required: true
         content:
@@ -1073,7 +1213,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
     delete:
-      summary: Delete one link from the caller's sandbox
+      summary: Delete one link from the caller's sandbox or the update named
       operationId: delete_edge_v1_projects__org___project__edges__type_name__delete
       parameters:
       - name: org
@@ -1116,6 +1256,16 @@ paths:
           description: 'For a judgment: whose; the persona''s when left out'
           title: Judged By
         description: 'For a judgment: whose; the persona''s when left out'
+      - name: branch
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: The caller's update to write (GET .../branches); their sandbox when left out
+          title: Branch
+        description: The caller's update to write (GET .../branches); their sandbox when left out
       responses:
         '200':
           description: Successful Response
@@ -1165,6 +1315,372 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
+  /v1/projects/{org}/{project}/branches:
+    get:
+      summary: Open updates of the project, and the caller's sandbox, with how much each changes
+      operationId: list_updates_v1_projects__org___project__branches_get
+      parameters:
+      - name: org
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Org
+      - name: project
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Project
+      - name: author
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - const: me
+            type: string
+          - type: 'null'
+          description: 'me: only the caller''s'
+          title: Author
+        description: 'me: only the caller''s'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdatesOut'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    post:
+      summary: Start an update of the caller's, from main
+      operationId: start_update_v1_projects__org___project__branches_post
+      parameters:
+      - name: org
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Org
+      - name: project
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Project
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewUpdateIn'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateOut'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/projects/{org}/{project}/branches/{branch}:
+    patch:
+      summary: Rename an update (its author)
+      operationId: rename_update_v1_projects__org___project__branches__branch__patch
+      parameters:
+      - name: org
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Org
+      - name: project
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Project
+      - name: branch
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Branch
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RenameIn'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateOut'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      summary: Discard an update and its changes (its author)
+      operationId: discard_update_v1_projects__org___project__branches__branch__delete
+      parameters:
+      - name: org
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Org
+      - name: project
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Project
+      - name: branch
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Branch
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiscardOut'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/projects/{org}/{project}/branches/{branch}/changes:
+    get:
+      summary: What an update changes, per record, and who wrote it; since a cursor, only what came after
+      operationId: update_changes_v1_projects__org___project__branches__branch__changes_get
+      parameters:
+      - name: org
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Org
+      - name: project
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Project
+      - name: branch
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Branch
+      - name: since
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: A cursor from an earlier answer
+          title: Since
+        description: A cursor from an earlier answer
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangesOut'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/projects/{org}/{project}/branches/{branch}/revert:
+    post:
+      summary: Put records of an update back as they were where it started (its author)
+      operationId: revert_v1_projects__org___project__branches__branch__revert_post
+      parameters:
+      - name: org
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Org
+      - name: project
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Project
+      - name: branch
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Branch
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RevertIn'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RevertOut'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/projects/{org}/{project}/branches/{branch}/readiness:
+    get:
+      summary: Whether an update can merge into main, and each reason it cannot
+      operationId: get_readiness_v1_projects__org___project__branches__branch__readiness_get
+      parameters:
+      - name: org
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Org
+      - name: project
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Project
+      - name: branch
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Branch
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadinessOut'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/projects/{org}/{project}/branches/{branch}/merge:
+    post:
+      summary: Merge an update into main (maintain); the update closes
+      operationId: merge_v1_projects__org___project__branches__branch__merge_post
+      parameters:
+      - name: org
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Org
+      - name: project
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Project
+      - name: branch
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Branch
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MergeOut'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/projects/{org}/{project}/branches/{branch}/resolve:
+    post:
+      summary: Resolve an update's conflicts with main, each record as the author confirms it
+      operationId: resolve_v1_projects__org___project__branches__branch__resolve_post
+      parameters:
+      - name: org
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Org
+      - name: project
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Project
+      - name: branch
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Branch
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResolveIn'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResolveOut'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/merge-queue:
+    get:
+      summary: Open updates of every project the caller maintains, oldest first, with their readiness
+      operationId: merge_queue_v1_merge_queue_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MergeQueueOut'
   /v1/books/{book}/grants:
     put:
       summary: Grant a role on a book; org admins only
@@ -1397,7 +1913,7 @@ paths:
   /v1/healthz:
     get:
       summary: Whether the service can serve graph requests; needs no key
-      operationId: healthz_v1_healthz_head
+      operationId: healthz_v1_healthz_get
       responses:
         '200':
           description: Successful Response
@@ -5297,6 +5813,154 @@ components:
       - field
       - amount
       title: Capital
+    Change:
+      properties:
+        kind:
+          type: string
+          enum:
+          - node
+          - edge
+          title: Kind
+        type:
+          type: string
+          title: Type
+        id:
+          type: string
+          title: Id
+        op:
+          type: string
+          enum:
+          - added
+          - changed
+          - removed
+          - unchanged
+          title: Op
+          description: 'Against main where the update started; unchanged only with since: written, then put back'
+        from:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: From
+          description: A link's source
+        to:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: To
+          description: A link's target
+        before:
+          anyOf:
+          - additionalProperties: true
+            type: object
+          - type: 'null'
+          title: Before
+          description: The record where the update started; null when added
+        after:
+          anyOf:
+          - additionalProperties: true
+            type: object
+          - type: 'null'
+          title: After
+          description: The record now; null when removed
+        written_by:
+          items:
+            type: string
+          type: array
+          title: Written By
+          description: The principals who wrote it on this update, first to last
+      type: object
+      required:
+      - kind
+      - type
+      - id
+      - op
+      - written_by
+      title: Change
+    ChangesOut:
+      properties:
+        graph:
+          type: string
+          title: Graph
+        branch:
+          type: string
+          title: Branch
+        changes:
+          items:
+            $ref: '#/components/schemas/Change'
+          type: array
+          title: Changes
+        cursor:
+          type: string
+          title: Cursor
+          description: Send as since to get only what is written after this answer
+      type: object
+      required:
+      - graph
+      - branch
+      - changes
+      - cursor
+      title: ChangesOut
+    Conflict:
+      properties:
+        kind:
+          type: string
+          enum:
+          - node
+          - edge
+          title: Kind
+        type:
+          type: string
+          title: Type
+        id:
+          type: string
+          title: Id
+        conflict:
+          type: string
+          title: Conflict
+          description: 'The engine''s kind of conflict: divergent_update, delete_vs_update, ...'
+        message:
+          type: string
+          title: Message
+        main:
+          anyOf:
+          - additionalProperties: true
+            type: object
+          - type: 'null'
+          title: Main
+          description: The record on main now; null when main deleted it. A link's has from and to
+        branch:
+          anyOf:
+          - additionalProperties: true
+            type: object
+          - type: 'null'
+          title: Branch
+          description: The record on the update; null when the update deleted it
+        fields:
+          items:
+            $ref: '#/components/schemas/FieldChange'
+          type: array
+          title: Fields
+          description: Each field changed on either side since the update began
+        proposed:
+          anyOf:
+          - additionalProperties: true
+            type: object
+          - type: 'null'
+          title: Proposed
+          description: 'Main''s version with the update''s own changes laid over it; fields both sides changed keep main''s
+            value. Null when either side deleted it: the user chooses between main and branch'
+      type: object
+      required:
+      - kind
+      - type
+      - id
+      - conflict
+      - message
+      - main
+      - branch
+      - fields
+      - proposed
+      title: Conflict
     DecisionIn:
       properties:
         brief:
@@ -5533,6 +6197,23 @@ components:
       - commitment
       - kind
       title: DependencyRef
+    DiscardOut:
+      properties:
+        graph:
+          type: string
+          title: Graph
+        branch:
+          type: string
+          title: Branch
+        discarded:
+          type: boolean
+          title: Discarded
+      type: object
+      required:
+      - graph
+      - branch
+      - discarded
+      title: DiscardOut
     Document:
       properties:
         slug:
@@ -5814,7 +6495,7 @@ components:
         branch:
           type: string
           title: Branch
-          description: The caller's sandbox, where it was written
+          description: 'Where it was written: the update named, or the caller''s sandbox'
         type:
           type: string
           title: Type
@@ -5848,6 +6529,34 @@ components:
       - graph_commit_id
       - record
       title: EntityWriteOut
+    FieldChange:
+      properties:
+        name:
+          type: string
+          title: Name
+        was:
+          title: Was
+          description: Its value when the update began
+        main:
+          title: Main
+        update:
+          title: Update
+        changed_by:
+          type: string
+          enum:
+          - main
+          - update
+          - both
+          title: Changed By
+          description: 'both: changed on each side, differently; the user chooses'
+      type: object
+      required:
+      - name
+      - was
+      - main
+      - update
+      - changed_by
+      title: FieldChange
     FieldOut:
       properties:
         name:
@@ -6277,6 +6986,50 @@ components:
       - role
       - teams
       title: Membership
+    MergeOut:
+      properties:
+        graph:
+          type: string
+          title: Graph
+        branch:
+          type: string
+          title: Branch
+        name:
+          type: string
+          title: Name
+        outcome:
+          type: string
+          title: Outcome
+          description: 'The engine''s: fast_forward or merged'
+        graph_commit_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Graph Commit Id
+        changes:
+          type: integer
+          title: Changes
+      type: object
+      required:
+      - graph
+      - branch
+      - name
+      - outcome
+      - graph_commit_id
+      - changes
+      title: MergeOut
+    MergeQueueOut:
+      properties:
+        updates:
+          items:
+            $ref: '#/components/schemas/QueuedUpdate'
+          type: array
+          title: Updates
+          description: Open updates of every project the caller maintains, oldest first
+      type: object
+      required:
+      - updates
+      title: MergeQueueOut
     Methods:
       properties:
         mock:
@@ -6352,6 +7105,16 @@ components:
       - slug
       - visibility
       title: NewBook
+    NewUpdateIn:
+      properties:
+        name:
+          type: string
+          maxLength: 200
+          minLength: 1
+          title: Name
+          default: New update
+      type: object
+      title: NewUpdateIn
     NewVersion:
       properties:
         label:
@@ -6469,6 +7232,36 @@ components:
       - name
       - title
       title: Persona
+    PolicyCheck:
+      properties:
+        policy:
+          type: string
+          title: Policy
+        name:
+          type: string
+          title: Name
+        statement:
+          type: string
+          title: Statement
+        severity:
+          type: string
+          title: Severity
+          description: error blocks the merge; warning and info do not
+        rows:
+          items:
+            additionalProperties: true
+            type: object
+          type: array
+          title: Rows
+          description: 'What breaks it on the update and not on main: the check query''s rows'
+      type: object
+      required:
+      - policy
+      - name
+      - statement
+      - severity
+      - rows
+      title: PolicyCheck
     Promise:
       properties:
         text:
@@ -6493,6 +7286,48 @@ components:
       - field
       - title
       title: Promise
+    QueuedUpdate:
+      properties:
+        org:
+          type: string
+          title: Org
+        project:
+          type: string
+          title: Project
+        graph:
+          type: string
+          title: Graph
+        branch:
+          type: string
+          title: Branch
+        name:
+          type: string
+          title: Name
+        author:
+          type: string
+          title: Author
+        author_name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Author Name
+        created_at:
+          type: string
+          title: Created At
+        readiness:
+          $ref: '#/components/schemas/ReadinessOut'
+      type: object
+      required:
+      - org
+      - project
+      - graph
+      - branch
+      - name
+      - author
+      - author_name
+      - created_at
+      - readiness
+      title: QueuedUpdate
     Rationale:
       properties:
         text:
@@ -6516,6 +7351,53 @@ components:
       - field
       - decision
       title: Rationale
+    ReadinessOut:
+      properties:
+        graph:
+          type: string
+          title: Graph
+        branch:
+          type: string
+          title: Branch
+        ready:
+          type: boolean
+          title: Ready
+          description: Whether the caller can merge it now
+        can_merge:
+          type: boolean
+          title: Can Merge
+          description: 'Whether the caller may merge into main: maintain or admin'
+        reasons:
+          items:
+            type: string
+          type: array
+          title: Reasons
+          description: Why it is not ready, in words; empty when it is
+        changes:
+          type: integer
+          title: Changes
+        conflicts:
+          items:
+            $ref: '#/components/schemas/Conflict'
+          type: array
+          title: Conflicts
+        policies:
+          items:
+            $ref: '#/components/schemas/PolicyCheck'
+          type: array
+          title: Policies
+          description: Policies the update breaks, errors first
+      type: object
+      required:
+      - graph
+      - branch
+      - ready
+      - can_merge
+      - reasons
+      - changes
+      - conflicts
+      - policies
+      title: ReadinessOut
     ReadingChange:
       properties:
         commitment:
@@ -6589,6 +7471,38 @@ components:
       - slug
       - record
       title: RecordOut
+    RecordRef:
+      properties:
+        kind:
+          type: string
+          enum:
+          - node
+          - edge
+          title: Kind
+        type:
+          type: string
+          title: Type
+        id:
+          type: string
+          title: Id
+          description: A record's key; a link's, as GET .../changes gives it
+      type: object
+      required:
+      - kind
+      - type
+      - id
+      title: RecordRef
+    RenameIn:
+      properties:
+        name:
+          type: string
+          maxLength: 200
+          minLength: 1
+          title: Name
+      type: object
+      required:
+      - name
+      title: RenameIn
     ReplaceIn:
       properties:
         value:
@@ -6615,6 +7529,112 @@ components:
       required:
       - value
       title: ReplaceIn
+    Resolution:
+      properties:
+        kind:
+          type: string
+          enum:
+          - node
+          - edge
+          title: Kind
+        type:
+          type: string
+          title: Type
+        id:
+          type: string
+          title: Id
+        record:
+          anyOf:
+          - additionalProperties: true
+            type: object
+          - type: 'null'
+          title: Record
+          description: The record as it should be on the update, every field (a link's with from and to); null to let it go
+      type: object
+      required:
+      - kind
+      - type
+      - id
+      - record
+      title: Resolution
+    ResolveIn:
+      properties:
+        records:
+          items:
+            $ref: '#/components/schemas/Resolution'
+          type: array
+          minItems: 1
+          title: Records
+          description: Every conflict of the update, each as the user confirmed it
+        confirm:
+          type: boolean
+          title: Confirm
+          description: 'Letting a record go also removes the links added to it on the update: refused, naming them, until
+            confirmed'
+          default: false
+      type: object
+      required:
+      - records
+      title: ResolveIn
+    ResolveOut:
+      properties:
+        graph:
+          type: string
+          title: Graph
+        branch:
+          type: string
+          title: Branch
+        resolved:
+          type: integer
+          title: Resolved
+        graph_commit_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Graph Commit Id
+      type: object
+      required:
+      - graph
+      - branch
+      - resolved
+      - graph_commit_id
+      title: ResolveOut
+    RevertIn:
+      properties:
+        records:
+          items:
+            $ref: '#/components/schemas/RecordRef'
+          type: array
+          minItems: 1
+          title: Records
+      type: object
+      required:
+      - records
+      title: RevertIn
+    RevertOut:
+      properties:
+        graph:
+          type: string
+          title: Graph
+        branch:
+          type: string
+          title: Branch
+        reverted:
+          type: integer
+          title: Reverted
+          description: Records put back, a removed record's removed links among them
+        graph_commit_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Graph Commit Id
+      type: object
+      required:
+      - graph
+      - branch
+      - reverted
+      - graph_commit_id
+      title: RevertOut
     ReviewIn:
       properties:
         commitments:
@@ -6798,6 +7818,75 @@ components:
       - available
       - why
       title: UnavailablePath
+    UpdateOut:
+      properties:
+        branch:
+          type: string
+          title: Branch
+          description: Send it as `branch` to read or write the update
+        name:
+          type: string
+          title: Name
+        author:
+          type: string
+          title: Author
+          description: The author's principal id
+        author_name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Author Name
+        mine:
+          type: boolean
+          title: Mine
+          description: Whether the caller is its author, and so may write, rename and discard it
+        sandbox:
+          type: boolean
+          title: Sandbox
+          description: 'The caller''s sandbox of a demo: where writes naming no update go'
+        created_at:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Created At
+        changed_at:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Changed At
+          description: When it was last written; null until it is
+        changes:
+          type: integer
+          title: Changes
+          description: How many records it changes
+      type: object
+      required:
+      - branch
+      - name
+      - author
+      - author_name
+      - mine
+      - sandbox
+      - created_at
+      - changed_at
+      - changes
+      title: UpdateOut
+    UpdatesOut:
+      properties:
+        graph:
+          type: string
+          title: Graph
+        updates:
+          items:
+            $ref: '#/components/schemas/UpdateOut'
+          type: array
+          title: Updates
+          description: Open updates, the most recently changed first
+      type: object
+      required:
+      - graph
+      - updates
+      title: UpdatesOut
     ValidationError:
       properties:
         loc:
@@ -6874,7 +7963,7 @@ components:
         branch:
           type: string
           title: Branch
-          description: The caller's sandbox, where the records were written
+          description: 'Where the records were written: the update named, or the caller''s sandbox'
         written:
           type: integer
           title: Written

@@ -102,7 +102,7 @@ export function InlineDay({ value, label, onSave, disabled, placeholder = 'add a
   return (
     <input
       type="date"
-      className="inline-input is-date"
+      className="inline-input"
       aria-label={label}
       autoFocus
       defaultValue={day}

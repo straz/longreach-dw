@@ -15,7 +15,7 @@ const DEMO: OpenDemo = {
   clock: { today: '2027-03-31', earliest: '2026-01-01' },
   content: { briefs: [], documents: [], indicators: {} },
 }
-const GATEWAY = { graph: 'proj-fairhaven-commitments', org: 'fairhaven', project: 'commitments', branch: 'main', query: async () => [] } as unknown as GatewayClient
+const GATEWAY = { graph: 'proj-fairhaven-commitments', org: 'fairhaven', project: 'commitments', branch: 'sandbox-p', query: async () => [] } as unknown as GatewayClient
 
 test('starting blank shows it is under way, and what the gateway said when it refuses', async () => {
   let refuse: (r: Response) => void = () => {}

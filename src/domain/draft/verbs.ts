@@ -90,3 +90,6 @@ export const VERBS: Record<string, Verb> = {
   FormalizedBy: { out: 'formalized by', in: 'formalizes' },
   RecordedIn: { out: 'recorded in', in: 'records' },
 }
+
+/** How a link reads from the record it is shown on: its out reading from its source, its in reading from its target. */
+export const verbOf = (l: { edge: string; direction: string }) => VERBS[l.edge]?.[l.direction === 'out' ? 'out' : 'in'] ?? l.edge

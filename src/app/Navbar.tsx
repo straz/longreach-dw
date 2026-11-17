@@ -1,19 +1,20 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { useCallback, useRef, useState } from 'react'
+import { useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import type { Me } from '../api.ts'
 import { formatDate } from '../domain/format.ts'
 import AsOfControl from '../features/shared/AsOfControl.tsx'
+import UpdateControl from '../features/updates/UpdateControl.tsx'
 import { useGateway } from '../gateway/react.tsx'
+import { isMain } from '../project.ts'
+import { Menu } from '../ui/Menu.tsx'
 import { startOver } from '../writes.ts'
-import { useDismiss } from '../ui/useDismiss.ts'
 import { type DemoListing, whoIs } from './session.ts'
 import { say } from './Card.tsx'
 import { sandboxKey } from './Shell.tsx'
 import './Navbar.css'
 
-// The bar every screen shares, from test8's (docs/PLAN.md §2). The user menu is a disclosure: a button that shows
-// a panel of plain buttons, closed by Escape (focus back on the button) or a press outside. The organization is the demo open, then the
+// The bar every screen shares, from test8's (docs/PLAN.md §2). The user menu is a disclosure (ui/Menu.tsx). The organization is the demo open, then the
 // as-of control; the user menu lists every demo the visitor can open, each as its persona at its own clock, and switching opens that
 // demo's organization. Below them, Start over (the visitor's changes to this demo are deleted, tyapi W11), the
 // Google account the visitor signed in with, and Log out.
@@ -25,6 +26,7 @@ export default function Navbar({ demo, demos, me, onSignOut }: { demo: DemoListi
       </Link>
       <span className="navbar-org">{demo.org_name}</span>
       <span className="navbar-space" />
+      <UpdateControl me={me.principal_id} />
       <AsOfControl />
       <UserMenu demo={demo} demos={demos} me={me} onSignOut={onSignOut} />
     </header>
@@ -32,21 +34,16 @@ export default function Navbar({ demo, demos, me, onSignOut }: { demo: DemoListi
 }
 
 /** A demo's clock, the day its screens are as of. */
-export const clockDay = (demo: DemoListing) => formatDate(demo.frame.clock, { long: true })
+const clockDay = (demo: DemoListing) => formatDate(demo.frame.clock, { long: true })
 
 function UserMenu({ demo, demos, me, onSignOut }: { demo: DemoListing; demos: DemoListing[]; me: Me; onSignOut: () => void }) {
   const navigate = useNavigate()
   const gateway = useGateway()
   const queryClient = useQueryClient()
-  const [open, setOpen] = useState(false)
   const [resetting, setResetting] = useState(false)
   const [resetError, setResetError] = useState<string | null>(null)
-  const ref = useRef<HTMLDivElement>(null)
-  const button = useRef<HTMLButtonElement>(null)
-  const close = useCallback(() => setOpen(false), [])
-  useDismiss(ref, open, close, button)
 
-  const reset = async () => {
+  const reset = async (close: () => void) => {
     if (!window.confirm(`Start over in ${demo.org_name}? Every change you made to it is deleted, and it goes back to how it began.`)) return
     setResetting(true)
     setResetError(null)
@@ -55,7 +52,7 @@ function UserMenu({ demo, demos, me, onSignOut }: { demo: DemoListing; demos: De
       const sandbox = await startOver(gateway)
       queryClient.setQueryData(sandboxKey(gateway.graph), sandbox.branch)
       await queryClient.invalidateQueries({ queryKey: [gateway.graph] })
-      setOpen(false)
+      close()
     } catch (e) {
       setResetError(say(e))
     } finally {
@@ -64,22 +61,21 @@ function UserMenu({ demo, demos, me, onSignOut }: { demo: DemoListing; demos: De
   }
 
   const persona = demo.persona
+  const face = (
+    <>
+      <span className="usermenu-avatar" aria-hidden="true">
+        {initials(persona.name)}
+      </span>
+      <span>
+        {persona.name}, {persona.title}
+      </span>
+    </>
+  )
   return (
-    <div className="usermenu" ref={ref}>
-      <button ref={button} type="button" className="usermenu-button" aria-expanded={open} aria-controls="usermenu-panel" onClick={() => setOpen((o) => !o)}>
-        <span className="usermenu-avatar" aria-hidden="true">
-          {initials(persona.name)}
-        </span>
-        <span className="usermenu-name">
-          {persona.name}, {persona.title}
-        </span>
-        <svg width="10" height="6" viewBox="0 0 10 6" aria-hidden="true">
-          <path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" strokeWidth="1.5" />
-        </svg>
-      </button>
-      {open && (
-        <div id="usermenu-panel" className="usermenu-panel" role="group" aria-label="Open a demo as">
-          <p className="usermenu-heading">Signed in to {demo.org_name}</p>
+    <Menu face={face} label="Open a demo as">
+      {(close) => (
+        <>
+          <p className="menu-heading">Signed in to {demo.org_name}</p>
           {demos.map((d) => {
             const current = d.org === demo.org
             return (
@@ -87,9 +83,9 @@ function UserMenu({ demo, demos, me, onSignOut }: { demo: DemoListing; demos: De
                 key={d.org}
                 type="button"
                 aria-current={current || undefined}
-                className={`usermenu-item${current ? ' is-current' : ''}`}
+                className={`menu-item${current ? ' is-current' : ''}`}
                 onClick={() => {
-                  setOpen(false)
+                  close()
                   if (!current) navigate(`/${d.org}`)
                 }}
               >
@@ -102,33 +98,33 @@ function UserMenu({ demo, demos, me, onSignOut }: { demo: DemoListing; demos: De
                     {d.persona.title}, {d.org_name}, as of {clockDay(d)}
                   </span>
                 </span>
-                {current && <span className="usermenu-current">Signed in</span>}
+                {current && <span className="menu-current">Signed in</span>}
               </button>
             )
           })}
-          <p className="usermenu-note">Each demo is its own organization, at its own date.</p>
-          {gateway.branch !== 'main' && (
+          <p className="menu-note">Each demo is its own organization, at its own date.</p>
+          {!isMain(gateway.branch) && (
             <>
-              <div className="usermenu-sep" aria-hidden="true" />
-              <button type="button" className="usermenu-item is-plain" disabled={resetting} onClick={() => void reset()}>
+              <div className="menu-sep" aria-hidden="true" />
+              <button type="button" className="menu-item is-plain" disabled={resetting} onClick={() => void reset(close)}>
                 {resetting ? 'Starting over…' : `Start over in ${demo.org_name}`}
               </button>
-              <p className="usermenu-note">Your changes are yours alone; starting over deletes them.</p>
+              <p className="menu-note">Your changes are yours alone; starting over deletes them.</p>
               {resetError && (
-                <p className="usermenu-note" role="alert">
+                <p className="menu-note" role="alert">
                   Could not start over: {resetError}
                 </p>
               )}
             </>
           )}
-          <div className="usermenu-sep" aria-hidden="true" />
-          <p className="usermenu-note">Google account: {whoIs(me)}</p>
-          <button type="button" className="usermenu-item is-plain" onClick={onSignOut}>
+          <div className="menu-sep" aria-hidden="true" />
+          <p className="menu-note">Google account: {whoIs(me)}</p>
+          <button type="button" className="menu-item is-plain" onClick={onSignOut}>
             Log out
           </button>
-        </div>
+        </>
       )}
-    </div>
+    </Menu>
   )
 }
 

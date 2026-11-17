@@ -1,9 +1,9 @@
-import { useCallback, useEffect, useId, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import { clampAsOf } from '../../domain/clock.ts'
 import { addDays, daysBetween } from '../../domain/dates.ts'
 import { formatDate } from '../../domain/format.ts'
 import type { IsoDate } from '../../model/generated.ts'
-import { useDismiss } from '../../ui/useDismiss.ts'
+import { Caret, useDisclosure } from '../../ui/Menu.tsx'
 import { useClock } from './client.tsx'
 import { useRouteState } from './routeState.ts'
 import './AsOfControl.css'
@@ -48,17 +48,12 @@ function useThrottledAsOf(setAsOf: (d: IsoDate) => void) {
 export default function AsOfControl() {
   const clock = useClock()
   const { asOf, setAsOf } = useRouteState()
-  const [open, setOpen] = useState(false)
-  const root = useRef<HTMLDivElement>(null)
-  const button = useRef<HTMLButtonElement>(null)
+  const { open, toggle, root, button } = useDisclosure()
   const panelId = useId()
   const sliderId = useId()
   const dateId = useId()
   const slide = useThrottledAsOf(setAsOf)
   const shown = slide.draft ?? asOf
-
-  const close = useCallback(() => setOpen(false), [])
-  useDismiss(root, open, close, button)
 
   return (
     <div className="asof" ref={root}>
@@ -68,12 +63,10 @@ export default function AsOfControl() {
         className="asof-button"
         aria-expanded={open}
         aria-controls={panelId}
-        onClick={() => setOpen((o) => !o)}
+        onClick={toggle}
       >
         As of {formatDate(shown, { long: true })}
-        <svg className="asof-caret" viewBox="0 0 10 6" aria-hidden="true">
-          <path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" strokeWidth="1.5" />
-        </svg>
+        <Caret className="asof-caret" />
       </button>
       {open && (
         <div id={panelId} className="asof-panel" role="group" aria-label="Choose the as-of date">

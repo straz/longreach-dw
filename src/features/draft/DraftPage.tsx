@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link as RouterLink, useParams } from 'react-router'
 import { useDemos } from '../../app/session.ts'
-import type { Item } from '../../domain/draft/palette.ts'
-import { type Ref, refKey } from '../../domain/draft/questions.ts'
+import { Problem } from '../../app/Card.tsx'
+import { type Item, itemKey, palette } from '../../domain/draft/palette.ts'
+import { type Ref, refKey } from '../../domain/record.ts'
 import { createRecord, putRecord } from '../../entities.ts'
 import { useGateway } from '../../gateway/react.tsx'
 import { useClient, useClock } from '../shared/client.tsx'
@@ -13,23 +14,26 @@ import WriteError from '../shared/WriteError.tsx'
 import Coach from './Coach.tsx'
 import { DraftContext, type DraftState, useDraftState } from './context.ts'
 import { InlineText } from './Inline.tsx'
-import { Sections, Sentence } from './Outline.tsx'
 import Palette from './Palette.tsx'
-import { useChanges, useDismissed, useDraft, useModel, useUnsaved } from './useDraft.ts'
+import { Sections } from './Sections.tsx'
+import { Sentence } from './Sentence.tsx'
+import { useDismissed, useDraft, useModel, useUndoableWrites, useUnsaved } from './useDraft.ts'
 import './draft.css'
 
 // New commitment as a page, not a menu (docs/21-new-commitment.md, N1, phase A): #/<org>/draft asks what is being
 // committed to, and #/<org>/draft/<slug> is the drafting page, the outline beside the coach. Phase A runs in the
-// visitor's sandbox of the demo (tyapi W11), on tyapi's generic record routes; the update's color, Review, Merge
-// and Discard come with updates (tyapi docs/20, phases 2 and 4).
+// branch the visitor works in (an update of theirs, or their sandbox), on tyapi's generic record routes; Review and
+// Merge come with tyapi docs/20, phase 4.
 
 export default function DraftPage() {
   const { slug } = useParams()
-  return slug ? <Drafting key={slug} slug={slug} /> : <Start />
+  const gateway = useGateway()
+  // A new draft, or another update, starts the page afresh: its unsaved cards, dismissals and focus are its own.
+  return slug ? <Drafting key={`${gateway.branch}/${slug}`} slug={slug} /> : <Start />
 }
 
 /** The first sentence of what was typed, as the commitment's title. */
-export const titleOf = (text: string) => {
+const titleOf = (text: string) => {
   const first = text.trim().split(/(?<=[.!?])\s+|\n/)[0].trim().replace(/[.!?]$/, '')
   return first.length > 100 ? `${first.slice(0, 97).trimEnd()}…` : first
 }
@@ -40,13 +44,13 @@ function Start() {
   const { go } = useRouteState()
   const { readOnly, why } = useWriteContext()
   const { portfolio } = usePortfolio()
-  const changes = useChanges()
+  const writes = useUndoableWrites()
   const [text, setText] = useState('')
   const drafts = portfolio?.commitments.filter((c) => c.state === 'proposed') ?? []
   const start = async () => {
     const said = text.trim()
     if (!said) return
-    const made = await changes.run(() =>
+    const made = await writes.run(() =>
       createRecord(gateway, { type: 'Commitment', fields: { title: titleOf(said), statement: said, scale: 'operational' }, links: [{ edge: 'Commits', from: client.org }] }),
     )
     if (made) go(`/draft/${made.slug}`)
@@ -71,14 +75,14 @@ function Start() {
         }}
       />
       <div className="start-actions">
-        <button type="button" className="btn-action" onClick={() => void start()} disabled={!text.trim() || changes.busy || readOnly} title={readOnly ? why : undefined}>
-          {changes.busy ? 'Starting…' : 'Start drafting'}
+        <button type="button" className="btn-action" onClick={() => void start()} disabled={!text.trim() || writes.busy || readOnly} title={readOnly ? why : undefined}>
+          {writes.busy ? 'Starting…' : 'Start drafting'}
         </button>
         <RouterLink className="btn-quiet as-link" to={`/${gateway.org}/commitment?new=import`}>
           or import a sample document
         </RouterLink>
       </div>
-      <WriteError error={changes.error} />
+      <WriteError error={writes.error} />
       <p className="start-example">
         For example: “We’ll move patient records to the new platform by Q3, budget $2.4M, assuming the vendor certifies HIPAA by May.” One sentence can
         name a party, a date, money and an assumption; the draft asks for the rest.
@@ -102,18 +106,17 @@ function Start() {
 function Drafting({ slug }: { slug: string }) {
   const gateway = useGateway()
   const clock = useClock()
-  const { readOnly: lookingBack } = useWriteContext()
+  const { readOnly } = useWriteContext()
   const demos = useDemos()
   const model = useModel()
-  const { draft, error, missing } = useDraft(slug)
-  const changes = useChanges()
+  const { draft, error, missing, retry } = useDraft(slug)
+  const writes = useUndoableWrites()
   const storage = `dw:draft:${gateway.graph}:${gateway.branch}:${slug}`
   const unsaved = useUnsaved(`${storage}:unsaved`)
   const { dismissed, dismiss } = useDismissed(`${storage}:dismissed`)
   const [focus, setFocus] = useState<Ref>({ type: 'Commitment', slug })
   const [paletteOn, setPaletteOn] = useState<Ref | null>(null)
   const [editing, setEditing] = useState<string | null>(null)
-  const readOnly = lookingBack || gateway.branch === 'main'
   const persona = demos.data?.find((d) => d.graph === gateway.graph)?.persona.name ?? 'you'
 
   const linksOf = useCallback((r: Ref) => (!draft ? [] : r.type === 'Commitment' && r.slug === draft.slug ? draft.links : (draft.around[refKey(r)]?.links ?? [])), [draft])
@@ -124,6 +127,13 @@ function Drafting({ slug }: { slug: string }) {
       setTimeout(() => document.getElementById(`unsaved-${id}`)?.scrollIntoView({ block: 'nearest', behavior: 'smooth' }), 50)
     },
     [unsaved],
+  )
+  const addByKey = useCallback(
+    (on: Ref, key: string) => {
+      const item = model.data && palette(model.data, on.type, linksOf(on)).find((i) => itemKey(i) === key)
+      if (item) addCard(on, item)
+    },
+    [model.data, linksOf, addCard],
   )
 
   // / or ⌘K opens the palette on the focused card; ⌘Z undoes the user's last change. Not while typing.
@@ -138,12 +148,12 @@ function Drafting({ slug }: { slug: string }) {
       }
       if (!typing && (e.metaKey || e.ctrlKey) && e.key === 'z' && !e.shiftKey) {
         e.preventDefault()
-        void changes.undo()
+        void writes.undo()
       }
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [focus, paletteOn, readOnly, changes])
+  }, [focus, paletteOn, readOnly, writes])
 
   const state = useMemo(
     (): DraftState | null =>
@@ -156,19 +166,20 @@ function Drafting({ slug }: { slug: string }) {
             today: clock.today,
             readOnly,
             persona,
-            changes,
+            writes,
             unsaved,
             focus,
             setFocus,
             openPalette: setPaletteOn,
             addCard,
+            addByKey,
             editing,
             setEditing,
             linksOf,
             recordOf,
           }
         : null,
-    [model.data, draft, gateway, clock.today, readOnly, persona, changes, unsaved, focus, addCard, editing, linksOf, recordOf],
+    [model.data, draft, gateway, clock.today, readOnly, persona, writes, unsaved, focus, addCard, addByKey, editing, linksOf, recordOf],
   )
 
   if (missing) {
@@ -181,7 +192,9 @@ function Drafting({ slug }: { slug: string }) {
       </div>
     )
   }
-  if (error || model.error) return <WriteError error={error ?? model.error} />
+  if (error || model.error) {
+    return <Problem what="open the draft" error={error ?? model.error} onRetry={() => (model.error ? void model.refetch() : retry())} />
+  }
   if (!state) return <p className="draft-loading">Opening the draft…</p>
   const r = state.draft.record
   return (
@@ -200,7 +213,7 @@ function Drafting({ slug }: { slug: string }) {
               disabled={readOnly}
               onSave={(v) =>
                 v &&
-                void changes.run(
+                void writes.run(
                   () => putRecord(gateway, { type: 'Commitment', slug, fields: { title: v } }),
                   () => ({ what: 'Changed the title', undo: () => putRecord(gateway, { type: 'Commitment', slug, fields: { title: r.title } }) }),
                 )
@@ -211,8 +224,8 @@ function Drafting({ slug }: { slug: string }) {
             <button type="button" className="btn-line is-small" onClick={() => setPaletteOn(focus)} disabled={readOnly}>
               ＋ Add… <kbd>/</kbd>
             </button>
-            <button type="button" className="btn-quiet is-small" onClick={() => void changes.undo()} disabled={!changes.last || changes.busy}>
-              Undo{changes.last ? `: ${changes.last.what}` : ''}
+            <button type="button" className="btn-quiet is-small" onClick={() => void writes.undo()} disabled={!writes.last || writes.busy}>
+              Undo{writes.last ? `: ${writes.last.what}` : ''}
             </button>
             <CopyLink />
             <RouterLink className="btn-quiet is-small as-link" to={`/${gateway.org}/commitment/${slug}`}>
@@ -220,9 +233,9 @@ function Drafting({ slug }: { slug: string }) {
             </RouterLink>
           </div>
         </header>
-        <WriteError error={changes.error} />
+        <WriteError error={writes.error} />
         <div className="draft-body">
-          <article className="draft-outline" aria-busy={changes.busy}>
+          <article className="draft-outline" aria-busy={writes.busy}>
             <Sentence />
             <Sections />
           </article>
@@ -255,9 +268,9 @@ function CopyLink() {
 
 /** The last change, with Undo, for eight seconds after it is made. */
 function UndoToast() {
-  const { changes } = useDraftState()
+  const { writes } = useDraftState()
   const [shown, setShown] = useState<string | null>(null)
-  const last = changes.last
+  const last = writes.last
   useEffect(() => {
     if (!last) return setShown(null)
     setShown(last.what)
@@ -268,7 +281,7 @@ function UndoToast() {
   return (
     <div className="undo-toast" role="status">
       <span>{shown}</span>
-      <button type="button" className="btn-link" onClick={() => void changes.undo()} disabled={changes.busy}>
+      <button type="button" className="btn-link" onClick={() => void writes.undo()} disabled={writes.busy}>
         Undo
       </button>
     </div>

@@ -1,0 +1,190 @@
+.updates-count {
+  color: var(--ink-on-dark-2);
+}
+
+.update-page {
+  max-width: 52rem;
+  margin: 0 auto;
+  padding: var(--space-6) var(--gutter);
+}
+
+.update-page h1 {
+  font-family: var(--serif);
+  font-size: var(--size-xl);
+  margin-bottom: var(--space-2);
+}
+
+.update-lede {
+  color: var(--ink-3);
+  margin-bottom: var(--space-5);
+}
+
+.update-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: 0;
+  list-style: none;
+}
+
+.update-row {
+  display: grid;
+  grid-template-columns: 6rem 1fr auto;
+  gap: var(--space-3);
+  align-items: baseline;
+  padding: var(--space-3);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.update-op {
+  font-size: var(--size-xs);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.update-op.is-added {
+  color: var(--op-added);
+}
+
+.update-op.is-changed {
+  color: var(--op-changed);
+}
+
+.update-op.is-removed {
+  color: var(--op-removed);
+}
+
+.update-what {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.update-type,
+.update-group,
+.update-who {
+  font-size: var(--size-xs);
+  color: var(--ink-3);
+}
+
+.update-field {
+  font-size: var(--size-sm);
+  color: var(--ink-2);
+}
+
+.update-field del {
+  color: var(--ink-3);
+}
+
+
+.merge-panel {
+  margin-top: var(--space-6);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--line-soft);
+}
+
+.merge-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: var(--space-3) 0;
+  font-size: var(--size-sm);
+}
+
+.merge-list .is-blocking {
+  font-weight: 600;
+}
+
+.merge-list .is-warning {
+  color: var(--ink-2);
+}
+
+.merge-list .is-done {
+  color: var(--ink-3);
+}
+
+.merge-conflict,
+.merge-policy {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin-bottom: var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.merge-conflict .btn-line {
+  align-self: flex-start;
+}
+
+.merge-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.merged-note {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border: 1px solid var(--line-soft);
+  border-left: 3px solid var(--op-added);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.conflicts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.merge-conflict legend {
+  padding: 0 var(--space-1);
+}
+
+.conflict-fields {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--size-sm);
+}
+
+.conflict-fields th,
+.conflict-fields td {
+  padding: var(--space-1) var(--space-2);
+  border-bottom: 1px solid var(--line-soft);
+  text-align: left;
+  vertical-align: top;
+}
+
+.conflict-fields thead th {
+  font-size: var(--size-xs);
+  color: var(--ink-3);
+}
+
+.conflict-fields tr.is-both th {
+  color: var(--op-changed);
+}
+
+.conflict-input {
+  width: 100%;
+  min-width: 10rem;
+  height: var(--control-h);
+  padding: 0 var(--space-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  font-size: var(--size-sm);
+}
+
+.conflict-picks {
+  display: inline-flex;
+  gap: var(--space-2);
+  margin-left: var(--space-2);
+}

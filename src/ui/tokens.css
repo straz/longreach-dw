@@ -83,6 +83,12 @@
   --facet-green: #4b7a3c;
   --facet-red: #9b3d4a;
 
+  /* Updates (tyapi docs/20): what is pending in the visitor's update, and how a record changed against main. */
+  --update: var(--facet-amber);
+  --op-added: var(--facet-green);
+  --op-changed: var(--facet-amber);
+  --op-removed: var(--facet-red);
+
   --shadow-sheet: -8px 0 24px rgb(26 35 50 / 0.08);
   --shadow-popover: 0 8px 24px rgb(26 35 50 / 0.14);
   --shadow-dialog: 0 24px 64px rgb(26 35 50 / 0.28);

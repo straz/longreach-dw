@@ -7,6 +7,7 @@ import { StateGlyph } from '../../ui/stateVocabulary.tsx'
 import NarrowPicker from './NarrowPicker.tsx'
 import { useRouteState } from './routeState.ts'
 import './CommitmentList.css'
+import { readStored, writeStored } from '../../storage.ts'
 
 // The left column (docs/PLAN.md §4.2, §4.3): search, the tab's own tools,
 // then groups in the order a CFO works through them. The Commitment tab opens
@@ -115,23 +116,10 @@ export default function CommitmentList({ portfolio, selected, tools, overview, r
 }
 
 // Which groups the viewer opened or closed, remembered in this browser only.
-const OPEN_KEY = 'dw.clist.open'
+const OPEN_KEY = 'dw:clist:open'
 
-function readOpen(): Record<string, boolean> {
-  try {
-    return JSON.parse(localStorage.getItem(OPEN_KEY) ?? '{}') as Record<string, boolean>
-  } catch {
-    return {}
-  }
-}
-
-function writeOpen(open: Record<string, boolean>) {
-  try {
-    localStorage.setItem(OPEN_KEY, JSON.stringify(open))
-  } catch {
-    // Storage blocked: the choice lasts until the page reloads.
-  }
-}
+const readOpen = () => readStored<Record<string, boolean>>(OPEN_KEY, {})
+const writeOpen = (open: Record<string, boolean>) => writeStored(OPEN_KEY, open)
 
 function Row({ c, selected, to, note }: { c: CommitmentView; selected: boolean; to: string; note?: string }) {
   const amount = c.capital?.authorized ?? c.capital?.total

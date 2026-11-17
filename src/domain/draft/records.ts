@@ -1,14 +1,12 @@
 import type { Fields, LinkIn, NodeType } from '../../entities.ts'
 import type { Item } from './palette.ts'
-import type { Ref } from './questions.ts'
+import { type Ref, TEXT_FIELDS } from '../record.ts'
 
 // What a new card is written as (docs/21-new-commitment.md, N8): its text, the kind its palette choice set, the
 // required fields the gateway has no default for, and the links it needs besides the one it was added with.
 
-const TEXT = ['title', 'name', 'statement', 'condition']
-
 /** The field a record's text goes in: its title, name, statement or condition (as tyapi's entities.text_field). */
-export const textField = (node: NodeType) => TEXT.find((t) => node.fields.some((f) => f.name === t && f.type === 'String')) ?? 'statement'
+export const textField = (node: NodeType) => TEXT_FIELDS.find((t) => node.fields.some((f) => f.name === t && f.type === 'String')) ?? 'statement'
 
 /** Required fields a new record must be sent with: no default from the gateway, not its key or text, and not a
  *  kind the palette choice already gives. Asked on the card, prefilled where there is an honest value. */

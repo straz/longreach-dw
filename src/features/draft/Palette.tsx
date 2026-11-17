@@ -1,17 +1,19 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { cardLabel } from '../../domain/draft/outline.ts'
 import { type Item, itemKey, palette } from '../../domain/draft/palette.ts'
-import type { Ref } from '../../domain/draft/questions.ts'
-import { VERBS } from '../../domain/draft/verbs.ts'
-import { type Hit, deleteLink, putLink, search } from '../../entities.ts'
+import { verbOf } from '../../domain/draft/verbs.ts'
+import type { Ref } from '../../domain/record.ts'
+import { type Hit, search } from '../../entities.ts'
 import { useDraftState } from './context.ts'
+import { useLinkExisting } from './useDraftWrites.ts'
 
 // The Add palette (docs/21-new-commitment.md, §3; ＋, / or ⌘K): what can be added from the focused card, as
 // verbs, and Link to…, a search of the graph filtered to what that card can link to. Arrow keys move, Enter
 // chooses, Escape closes.
 
 export default function Palette({ focus, onClose }: { focus: Ref; onClose: () => void }) {
-  const { model, project, changes, addCard, linksOf, draft } = useDraftState()
+  const { model, project, addCard, linksOf, draft } = useDraftState()
+  const linkExisting = useLinkExisting()
   const items = useMemo(() => palette(model, focus.type, linksOf(focus)), [model, focus, linksOf])
   const [mode, setMode] = useState<'add' | 'link'>('add')
   const [filter, setFilter] = useState('')
@@ -35,7 +37,7 @@ export default function Palette({ focus, onClose }: { focus: Ref; onClose: () =>
     let live = true
     const types = linkable.filter((t) => model.nodes.find((n) => n.name === t)?.searchable_by)
     const timer = setTimeout(() => {
-      search(project, { text: words, types, branch: (project as { branch?: string }).branch, limit: 10 })
+      search(project, { text: words, types, limit: 10 })
         .then((found) => live && setHits(found.hits.filter((h) => !(h.type === focus.type && h.slug === focus.slug))))
         .catch(() => live && setHits([]))
     }, 250)
@@ -57,12 +59,7 @@ export default function Palette({ focus, onClose }: { focus: Ref; onClose: () =>
     onClose()
   }
   const link = async (item: Item, hit: Hit) => {
-    const [from, to] = item.direction === 'out' ? [focus.slug, hit.slug] : [hit.slug, focus.slug]
-    const made = await changes.run(
-      () => putLink(project, { edge: item.edge, from, to }),
-      () => ({ what: `Linked “${hit.text.slice(0, 40)}”`, undo: () => deleteLink(project, { edge: item.edge, from, to }) }),
-    )
-    if (made) onClose()
+    if (await linkExisting(focus, item.edge, item.direction, hit)) onClose()
   }
   const pick = (hit: Hit) => {
     const ways = items.filter((i) => i.type === hit.type && !i.full)
@@ -122,7 +119,7 @@ export default function Palette({ focus, onClose }: { focus: Ref; onClose: () =>
                 <li key={itemKey(i)}>
                   <button type="button" className="palette-item" onClick={() => void link(i, choosing)}>
                     <strong>
-                      {VERBS[i.edge]?.[i.direction]} “{choosing.text.slice(0, 60)}”
+                      {verbOf(i)} “{choosing.text.slice(0, 60)}”
                     </strong>
                   </button>
                 </li>

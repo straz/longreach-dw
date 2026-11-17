@@ -2,6 +2,7 @@ import { query } from '../api.ts'
 import type { QueryName, QueryParams, QueryRow } from '../model/generated.ts'
 import { endOf, fromApi, toApi } from '../wire.ts'
 import type { GatewayClient, ReadOpts } from './client.ts'
+import { MAIN } from '../project.ts'
 
 // test8's GatewayClient over the Longreach API, for one demo's graph and one branch of it (docs/PLAN.md §2, phase
 // 3). Dates are converted at the boundary (src/wire.ts): an as-of day goes out as the end of that day, other days
@@ -14,7 +15,7 @@ export class DwGateway implements GatewayClient {
   /** The branch it reads: the visitor's sandbox of the demo, where their writes go (tyapi W11), or main. */
   readonly branch: string
 
-  constructor({ graph, org, project, branch = 'main' }: { graph: string; org: string; project: string; branch?: string }) {
+  constructor({ graph, org, project, branch = MAIN }: { graph: string; org: string; project: string; branch?: string }) {
     this.graph = graph
     this.org = org
     this.project = project

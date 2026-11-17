@@ -1,5 +1,7 @@
 import type { IsoDate, QueryRow } from '../model/generated.ts'
-import { tripwireStatus } from './materiality.ts'
+import { type Alternative, alternativesOf } from './alternatives.ts'
+import { dayOf } from './dates.ts'
+import { type LatestReading, tripwireStatus } from './materiality.ts'
 import type { CommitmentView, Portfolio } from './portfolio.ts'
 import type { BeliefEvaluation, Stance } from './watchState.ts'
 
@@ -31,8 +33,6 @@ export type DetailRows = { [N in DetailQuery]: QueryRow<N>[] } & {
   approvals: QueryRow<'approvals'>[]
 }
 
-export type Alternative = { slug: string; statement: string; chosen: boolean; reasons: QueryRow<'reasons'>[] }
-
 export type Origin = QueryRow<'origins'> & {
   mandate?: QueryRow<'decision_mandates'>
   approvals: QueryRow<'approvals'>[]
@@ -41,7 +41,7 @@ export type Origin = QueryRow<'origins'> & {
 
 export type Dependency = { commitment: CommitmentView; kind?: string; direction: 'on' | 'by'; protectionGap: boolean }
 
-export type TripwireView = QueryRow<'tripwires'> & { latest?: { value: number; recorded_at: string }; near: boolean; fired: boolean }
+export type TripwireView = QueryRow<'tripwires'> & { latest?: LatestReading; near: boolean; fired: boolean }
 
 export type HistoryEntry = { at: string; kind: 'transition' | 'review'; title: string; detail?: string }
 
@@ -86,15 +86,7 @@ export function buildDetail(portfolio: Portfolio, rows: DetailRows, slug: string
     ...originRow,
     mandate: rows.decision_mandates.find((m) => m.decision === originRow.decision),
     approvals: rows.approvals,
-    alternatives: rows.alternatives
-      .filter((a) => a.decision === originRow.decision)
-      .map((a) => ({
-        slug: a.alternative,
-        statement: a.statement,
-        chosen: rows.chosen.some((c) => c.decision === originRow.decision && c.alternative === a.alternative),
-        reasons: rows.reasons.filter((r) => r.alternative === a.alternative),
-      }))
-      .sort((a, b) => Number(b.chosen) - Number(a.chosen)),
+    alternatives: alternativesOf(originRow.decision, rows),
   }
 
   const tripwires = rows.tripwires
@@ -153,7 +145,7 @@ export function spineOf(view: CommitmentView, beliefs: Map<string, BeliefEvaluat
     for (const s of e.steps) {
       if (s.stance !== 'supports' && (s.judged || s.stance !== previous)) {
         const k = claim(s.claim)
-        const event: SpineEvent = { date: s.at.slice(0, 10), kind: 'evidence', title: k?.statement ?? s.claim, detail: s.note, stance: s.stance, belief: f.belief, claim: s.claim, synthetic: k?.synthetic }
+        const event: SpineEvent = { date: dayOf(s.at), kind: 'evidence', title: k?.statement ?? s.claim, detail: s.note, stance: s.stance, belief: f.belief, claim: s.claim, synthetic: k?.synthetic }
         const seen = byClaim.get(s.claim)
         if (!seen) byClaim.set(s.claim, event)
         else {
@@ -167,9 +159,9 @@ export function spineOf(view: CommitmentView, beliefs: Map<string, BeliefEvaluat
   }
   events.push(...byClaim.values())
 
-  if (origin) events.push({ date: origin.decided_at.slice(0, 10), kind: 'decision', title: origin.statement })
+  if (origin) events.push({ date: dayOf(origin.decided_at), kind: 'decision', title: origin.statement })
   for (const r of rows.reviews.filter((r) => r.commitment === view.commitment && r.held_at)) {
-    events.push({ date: r.held_at!.slice(0, 10), kind: 'decision', title: r.notes?.split('.')[0] ?? `Review: ${r.outcome}`, detail: `Outcome: ${r.outcome}` })
+    events.push({ date: dayOf(r.held_at!), kind: 'decision', title: r.notes?.split('.')[0] ?? `Review: ${r.outcome}`, detail: `Outcome: ${r.outcome}` })
   }
 
   for (const o of rows.options.filter((o) => o.commitment === view.commitment && o.closes_at)) {
@@ -180,7 +172,7 @@ export function spineOf(view: CommitmentView, beliefs: Map<string, BeliefEvaluat
   const mine = new Set(view.foundations.map((f) => f.belief))
   const reports = new Map<string, SpineEvent>()
   for (const x of rows.expected.filter((x) => mine.has(x.belief) && x.expected)) {
-    const date = x.expected!.slice(0, 10)
+    const date = x.expected!
     const key = `${date}|${x.source}`
     if (!reports.has(key)) reports.set(key, { date, kind: 'report', title: x.source, belief: x.belief })
   }

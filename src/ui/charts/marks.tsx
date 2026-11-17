@@ -1,3 +1,4 @@
+import { toUtc } from '../../domain/dates.ts'
 import './marks.css'
 
 // The time axis's mark vocabulary (docs/PLAN.md §7.3). Every dated thing on
@@ -54,7 +55,7 @@ export function Mark({ kind, size = 12, tone }: { kind: MarkKind; size?: number;
 export function timeScale(start: string, end: string, x0: number, x1: number) {
   const t0 = Date.parse(`${start}T00:00:00Z`)
   const t1 = Date.parse(`${end}T00:00:00Z`)
-  return (date: string) => x0 + ((Date.parse(`${date.slice(0, 10)}T00:00:00Z`) - t0) / (t1 - t0)) * (x1 - x0)
+  return (date: string) => x0 + ((toUtc(date) - t0) / (t1 - t0)) * (x1 - x0)
 }
 
 /** First days of each month between two dates, for axis ticks. */

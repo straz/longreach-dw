@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { dayOf } from '../../domain/dates.ts'
 import { formatDate } from '../../domain/format.ts'
 import type { Portfolio } from '../../domain/portfolio.ts'
 import { type Evidence, useEvidence } from '../shared/useEvidence.ts'
@@ -73,7 +74,7 @@ export default function EvidenceView({ portfolio, scope, selected, onSelect }: P
               <p className="ev-prov">
                 <span className={internal(k.metric) ? 'internal-mark' : 'ext-mark'}>{internal(k.metric) ? 'Internal' : 'External'}</span>
                 {k.source_title}
-                {k.observed_at && k.observed_at.slice(0, 10) !== k.recorded_at.slice(0, 10) && <> · as of {formatDate(k.observed_at)}</>}
+                {k.observed_at && dayOf(k.observed_at) !== dayOf(k.recorded_at) && <> · as of {formatDate(k.observed_at)}</>}
                 {k.synthetic && <span className="synthetic-mark">Synthetic</span>}
               </p>
               <ul className="ev-bears">

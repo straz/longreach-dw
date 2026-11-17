@@ -1,7 +1,7 @@
 import { type FormEvent, useState } from 'react'
 import { formatMoney } from '../../domain/format.ts'
 import type { Field } from '../../domain/fields.ts'
-import type { FieldProposal } from '../../gateway/extractor.ts'
+import type { FieldProposal } from '../../gateway/documents.ts'
 import type { Names } from './fieldText.tsx'
 
 // The owner's own value for a field, replacing what was extracted or filling
@@ -19,14 +19,21 @@ type Props = {
   onCancel: () => void
 }
 
+/** The mandates a decision can be made under: any held by a person or a body, never an agent's (agents only
+ *  propose and monitor, tyapi docs/10-ty-core.md). */
+const authorizing = (names: Names) => names.mandates.filter((m) => names.mandate(m.mandate)?.holderKind !== 'agent')
+
 export default function FieldEditor({ field, initial, names, self, user, at, onSave, onCancel }: Props) {
   const init = initial?.field === field ? initial : undefined
+  const choices = authorizing(names)
+  // A new rationale starts under one of the persona's own mandates, else the first that can authorize it.
+  const ownMandate = (choices.find((m) => m.holder === user && m.power !== 'monitor') ?? choices[0])?.mandate ?? ''
   const [title, setTitle] = useState(init?.field === 'promise' ? init.title : '')
   const [text, setText] = useState(init && 'text' in init && init.field !== 'capital' && init.field !== 'owner' ? init.text : '')
   const [amount, setAmount] = useState(init?.field === 'capital' ? String(init.amount) : '')
   const [until, setUntil] = useState(init?.field === 'capital' ? (init.until ?? '') : init?.field === 'success_criteria' ? (init.target_at ?? '') : '')
   const [party, setParty] = useState(init?.field === 'owner' ? init.party : user)
-  const [mandate, setMandate] = useState(init?.field === 'rationale' ? init.decision.under : 'cfo-commit')
+  const [mandate, setMandate] = useState(init?.field === 'rationale' ? init.decision.under : ownMandate)
   const [decision, setDecision] = useState(init?.field === 'rationale' ? init.decision.statement : '')
   const [beliefs, setBeliefs] = useState(new Map((init?.field === 'assumptions' ? init.beliefs : []).map((b) => [b.belief, b.necessary])))
   const [deps, setDeps] = useState(new Set((init?.field === 'dependencies' ? init.on : []).map((d) => d.commitment)))
@@ -117,14 +124,12 @@ export default function FieldEditor({ field, initial, names, self, user, at, onS
           <label className="feditor-label">
             Authorized under
             <select value={mandate} onChange={(e) => setMandate(e.target.value)}>
-              {names.mandates
-                .filter((m) => m.power !== 'propose' || m.mandate === 'cto-amend')
-                .map((m) => (
-                  <option key={m.mandate} value={m.mandate}>
-                    {m.mandate}: {m.holder_name}
-                    {m.limit_amount ? `, up to $${m.limit_amount}M` : ''}
-                  </option>
-                ))}
+              {choices.map((m) => (
+                <option key={m.mandate} value={m.mandate}>
+                  {m.mandate}: {m.holder_name}
+                  {m.limit_amount ? `, up to ${formatMoney(m.limit_amount)}` : ''}
+                </option>
+              ))}
             </select>
           </label>
         </>

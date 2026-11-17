@@ -1,19 +1,23 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import type { Me } from '../api.ts'
 import { formatDate } from '../domain/format.ts'
 import AsOfControl from '../features/shared/AsOfControl.tsx'
 import { useGateway } from '../gateway/react.tsx'
 import { startOver } from '../writes.ts'
-import type { Demo } from './session.ts'
+import { useDismiss } from '../ui/useDismiss.ts'
+import { type DemoListing, whoIs } from './session.ts'
+import { say } from './Card.tsx'
+import { sandboxKey } from './Shell.tsx'
 import './Navbar.css'
 
-// The bar every screen shares, from test8's (docs/PLAN.md §2). The organization is the demo open, then the
+// The bar every screen shares, from test8's (docs/PLAN.md §2). The user menu is a disclosure: a button that shows
+// a panel of plain buttons, closed by Escape (focus back on the button) or a press outside. The organization is the demo open, then the
 // as-of control; the user menu lists every demo the visitor can open, each as its persona at its own clock, and switching opens that
 // demo's organization. Below them, Start over (the visitor's changes to this demo are deleted, tyapi W11), the
 // Google account the visitor signed in with, and Log out.
-export default function Navbar({ demo, demos, me, onSignOut }: { demo: Demo; demos: Demo[]; me: Me; onSignOut: () => void }) {
+export default function Navbar({ demo, demos, me, onSignOut }: { demo: DemoListing; demos: DemoListing[]; me: Me; onSignOut: () => void }) {
   return (
     <header className="navbar">
       <Link className="navbar-brand" to={`/${demo.org}/commitment`} aria-label={`Longreach, back to ${demo.org_name}`}>
@@ -28,48 +32,41 @@ export default function Navbar({ demo, demos, me, onSignOut }: { demo: Demo; dem
 }
 
 /** A demo's clock, the day its screens are as of. */
-export const clockDay = (demo: Demo) => formatDate(demo.frame.clock.slice(0, 10), { long: true })
+export const clockDay = (demo: DemoListing) => formatDate(demo.frame.clock, { long: true })
 
-function UserMenu({ demo, demos, me, onSignOut }: { demo: Demo; demos: Demo[]; me: Me; onSignOut: () => void }) {
+function UserMenu({ demo, demos, me, onSignOut }: { demo: DemoListing; demos: DemoListing[]; me: Me; onSignOut: () => void }) {
   const navigate = useNavigate()
   const gateway = useGateway()
   const queryClient = useQueryClient()
   const [open, setOpen] = useState(false)
   const [resetting, setResetting] = useState(false)
   const [resetError, setResetError] = useState<string | null>(null)
+  const ref = useRef<HTMLDivElement>(null)
+  const button = useRef<HTMLButtonElement>(null)
+  const close = useCallback(() => setOpen(false), [])
+  useDismiss(ref, open, close, button)
 
   const reset = async () => {
     if (!window.confirm(`Start over in ${demo.org_name}? Every change you made to it is deleted, and it goes back to how it began.`)) return
     setResetting(true)
     setResetError(null)
     try {
-      await startOver(gateway)
+      // The branch the gateway started is the one to read from now on, whatever its name.
+      const sandbox = await startOver(gateway)
+      queryClient.setQueryData(sandboxKey(gateway.graph), sandbox.branch)
       await queryClient.invalidateQueries({ queryKey: [gateway.graph] })
       setOpen(false)
     } catch (e) {
-      setResetError(e instanceof Error ? e.message : String(e))
+      setResetError(say(e))
     } finally {
       setResetting(false)
     }
   }
-  const ref = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    if (!open) return
-    const close = (e: PointerEvent) => !ref.current?.contains(e.target as Node) && setOpen(false)
-    const key = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false)
-    document.addEventListener('pointerdown', close)
-    document.addEventListener('keydown', key)
-    return () => {
-      document.removeEventListener('pointerdown', close)
-      document.removeEventListener('keydown', key)
-    }
-  }, [open])
 
   const persona = demo.persona
   return (
     <div className="usermenu" ref={ref}>
-      <button type="button" className="usermenu-button" aria-expanded={open} aria-haspopup="menu" onClick={() => setOpen((o) => !o)}>
+      <button ref={button} type="button" className="usermenu-button" aria-expanded={open} aria-controls="usermenu-panel" onClick={() => setOpen((o) => !o)}>
         <span className="usermenu-avatar" aria-hidden="true">
           {initials(persona.name)}
         </span>
@@ -81,7 +78,7 @@ function UserMenu({ demo, demos, me, onSignOut }: { demo: Demo; demos: Demo[]; m
         </svg>
       </button>
       {open && (
-        <div className="usermenu-panel" role="menu" aria-label="Open a demo as">
+        <div id="usermenu-panel" className="usermenu-panel" role="group" aria-label="Open a demo as">
           <p className="usermenu-heading">Signed in to {demo.org_name}</p>
           {demos.map((d) => {
             const current = d.org === demo.org
@@ -89,8 +86,7 @@ function UserMenu({ demo, demos, me, onSignOut }: { demo: Demo; demos: Demo[]; m
               <button
                 key={d.org}
                 type="button"
-                role="menuitemradio"
-                aria-checked={current}
+                aria-current={current || undefined}
                 className={`usermenu-item${current ? ' is-current' : ''}`}
                 onClick={() => {
                   setOpen(false)
@@ -113,8 +109,8 @@ function UserMenu({ demo, demos, me, onSignOut }: { demo: Demo; demos: Demo[]; m
           <p className="usermenu-note">Each demo is its own organization, at its own date.</p>
           {gateway.branch !== 'main' && (
             <>
-              <div className="usermenu-sep" role="separator" />
-              <button type="button" role="menuitem" className="usermenu-item is-plain" disabled={resetting} onClick={() => void reset()}>
+              <div className="usermenu-sep" aria-hidden="true" />
+              <button type="button" className="usermenu-item is-plain" disabled={resetting} onClick={() => void reset()}>
                 {resetting ? 'Starting over…' : `Start over in ${demo.org_name}`}
               </button>
               <p className="usermenu-note">Your changes are yours alone; starting over deletes them.</p>
@@ -125,9 +121,9 @@ function UserMenu({ demo, demos, me, onSignOut }: { demo: Demo; demos: Demo[]; m
               )}
             </>
           )}
-          <div className="usermenu-sep" role="separator" />
-          <p className="usermenu-note">Google account: {me.email ?? me.display_name}</p>
-          <button type="button" role="menuitem" className="usermenu-item is-plain" onClick={onSignOut}>
+          <div className="usermenu-sep" aria-hidden="true" />
+          <p className="usermenu-note">Google account: {whoIs(me)}</p>
+          <button type="button" className="usermenu-item is-plain" onClick={onSignOut}>
             Log out
           </button>
         </div>

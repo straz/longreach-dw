@@ -1,11 +1,15 @@
 import type { IsoDate, QueryRow, ReviewOutcome, TransitionToState } from '../model/generated.ts'
+import { type Alternative, alternativesOf } from './alternatives.ts'
+import { avoidableWindow } from './capital.ts'
+import { compareDates, dayOf } from './dates.ts'
 import type { BeliefRow, WatchRow } from './materiality.ts'
 import { isBriefReview, pathOfAlternative } from './slugs.ts'
 import type { CommitmentView, Portfolio } from './portfolio.ts'
 
 // Reconsideration briefs (docs/PLAN.md §2.6, §4.4). The paths are authored
-// (content/<client>/briefs.yml); a brief's state comes from the graph: the
-// Watch flags on its beliefs and the reviews held on its commitments.
+// in the demo's content (GET /v1/projects/{org}/{project}/demo); a brief's
+// state comes from the graph: the Watch flags on its beliefs and the reviews
+// held on its commitments.
 
 export const PATH_KEYS = ['continue', 'change', 'delay', 'exit'] as const
 export type PathKey = (typeof PATH_KEYS)[number]
@@ -66,7 +70,7 @@ export type BriefDecision = QueryRow<'review_decisions'> & {
   held_at: string
   mandate?: QueryRow<'decision_mandates'>
   approved: boolean
-  alternatives: (QueryRow<'alternatives'> & { chosen: boolean; reasons: QueryRow<'reasons'>[] })[]
+  alternatives: Alternative[]
 }
 
 export type Brief = {
@@ -116,10 +120,7 @@ function decisionOf(spec: BriefSpec, rows: BriefRows): BriefDecision | undefined
     mandate,
     // Approved when the mandate's holder made the decision, or approved it since.
     approved: !mandate || d.decided_by === mandate.holder || rows.decision_approvals.some((a) => a.decision === d.decision && a.party === mandate.holder),
-    alternatives: rows.alternatives
-      .filter((a) => a.decision === d.decision)
-      .map((a) => ({ ...a, chosen: rows.chosen.some((c) => c.decision === d.decision && c.alternative === a.alternative), reasons: rows.reasons.filter((r) => r.alternative === a.alternative) }))
-      .sort((a, b) => Number(b.chosen) - Number(a.chosen)),
+    alternatives: alternativesOf(d.decision, rows),
   }
 }
 
@@ -132,8 +133,12 @@ export function buildBriefs(specs: BriefSpec[], p: Portfolio, rows: BriefRows): 
   const base = (spec: BriefSpec): Omit<Brief, 'state'> => {
     const bundle = spec.commitments.flatMap((c) => (views.has(c) ? [views.get(c)!] : []))
     const rowsFor = [...p.watch.flags, ...p.watch.moved, ...p.watch.holding].filter((r: WatchRow): r is BeliefRow => r.kind === 'belief' && spec.beliefs.includes(r.belief))
-    const windows = bundle.filter((c) => c.capital?.until && c.capital.avoidable > 0 && c.capital.until >= asOf).sort((a, b) => a.capital!.until!.localeCompare(b.capital!.until!))
-    const first = windows[0]
+    const first = bundle
+      .flatMap((c) => {
+        const w = avoidableWindow(c.capital, asOf, c.nextWindow)
+        return w ? [{ ...w, commitment: c.commitment }] : []
+      })
+      .sort((a, b) => a.date.localeCompare(b.date))[0]
     return {
       spec,
       bundle,
@@ -142,13 +147,13 @@ export function buildBriefs(specs: BriefSpec[], p: Portfolio, rows: BriefRows): 
       decision: decisionOf(spec, rows),
       unspent: bundle.reduce((s, c) => s + (c.capital?.unspent ?? 0), 0),
       avoidable: bundle.reduce((s, c) => s + (c.capital?.avoidable ?? 0), 0),
-      firstWindow: first && { date: first.capital!.until!, title: first.nextWindow && first.nextWindow.date === first.capital!.until ? first.nextWindow.title : 'Avoidable until', commitment: first.commitment },
+      firstWindow: first,
     }
   }
 
   // A deferral's revisit date: the earliest revisit_at on the bundle after the review.
   const revisitOf = (b: Omit<Brief, 'state'>) => {
-    const held = b.decision?.held_at.slice(0, 10)
+    const held = b.decision && dayOf(b.decision.held_at)
     return b.bundle.map((c) => c.revisit_at).filter((d): d is IsoDate => !!d && !!held && d >= held).sort()[0]
   }
 
@@ -196,9 +201,8 @@ export const remainingAfter = (b: Brief, path: AvailablePath) => b.unspent - pat
 
 /** Open briefs by nearest deadline, then awaiting approval, deferred by revisit date, decided newest first. */
 export function groupBriefs(briefs: Brief[]): { key: BriefState; title: string; briefs: Brief[] }[] {
-  const deadline = (b: Brief) => b.firstWindow?.date ?? '9'
   return [
-    { key: 'open' as const, title: 'Open', briefs: briefs.filter((b) => b.state === 'open').sort((a, b) => deadline(a).localeCompare(deadline(b))) },
+    { key: 'open' as const, title: 'Open', briefs: briefs.filter((b) => b.state === 'open').sort((a, b) => compareDates(a.firstWindow?.date, b.firstWindow?.date)) },
     { key: 'awaiting' as const, title: 'Awaiting approval', briefs: briefs.filter((b) => b.state === 'awaiting') },
     { key: 'deferred' as const, title: 'Deferred', briefs: briefs.filter((b) => b.state === 'deferred').sort((a, b) => (a.revisit ?? '').localeCompare(b.revisit ?? '')) },
     { key: 'decided' as const, title: 'Decided', briefs: briefs.filter((b) => b.state === 'decided').sort((a, b) => (b.decision?.held_at ?? '').localeCompare(a.decision?.held_at ?? '')) },

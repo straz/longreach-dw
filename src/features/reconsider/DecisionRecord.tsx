@@ -87,11 +87,9 @@ function Approve({ brief }: { brief: Brief }) {
         Waiting for <strong>{m.holder_name}</strong> under <strong>{m.mandate}</strong>. Nothing changes until they approve; when they have, record it here.
       </p>
       <WriteError error={write.error} />
-      {!write.readOnly && (
-        <button type="button" className="btn-action" disabled={write.pending} onClick={approve}>
-          {write.pending ? 'Recording…' : `Record ${m.holder_name}'s approval`}
-        </button>
-      )}
+      <button type="button" className="btn-action" disabled={write.readOnly || write.pending} title={write.readOnly ? write.why : undefined} onClick={approve}>
+        {write.pending ? 'Recording…' : `Record ${m.holder_name}'s approval`}
+      </button>
     </div>
   )
 }

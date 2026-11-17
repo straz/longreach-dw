@@ -7,9 +7,8 @@ import { type Watch, buildWatch } from './materiality.ts'
 import { type BeliefEvaluation, type BeliefState, evaluateBelief, isMoved, judgmentsFrom } from './watchState.ts'
 
 // The portfolio as of a date: the stored queries a screen needs, joined
-// through the domain rules. Pure: the caller fetches PORTFOLIO_QUERIES (the
-// app through TanStack Query, the content checker through the mock) and
-// passes the rows in.
+// through the domain rules. Pure: the caller (features/shared/usePortfolio.ts)
+// fetches PORTFOLIO_QUERIES and passes the rows in.
 
 export const PORTFOLIO_QUERIES = [
   'commitments',
@@ -34,12 +33,9 @@ export const PORTFOLIO_QUERIES = [
 
 type PortfolioQuery = (typeof PORTFOLIO_QUERIES)[number]
 export type PortfolioRows = { [N in PortfolioQuery]: QueryRow<N>[] } & {
-  /** Reports expected after the as-of date: expected_evidence with `after` set to it (expectedAfter). */
+  /** Reports expected after the as-of date: expected_evidence with `after` at its end. */
   expected: QueryRow<'expected_evidence'>[]
 }
-
-/** The `after` parameter of expected_evidence for an as-of date. */
-export const expectedAfter = (asOf: IsoDate) => `${asOf}T23:59:59Z`
 
 /** The demo's four statuses, projected from ty-core fields (docs/PLAN.md §2.2). */
 export type Status = 'active' | 'unverified' | 'incomplete' | 'past'

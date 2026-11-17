@@ -15,8 +15,8 @@ export function useBriefs(): { briefs?: Brief[]; error?: Error } {
   const specs: BriefSpec[] = useDemoContent().briefs
   const { rows, settled: rowsSettled, error: rowsError } = useQueryRows(BRIEF_QUERIES, asOf)
   // Only when the portfolio and the reviews describe the same date; until then, the last briefs that did.
-  const settled = rowsSettled && portfolio?.asOf === asOf && !!specs
-  const fresh = useMemo(() => (settled && rows ? buildBriefs(specs!, portfolio!, rows) : undefined), [settled, specs, portfolio, rows])
+  const settled = rowsSettled && portfolio?.asOf === asOf
+  const fresh = useMemo(() => (settled && rows ? buildBriefs(specs, portfolio!, rows) : undefined), [settled, specs, portfolio, rows])
   return { briefs: useSettled(fresh, settled), error: error ?? rowsError }
 }
 

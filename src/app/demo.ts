@@ -1,24 +1,13 @@
 import type { Schemas } from '../api.ts'
-import type { Demo } from '../features/shared/client.tsx'
-import { days } from '../gateway/dw.ts'
+import type { OpenDemo } from '../features/shared/client.tsx'
+import { fromApi, noNulls } from '../wire.ts'
 
 // A demo as tyapi describes it (GET /v1/projects/{org}/{project}/demo) → what the screens read
-// (features/shared/client.tsx): its client, its clock, and its content, every instant as its day in UTC. The API
-// writes an optional field it has no value for as null; test8's types, and the screens, leave it out.
+// (features/shared/client.tsx): its client, its clock, and its content, in the screens' dates (src/wire.ts), and
+// without the nulls the API writes for absent values.
 
-/** T with every null, at any depth, as an absent value. */
-export type NoNulls<T> = T extends null ? undefined : T extends (infer U)[] ? NoNulls<U>[] : T extends object ? { [K in keyof T]: NoNulls<T[K]> } : T
-
-export function noNulls<T>(value: T): NoNulls<T> {
-  if (Array.isArray(value)) return value.map(noNulls) as NoNulls<T>
-  if (value && typeof value === 'object') {
-    return Object.fromEntries(Object.entries(value).filter(([, v]) => v !== null).map(([k, v]) => [k, noNulls(v)])) as NoNulls<T>
-  }
-  return value as NoNulls<T>
-}
-
-export function demoFrom(out: Schemas['DemoOut']): Demo {
-  const d = noNulls(days(out))
+export function demoFrom(out: Schemas['DemoOut']): OpenDemo {
+  const d = noNulls(fromApi(out))
   return {
     client: {
       org: d.party,

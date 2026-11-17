@@ -1,19 +1,24 @@
 import { useQuery } from '@tanstack/react-query'
 import { createContext, useContext } from 'react'
 import { answer, client, type Me, type Schemas } from '../api.ts'
+import { fromApi } from '../wire.ts'
 
 // Who is signed in, and the demos they can open (docs/PLAN.md §3, phase 2). Each demo is its own
 // organization, with its persona and its clock; the one open is named in the URL, #/<org>/…
 
-export type Demo = Schemas['DemoListing']
+/** A demo as the user menu lists it, its dates as days (src/wire.ts). */
+export type DemoListing = Schemas['DemoListing']
 
-export const useMe = () => useQuery({ queryKey: ['me'], queryFn: () => answer(client.GET('/auth/me')), retry: false })
+export const useMe = () => useQuery({ queryKey: ['me'], queryFn: () => answer(client.GET('/auth/me')) })
+
+/** How to name who is signed in: their email, or their name when they have none. */
+export const whoIs = (me: Me) => me.email ?? me.display_name
 
 export const useDemos = () =>
-  useQuery({ queryKey: ['demos'], queryFn: async () => (await answer(client.GET('/v1/demos'))).demos, retry: false })
+  useQuery({ queryKey: ['demos'], queryFn: async () => fromApi((await answer(client.GET('/v1/demos'))).demos) })
 
 /** The demo to open when the URL names none: the first with briefs, which has all of Decision Watch to show. */
-export const defaultDemo = (demos: Demo[]): Demo | undefined => demos.find((d) => d.briefs > 0) ?? demos[0]
+export const defaultDemo = (demos: DemoListing[]): DemoListing | undefined => demos.find((d) => d.briefs > 0) ?? demos[0]
 
 /** Why the gateway refused the last sign-in, from its redirect back here (`signin_refused`). It is taken off
  *  the address once read, so a reload does not show it again. */

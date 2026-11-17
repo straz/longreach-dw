@@ -1,5 +1,6 @@
 import { type KeyboardEvent, type ReactNode, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router'
+import { compareDates } from '../../domain/dates.ts'
 import { formatDate, formatMoney } from '../../domain/format.ts'
 import type { CommitmentView, Portfolio } from '../../domain/portfolio.ts'
 import { StateGlyph } from '../../ui/stateVocabulary.tsx'
@@ -19,7 +20,7 @@ function groupsOf(commitments: CommitmentView[], query: string): Group[] {
   const match = (c: CommitmentView) =>
     !q || [c.title, c.counterparty, c.owner?.name, c.statement].some((s) => s?.toLowerCase().includes(q))
   const rows = commitments.filter(match)
-  const byWindow = (a: CommitmentView, b: CommitmentView) => (a.nextWindow?.date ?? '9').localeCompare(b.nextWindow?.date ?? '9')
+  const byWindow = (a: CommitmentView, b: CommitmentView) => compareDates(a.nextWindow?.date, b.nextWindow?.date)
   const bySize = (a: CommitmentView, b: CommitmentView) =>
     Number(b.scale === 'program') - Number(a.scale === 'program') || (b.capital?.total ?? 0) - (a.capital?.total ?? 0)
   const moved = rows.filter((c) => c.moved).sort(byWindow)
@@ -114,7 +115,7 @@ export default function CommitmentList({ portfolio, selected, tools, overview, r
 }
 
 // Which groups the viewer opened or closed, remembered in this browser only.
-const OPEN_KEY = 'test8.clist.open'
+const OPEN_KEY = 'dw.clist.open'
 
 function readOpen(): Record<string, boolean> {
   try {

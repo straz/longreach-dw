@@ -117,7 +117,7 @@ test("it reads the visitor's own sandbox, started on opening the demo; a reader 
   const read = fetch.mock.calls.map(([r]) => r).find((r) => r.url.includes('/queries/'))!
   expect((await read.json()).branch).toBe('main')
   fireEvent.click(screen.getByRole('button', { name: /Dana Whitlock, CFO/ }))
-  expect(screen.queryByRole('menuitem', { name: /Start over/ })).toBeNull()
+  expect(screen.queryByRole('button', { name: /Start over/ })).toBeNull()
 })
 
 test('starting over deletes the sandbox, starts a new one and reads it again', async () => {
@@ -128,7 +128,7 @@ test('starting over deletes the sandbox, starts a new one and reads it again', a
   const reads = () => calls(fetch).filter((c) => c.includes('/queries/')).length
   await vi.waitFor(() => expect(reads()).toBeGreaterThan(0))
   const before = reads()
-  fireEvent.click(screen.getByRole('menuitem', { name: 'Start over in Fairhaven Systems' }))
+  fireEvent.click(screen.getByRole('button', { name: 'Start over in Fairhaven Systems' }))
   await vi.waitFor(() => expect(calls(fetch)).toContain('DELETE /v1/projects/fairhaven/commitments/sandbox'))
   const sandbox = calls(fetch).filter((c) => c.endsWith('/sandbox'))
   expect(sandbox.slice(-2)).toEqual(['DELETE /v1/projects/fairhaven/commitments/sandbox', 'POST /v1/projects/fairhaven/commitments/sandbox'])
@@ -139,13 +139,13 @@ test('the user menu lists every demo, and opens another at its own clock', async
   serve({ 'GET /auth/me': [200, STEVE], 'GET /v1/demos': [200, { demos: DEMOS }] })
   open()
   fireEvent.click(await screen.findByRole('button', { name: /Dana Whitlock, CFO/ }))
-  const menu = screen.getByRole('menu', { name: 'Open a demo as' })
-  expect(within(menu).getAllByRole('menuitemradio').map((item) => item.textContent)).toEqual([
+  const menu = screen.getByRole('group', { name: 'Open a demo as' })
+  expect(within(menu).getAllByRole('button', { name: /as of/ }).map((item) => item.textContent)).toEqual([
     'RCRhea CastilloProvost, Alder College, as of Nov 15, 2027',
     'DWDana WhitlockCFO, Fairhaven Systems, as of Mar 31, 2027Signed in',
   ])
   expect(within(menu).getByText('Google account: steve@strassmann.com')).toBeInTheDocument()
-  fireEvent.click(within(menu).getByRole('menuitemradio', { name: /Rhea Castillo/ }))
+  fireEvent.click(within(menu).getByRole('button', { name: /Rhea Castillo/ }))
   expect(await screen.findByText('Alder College', { selector: '.navbar-org' })).toBeInTheDocument()
   expect(window.location.hash).toBe('#/alder-college/commitment')
 })
@@ -173,10 +173,52 @@ test('logging out ends the session and shows the sign-in again', async () => {
   })
   open()
   fireEvent.click(await screen.findByRole('button', { name: /Dana Whitlock, CFO/ }))
-  fireEvent.click(screen.getByRole('menuitem', { name: 'Log out' }))
+  fireEvent.click(screen.getByRole('button', { name: 'Log out' }))
   expect(await screen.findByRole('link', { name: 'Sign in with Google' })).toBeInTheDocument()
   const logout = fetch.mock.calls.find(([r]) => new URL(r.url).pathname === '/auth/logout')![0]
   expect([logout.url, logout.credentials, logout.headers.get('x-longreach-client')]).toEqual([`${API_URL}/auth/logout`, 'include', 'dw'])
+})
+
+test('a failed sign-out says why and can try again', async () => {
+  let up = false
+  serve({
+    'GET /auth/me': [200, STEVE],
+    'GET /v1/demos': [200, { demos: DEMOS }],
+    'POST /auth/logout': () => (up ? [200, { signed_out: true }] : [503, { error: 'the gateway is restarting', code: 'unavailable' }]),
+  })
+  open()
+  fireEvent.click(await screen.findByRole('button', { name: /Dana Whitlock, CFO/ }))
+  fireEvent.click(screen.getByRole('button', { name: 'Log out' }))
+  expect(await screen.findByRole('alert')).toHaveTextContent('Longreach did not sign you out: the gateway is restarting')
+  up = true
+  serve({ 'GET /auth/me': UNAUTHORIZED, 'POST /auth/logout': [200, { signed_out: true }] })
+  fireEvent.click(screen.getByRole('button', { name: 'Try again' }))
+  expect(await screen.findByRole('link', { name: 'Sign in with Google' })).toBeInTheDocument()
+})
+
+test('a failed start over says why and keeps the menu open', async () => {
+  vi.stubGlobal('confirm', () => true)
+  serve({
+    'GET /auth/me': [200, STEVE],
+    'GET /v1/demos': [200, { demos: DEMOS }],
+    'DELETE /v1/projects/fairhaven/commitments/sandbox': [503, { error: 'the graph service is not reachable', code: 'unavailable' }],
+  })
+  open()
+  fireEvent.click(await screen.findByRole('button', { name: /Dana Whitlock, CFO/ }))
+  fireEvent.click(screen.getByRole('button', { name: 'Start over in Fairhaven Systems' }))
+  expect(await screen.findByRole('alert')).toHaveTextContent('Could not start over: the graph service is not reachable')
+  expect(screen.getByRole('group', { name: 'Open a demo as' })).toBeInTheDocument()
+})
+
+test('Escape closes the user menu and puts focus back on its button', async () => {
+  serve({ 'GET /auth/me': [200, STEVE], 'GET /v1/demos': [200, { demos: DEMOS }] })
+  open()
+  const button = await screen.findByRole('button', { name: /Dana Whitlock, CFO/ })
+  fireEvent.click(button)
+  expect(button).toHaveAttribute('aria-expanded', 'true')
+  fireEvent.keyDown(document, { key: 'Escape' })
+  expect(button).toHaveAttribute('aria-expanded', 'false')
+  expect(document.activeElement).toBe(button)
 })
 
 test('a visitor with no demo is told so', async () => {

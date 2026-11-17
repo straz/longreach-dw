@@ -1,8 +1,9 @@
-import { useEffect, useId, useRef, useState } from 'react'
+import { useCallback, useEffect, useId, useRef, useState } from 'react'
 import { clampAsOf } from '../../domain/clock.ts'
 import { addDays, daysBetween } from '../../domain/dates.ts'
 import { formatDate } from '../../domain/format.ts'
 import type { IsoDate } from '../../model/generated.ts'
+import { useDismiss } from '../../ui/useDismiss.ts'
 import { useClock } from './client.tsx'
 import { useRouteState } from './routeState.ts'
 import './AsOfControl.css'
@@ -56,23 +57,8 @@ export default function AsOfControl() {
   const slide = useThrottledAsOf(setAsOf)
   const shown = slide.draft ?? asOf
 
-  useEffect(() => {
-    if (!open) return
-    const onPointer = (e: PointerEvent) => {
-      if (!root.current?.contains(e.target as Node)) setOpen(false)
-    }
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key !== 'Escape') return
-      setOpen(false)
-      button.current?.focus()
-    }
-    document.addEventListener('pointerdown', onPointer)
-    document.addEventListener('keydown', onKey)
-    return () => {
-      document.removeEventListener('pointerdown', onPointer)
-      document.removeEventListener('keydown', onKey)
-    }
-  }, [open])
+  const close = useCallback(() => setOpen(false), [])
+  useDismiss(root, open, close, button)
 
   return (
     <div className="asof" ref={root}>

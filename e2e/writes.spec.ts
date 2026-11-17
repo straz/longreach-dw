@@ -69,7 +69,7 @@ test('import the AFE, correct one field, verify the rest, activate', async ({ pa
   await expect(page.getByText('$583M')).toBeVisible()
 
   await page.getByRole('button', { name: 'New commitment' }).click()
-  await page.getByRole('menuitem', { name: /Import a document/ }).click()
+  await page.getByRole('button', { name: /Import a document/ }).click()
   await page.getByRole('button', { name: /GB300 cluster storage tier/ }).click()
   await expect(page.getByText('7 fields proposed, none verified yet.')).toBeVisible({ timeout: 10_000 })
   await page.getByRole('button', { name: 'Create and verify' }).click()
@@ -111,7 +111,7 @@ test('import a document and activate it as extracted', async ({ page }) => {
 test('start blank, then add the promise', async ({ page }) => {
   await open(page, 'commitment')
   await page.getByRole('button', { name: 'New commitment' }).click()
-  await page.getByRole('menuitem', { name: /Start blank/ }).click()
+  await page.getByRole('button', { name: /Start blank/ }).click()
   await expect(page).toHaveURL(/c\d+-draft/)
   await expect(page.getByText('7 fields still missing', { exact: false })).toBeVisible()
   const promise = page.locator('.vfield').filter({ hasText: 'Promise' })
@@ -163,7 +163,7 @@ test('starting over brings back the seed', async ({ page }) => {
   await expect(toggle).toHaveAttribute('aria-pressed', 'false')
   page.once('dialog', (dialog) => void dialog.accept())
   await page.getByRole('button', { name: /Dana Whitlock, CFO/ }).click()
-  await page.getByRole('menuitem', { name: 'Start over in Fairhaven Systems' }).click()
+  await page.getByRole('button', { name: 'Start over in Fairhaven Systems' }).click()
   await expect(toggle).toHaveAttribute('aria-pressed', 'true')
 })
 

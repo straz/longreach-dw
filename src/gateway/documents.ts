@@ -1,8 +1,8 @@
 import type { IsoDate, NodeData } from '../model/generated.ts'
 
-// Field extraction from documents (test8's docs/PLAN.md §4.2). The extractions are authored with each demo in
-// tyapi (demos/<org>/imports.yaml) and come with its content (features/shared/client.tsx, useDocuments); a real
-// extractor would read the uploaded file and return the same shape.
+// A demo's sample documents and the field values extracted from them (test8's docs/PLAN.md §4.2). Both are
+// authored with each demo in tyapi (demos/<org>/imports.yaml) and come with its content (GET .../demo,
+// features/shared/client.tsx, useDocuments). Types only: dw extracts nothing itself.
 
 export type FieldProposal =
   | { field: 'promise'; text: string; span?: string; title: string }

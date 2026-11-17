@@ -2,9 +2,7 @@ import { Navigate, type RouteObject, useParams } from 'react-router'
 import CommitmentTab from '../features/commitment/CommitmentTab.tsx'
 import ReconsiderTab from '../features/reconsider/ReconsiderTab.tsx'
 import WatchTab from '../features/watch/WatchTab.tsx'
-import { Card, Problem } from './Card.tsx'
-import { useDemos } from './session.ts'
-import Shell, { FirstDemo } from './Shell.tsx'
+import Shell, { DemosGate, FirstDemo } from './Shell.tsx'
 
 // Hash routes, because GitHub Pages has no server rewrites: #/<org>/<tab>/<selection>?asof=. The demo comes
 // first; under it, test8's routes, whose optional segments carry the selection: a commitment, a Watch view, a
@@ -32,8 +30,5 @@ function FirstTab() {
 
 /** A URL that names no demo: the visitor's first. */
 function NoDemoNamed() {
-  const demos = useDemos()
-  if (demos.isPending) return <Card lede="Opening your demos…" />
-  if (demos.error) return <Problem what="list your demos" error={demos.error} onRetry={() => void demos.refetch()} />
-  return <FirstDemo demos={demos.data} />
+  return <DemosGate>{(demos) => <FirstDemo demos={demos} />}</DemosGate>
 }

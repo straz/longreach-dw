@@ -1,7 +1,8 @@
 import { useMemo } from 'react'
-import { type Portfolio, PORTFOLIO_QUERIES, buildPortfolio, expectedAfter } from '../../domain/portfolio.ts'
+import { type Portfolio, PORTFOLIO_QUERIES, buildPortfolio } from '../../domain/portfolio.ts'
 import { useGatewayQuery, useQueryRows, useSettled } from '../../gateway/react.tsx'
 import type { IsoDate } from '../../model/generated.ts'
+import { endOf } from '../../wire.ts'
 import { useClient, useClock, useDemoContent } from './client.tsx'
 import { useRouteState } from './routeState.ts'
 
@@ -20,7 +21,7 @@ export type PortfolioResult = {
 export function usePortfolioAt(asOf: IsoDate): PortfolioResult {
   const { org } = useClient()
   const { rows, settled: rowsSettled, isUpdating, error } = useQueryRows(PORTFOLIO_QUERIES, asOf)
-  const expected = useGatewayQuery('expected_evidence', { after: expectedAfter(asOf) }, asOf)
+  const expected = useGatewayQuery('expected_evidence', { after: endOf(asOf) }, asOf)
   // Built only from answers for this date; until they are all in, the previous date's portfolio stays.
   const settled = rowsSettled && !!expected.data && !expected.isPlaceholderData
   const fresh = useMemo(() => (settled && rows ? buildPortfolio({ ...rows, expected: expected.data! }, asOf, org) : undefined), [settled, rows, expected.data, asOf, org])

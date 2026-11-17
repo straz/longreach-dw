@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react'
 import { formatDate } from '../../domain/format.ts'
 import { FIELD_LABEL } from '../../domain/fields.ts'
-import type { SampleDocument } from '../../gateway/extractor.ts'
+import type { SampleDocument } from '../../gateway/documents.ts'
 import { useDocuments } from '../shared/client.tsx'
 import { importDocument } from '../../writes.ts'
 import { useRouteState } from '../shared/routeState.ts'
 import { usePortfolio } from '../shared/usePortfolio.ts'
 import { useService } from '../shared/useService.ts'
 import { useWriteContext } from '../shared/useWriteContext.ts'
+import WriteError from '../shared/WriteError.tsx'
 import DocumentView from './DocumentView.tsx'
 import Sheet from './Sheet.tsx'
 import { FieldValue, useNames } from './fieldText.tsx'
@@ -33,10 +34,9 @@ export default function ImportSheet({ onClose }: { onClose: () => void }) {
   )
 }
 
-function Picker({ docs, onPick }: { docs?: SampleDocument[]; onPick: (d: SampleDocument) => void }) {
+function Picker({ docs, onPick }: { docs: SampleDocument[]; onPick: (d: SampleDocument) => void }) {
   const { portfolio } = usePortfolio()
   const { go } = useRouteState()
-  if (!docs) return <div className="isheet-body isheet-loading">Loading documents…</div>
   return (
     <div className="isheet-body">
       <ul className="doc-cards">
@@ -58,7 +58,7 @@ function Picker({ docs, onPick }: { docs?: SampleDocument[]; onPick: (d: SampleD
             )
           })}
       </ul>
-      <p className="isheet-note">Sample documents, written for this demonstration. Nothing leaves your browser.</p>
+      <p className="isheet-note">Sample documents, written for this demonstration. Importing one records it in your copy of the demo.</p>
     </div>
   )
 }
@@ -123,7 +123,7 @@ function Reading({ doc, onBack, onDone }: { doc: SampleDocument; onBack: () => v
           {mutation.isPending ? 'Creating…' : 'Create and verify'}
         </button>
       </footer>
-      {mutation.error && <p className="isheet-error">The graph did not accept the import: {String(mutation.error.message)}</p>}
+      <WriteError error={mutation.error} />
     </>
   )
 }

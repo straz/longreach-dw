@@ -45,6 +45,11 @@
   font-weight: 600;
 }
 
+/* Focused on opening so a screen reader starts at the title; not a control, so no ring. */
+.isheet-title:focus {
+  outline: none;
+}
+
 .isheet-sub {
   margin-top: 2px;
   max-width: 64ch;
@@ -72,10 +77,6 @@
 .isheet-body {
   padding: var(--space-5) var(--space-6);
   overflow-y: auto;
-}
-
-.isheet-loading {
-  color: var(--ink-3);
 }
 
 .doc-cards {
@@ -216,12 +217,6 @@
   margin-left: auto;
   font-size: var(--size-sm);
   color: var(--ink-3);
-}
-
-.isheet-error {
-  padding: 0 var(--space-6) var(--space-3);
-  font-size: var(--size-sm);
-  color: var(--attention-ink);
 }
 
 /* Field values, shared with the verification sheet. */

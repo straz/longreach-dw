@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { createHashRouter, RouterProvider } from 'react-router'
-import { ApiError, answer, client, type Me, signInUrl } from '../api.ts'
+import { ApiError, answer, client as api, type Me, signInUrl } from '../api.ts'
 import { Card, Problem, say } from './Card.tsx'
 import { routes } from './routes.tsx'
 import { SessionContext, takeSigninRefusal, useMe } from './session.ts'
@@ -13,9 +13,11 @@ import { SessionContext, takeSigninRefusal, useMe } from './session.ts'
 
 export const makeQueryClient = () => new QueryClient({ defaultOptions: { queries: { staleTime: Infinity, retry: false } } })
 
-export default function App({ queryClient = makeQueryClient() }: { queryClient?: QueryClient }) {
+export default function App({ queryClient }: { queryClient?: QueryClient }) {
+  // Made once: a default parameter would make a new client, and lose the cache, on every render.
+  const [client] = useState(() => queryClient ?? makeQueryClient())
   return (
-    <QueryClientProvider client={queryClient}>
+    <QueryClientProvider client={client}>
       <Gate />
     </QueryClientProvider>
   )
@@ -50,14 +52,17 @@ function Signed({ me }: { me: Me }) {
   const [router] = useState(() => createHashRouter(routes))
   const [problem, setProblem] = useState<string | null>(null)
   const signOut = async () => {
+    setProblem(null)
     try {
-      await answer(client.POST('/auth/logout'))
-      await queryClient.resetQueries()
+      await answer(api.POST('/auth/logout'))
+      // Forget every answer but who is signed in, then ask that again: its 401 shows the sign-in.
+      queryClient.removeQueries({ predicate: (q) => q.queryKey[0] !== 'me' })
+      await queryClient.invalidateQueries({ queryKey: ['me'] })
     } catch (e) {
       setProblem(say(e))
     }
   }
-  if (problem) return <Problem what="sign you out" error={problem} />
+  if (problem) return <Problem what="sign you out" error={problem} onRetry={() => void signOut()} />
   return (
     <SessionContext.Provider value={{ me, signOut: () => void signOut() }}>
       <RouterProvider router={router} />

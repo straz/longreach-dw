@@ -7,7 +7,8 @@ import createClient, { type Middleware } from 'openapi-fetch'
 import type { components, paths } from './model/api.ts'
 import type { QueryName, QueryParams, QueryRow } from './model/generated.ts'
 
-export const API_URL = (import.meta.env.VITE_API_URL ?? 'https://127.0.0.1:8100').replace(/\/+$/, '')
+/** The API's root, set by the build (vite.config.ts): the laptop's gateway unless VITE_API_URL names another. */
+export const API_URL = String(import.meta.env.VITE_API_URL).replace(/\/+$/, '')
 /** The version of the graph routes' contract dw is written for; they refuse a call that names another. */
 export const GRAPHS_API = '0.14'
 /** How much of an answer that is not the API's error an ApiError keeps. */

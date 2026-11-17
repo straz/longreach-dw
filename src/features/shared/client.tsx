@@ -1,7 +1,8 @@
 import { type ReactNode, createContext, useContext } from 'react'
 import type { BriefSpec } from '../../domain/briefs.ts'
 import type { Clock } from '../../domain/clock.ts'
-import type { SampleDocument } from '../../gateway/extractor.ts'
+import { setDisplayYear } from '../../domain/format.ts'
+import type { SampleDocument } from '../../gateway/documents.ts'
 import type { Indicator } from './usePortfolio.ts'
 
 // The demo open: who it is signed in as, its clock, and its content besides the records (briefs, sample
@@ -21,15 +22,18 @@ export type Client = {
 
 export type DemoContent = { briefs: BriefSpec[]; documents: SampleDocument[]; indicators: Record<string, Indicator> }
 
-export type Demo = { client: Client; clock: Clock; content: DemoContent }
+/** The demo open: what the screens read of it. (app/session.ts's DemoListing is how the user menu lists one.) */
+export type OpenDemo = { client: Client; clock: Clock; content: DemoContent }
 
-const DemoContext = createContext<Demo | null>(null)
+const DemoContext = createContext<OpenDemo | null>(null)
 
-export function DemoProvider({ demo, children }: { demo: Demo; children: ReactNode }) {
+export function DemoProvider({ demo, children }: { demo: OpenDemo; children: ReactNode }) {
+  // Dates in the demo's own year are shown without it (domain/format.ts). Set before the screens render.
+  setDisplayYear(demo.clock.today.slice(0, 4))
   return <DemoContext.Provider value={demo}>{children}</DemoContext.Provider>
 }
 
-function useDemo(): Demo {
+function useDemo(): OpenDemo {
   const value = useContext(DemoContext)
   if (!value) throw new Error('a demo screen needs a DemoProvider')
   return value

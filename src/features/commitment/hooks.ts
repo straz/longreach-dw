@@ -1,26 +1,32 @@
 import { useMemo } from 'react'
-import { type CommitmentDetail, type DetailRows, DETAIL_QUERIES, buildDetail } from '../../domain/detail.ts'
-import { expectedAfter } from '../../domain/portfolio.ts'
-import { useGatewayQuery, useQueryRows } from '../../gateway/react.tsx'
+import { type CommitmentDetail, DETAIL_QUERIES, buildDetail, currentOrigin } from '../../domain/detail.ts'
+import { useGatewayQuery, useQueryRows, useSettled } from '../../gateway/react.tsx'
+import { endOf } from '../../wire.ts'
 import { useRouteState } from '../shared/routeState.ts'
 import { usePortfolio } from '../shared/usePortfolio.ts'
 
-// Everything the detail pane needs for one commitment, as of the route's date.
+// Everything the detail pane needs for one commitment, as of the route's date. Built only from answers that are
+// all for this date (as usePortfolioAt is); until they are, the previous date's detail stays on screen.
 
-export function useCommitmentDetail(slug: string | undefined): { detail?: CommitmentDetail; isLoading: boolean } {
+export function useCommitmentDetail(slug: string | undefined): { detail?: CommitmentDetail; isLoading: boolean; error?: Error } {
   const { asOf } = useRouteState()
-  const { portfolio } = usePortfolio()
-  const { rows } = useQueryRows(DETAIL_QUERIES, asOf)
-  const expected = useGatewayQuery('expected_evidence', { after: expectedAfter(asOf) }, asOf)
-  const decision = rows?.origins.filter((o) => o.commitment === slug).at(-1)?.decision
-  const approvals = useGatewayQuery('approvals', { decision: decision ?? '' }, asOf)
+  const { portfolio, error: portfolioError } = usePortfolio()
+  const { rows, settled: rowsSettled, error: rowsError } = useQueryRows(DETAIL_QUERIES, asOf)
+  const expected = useGatewayQuery('expected_evidence', { after: endOf(asOf) }, asOf)
+  const decision = slug && rows ? currentOrigin(rows.origins, slug)?.decision : undefined
+  // Only a commitment with an originating decision has approvals to ask for.
+  const approvals = useGatewayQuery('approvals', { decision: decision ?? '' }, asOf, { enabled: !!decision })
 
-  const ready = !!(portfolio && slug && rows && expected.data && approvals.data)
-  const detail = useMemo(() => {
-    if (!ready) return undefined
-    const all: DetailRows = { ...rows!, expected: expected.data!, approvals: decision ? approvals.data! : [] }
-    return buildDetail(portfolio!, all, slug!)
-  }, [ready, portfolio, slug, rows, expected.data, approvals.data, decision])
-  // Not loading and no detail: the slug names no commitment.
-  return { detail, isLoading: !ready }
+  const fresh = (q: { data?: unknown; isPlaceholderData: boolean }) => q.data !== undefined && !q.isPlaceholderData
+  const settled = !!(portfolio && slug && rowsSettled && fresh(expected) && (!decision || fresh(approvals)))
+  const built = useMemo(
+    () => (settled ? buildDetail(portfolio!, { ...rows!, expected: expected.data!, approvals: decision ? approvals.data! : [] }, slug!) : undefined),
+    [settled, portfolio, slug, rows, expected.data, approvals.data, decision],
+  )
+  // The last detail built stays while the next date loads, but never stands in for another commitment's.
+  const last = useSettled(built, settled)
+  const detail = last?.view.commitment === slug ? last : undefined
+  const error = portfolioError ?? rowsError ?? expected.error ?? approvals.error ?? undefined
+  // Not loading, no error and no detail: the slug names no commitment.
+  return { detail, isLoading: !settled && !error, error }
 }

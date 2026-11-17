@@ -28,6 +28,7 @@ jobs:
           node-version: 24 # runs scripts/*.ts directly
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
       - run: pnpm test
       - run: pnpm build
         env:
@@ -45,3 +46,12 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+
+  # After each deploy (docs/PLAN.md §6): the published app and the API it calls answer, as a visitor who is not
+  # signed in sees them. Signing in needs Google, so it stays a person's check.
+  smoke:
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: node scripts/smoke.ts https://dw.longreach.ai https://api.longreach.ai

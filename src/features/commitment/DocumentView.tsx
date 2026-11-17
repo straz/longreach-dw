@@ -41,12 +41,26 @@ export default function DocumentView({ text, shown, focus, onSpan }: Props) {
           const inner = inline(seg.text)
           if (!seg.span) return <Fragment key={j}>{inner}</Fragment>
           const visible = !shown || shown.has(seg.span)
+          const span = seg.span
+          // A clickable passage is a button to the keyboard too: reachable by Tab, pressed with Enter or Space.
+          const pick = visible && onSpan ? () => onSpan(span) : undefined
           return (
             <mark
               key={j}
               data-span={seg.span}
               className={`docview-span${visible ? ' is-found' : ''}${focus === seg.span ? ' is-focus' : ''}`}
-              onClick={visible && onSpan ? () => onSpan(seg.span!) : undefined}
+              onClick={pick}
+              role={pick ? 'button' : undefined}
+              tabIndex={pick ? 0 : undefined}
+              onKeyDown={
+                pick
+                  ? (e) => {
+                      if (e.key !== 'Enter' && e.key !== ' ') return
+                      e.preventDefault()
+                      pick()
+                    }
+                  : undefined
+              }
             >
               {inner}
             </mark>

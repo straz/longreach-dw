@@ -93,8 +93,8 @@ export function buildComingUp(input: ComingUpInput): ComingItem[] {
   items.push(...scheduled.values())
 
   const reports = new Map<string, Item>()
-  for (const x of input.expected.filter((x) => ahead(x.expected?.slice(0, 10)))) {
-    const date = x.expected!.slice(0, 10)
+  for (const x of input.expected.filter((x) => ahead(x.expected))) {
+    const date = x.expected!
     const key = `${date}|${x.source}`
     const item = reports.get(key) ?? { date, kind: 'report' as const, title: x.source, commitments: [], beliefs: [] }
     item.beliefs.push(x.belief)

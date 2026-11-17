@@ -38,14 +38,4 @@ if (hasDom) {
   }
 }
 
-afterEach(() => {
-  cleanup()
-  if (!hasDom) return
-  // The mock gateway mirrors its graph to sessionStorage (docs/PLAN.md §6.3);
-  // without this, one test's writes would carry into the next.
-  try {
-    window.sessionStorage.clear()
-  } catch {
-    // Storage unavailable in this environment; nothing to clear.
-  }
-})
+afterEach(cleanup)

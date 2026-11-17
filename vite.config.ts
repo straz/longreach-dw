@@ -2,11 +2,12 @@ import { existsSync, readFileSync } from 'node:fs'
 import react from '@vitejs/plugin-react'
 import type { Plugin } from 'vite'
 import { defineConfig } from 'vitest/config'
+import { LOCAL_API, LOCAL_APP, TYAPI } from './local.ts'
 
 // The dev server runs at https://127.0.0.1:5173, the origin tyapi's gateway allows on a laptop, with the
 // gateway's own local certificate (TYAPI: the tyapi checkout), so the two are one site and the gateway's
 // session cookie comes with every call (docs/PLAN.md §4). A build needs neither.
-const tls = `${process.env.TYAPI ?? '../tyapi'}/secrets/tls`
+const tls = `${TYAPI}/secrets/tls`
 const https = existsSync(`${tls}/gateway.pem`) ? { cert: readFileSync(`${tls}/gateway.pem`), key: readFileSync(`${tls}/gateway.key`) } : undefined
 
 // localhost reaches the same server but is another site to the browser: the gateway refuses its calls
@@ -28,7 +29,9 @@ export default defineConfig({
   plugins: [react(), toLoopback],
   // Served at the root of https://dw.longreach.ai.
   base: '/',
-  server: { host: '127.0.0.1', port: 5173, strictPort: true, https },
+  // The API's root, from the build; a laptop's gateway unless VITE_API_URL says otherwise (the deploy sets it).
+  define: { 'import.meta.env.VITE_API_URL': JSON.stringify(process.env.VITE_API_URL ?? LOCAL_API) },
+  server: { host: new URL(LOCAL_APP).hostname, port: Number(new URL(LOCAL_APP).port), strictPort: true, https },
   test: {
     // Node by default; component tests opt in with a `// @vitest-environment jsdom` docblock.
     environment: 'node',

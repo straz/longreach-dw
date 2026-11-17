@@ -1,15 +1,15 @@
 import { answer, client, type Schemas } from './api.ts'
 import type { Field } from './domain/fields.ts'
 import type { PathKey } from './domain/briefs.ts'
-import { instants } from './gateway/dw.ts'
-import type { FieldProposal } from './gateway/extractor.ts'
+import type { FieldProposal } from './gateway/documents.ts'
 import type { IsoDate } from './model/generated.ts'
+import { toApi } from './wire.ts'
 
 // Decision Watch's writes (docs/PLAN.md §2: no planners here). Each is one of tyapi's domain routes, which reads
 // what it needs from the graph and builds the records on the server, as the demo's persona, at the demo's clock
 // (tyapi docs/18-dw-backend.md §3). dw sends only the intent; features/shared/useService.ts then refetches the
 // demo's answers. The screens work in calendar days; a day in a body goes out as its midnight in UTC, the form a
-// calendar day is stored in (tyapi W14; gateway/dw.ts).
+// calendar day is stored in (tyapi W14; src/wire.ts).
 
 /** The demo a write goes to. */
 export type Project = { org: string; project: string }
@@ -31,7 +31,7 @@ export const replaceField = (p: Project, { slug, value }: { slug: string; value:
   answer(
     client.POST('/v1/projects/{org}/{project}/commitments/{slug}/fields/{field}/replace', {
       params: { path: { ...where(p), slug, field: value.field } },
-      body: { value: instants(value) },
+      body: { value: toApi(value) },
     }),
   )
 
@@ -61,7 +61,7 @@ export const recordDecision = (p: Project, { revisitAt, conditions, ...input }: 
   answer(
     client.POST('/v1/projects/{org}/{project}/decisions', {
       params: { path: where(p) },
-      body: instants({ ...input, conditions: conditions || undefined, revisit_at: revisitAt }),
+      body: toApi({ ...input, conditions: conditions || undefined, revisit_at: revisitAt }),
     }),
   )
 

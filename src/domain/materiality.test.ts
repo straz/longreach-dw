@@ -166,4 +166,13 @@ describe('lifecycle', () => {
     expect(buildWatch(input({ beliefs: new Map([['b', judged('2027-02-10')]]), reviews: [review('2027-03-01')] })).flags[0].lifecycle).toBe('reviewed')
     expect(buildWatch(input({ beliefs: new Map([['b', judged('2027-03-20')]]), reviews: [review('2027-03-01')] })).flags[0].lifecycle).toBe('reopened')
   })
+
+  it('on the day of a review, is reopened by evidence recorded after it and not by evidence before it', () => {
+    // Moments come from the API in one fixed form (wire.ts), so their time of day orders them.
+    const at = (moment: string) => evaluation('b', 'contradicting', { judgments: [{ claim: 'k', belief: 'b', stance: 'contradicts', by: 'cfo', at: moment, agent: false }] })
+    const held: QueryRow<'reviews'> = { review: 'r', commitment: 'c1', kind: 'scheduled', scheduled_for: '2027-03-01', held_at: '2027-03-01T12:00:00.000Z', outcome: 'affirm' }
+    const lifecycle = (moment: string) => buildWatch(input({ beliefs: new Map([['b', at(moment)]]), reviews: [held] })).flags[0].lifecycle
+    expect(lifecycle('2027-03-01T15:30:00.000Z')).toBe('reopened')
+    expect(lifecycle('2027-03-01T09:00:00.000Z')).toBe('reviewed')
+  })
 })

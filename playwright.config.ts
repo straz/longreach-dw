@@ -1,4 +1,5 @@
 import { defineConfig } from '@playwright/test'
+import { LOCAL_APP } from './local.ts'
 
 // Browser tests against the laptop's tyapi stack (docs/PLAN.md §6): dw's dev server at https://127.0.0.1:5173 and
 // tyapi's gateway at https://127.0.0.1:8100, `make up` there first, with the mock sign-in
@@ -10,7 +11,7 @@ export default defineConfig({
   workers: 1,
   outputDir: 'test-results',
   use: {
-    baseURL: 'https://127.0.0.1:5173/',
+    baseURL: `${LOCAL_APP}/`,
     channel: 'chrome',
     viewport: { width: 1440, height: 960 },
     // The gateway's local certificate, which the dev server shares (vite.config.ts).
@@ -18,7 +19,7 @@ export default defineConfig({
   },
   webServer: {
     command: 'pnpm dev',
-    url: 'https://127.0.0.1:5173/',
+    url: `${LOCAL_APP}/`,
     ignoreHTTPSErrors: true,
     reuseExistingServer: true,
     timeout: 60_000,

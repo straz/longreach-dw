@@ -1,5 +1,4 @@
 import type { IsoDate } from '../model/generated.ts'
-import { DISPLAY_YEAR } from './clock.ts'
 import { daysBetween } from './dates.ts'
 
 // Every money and date string on screen and in print comes from here
@@ -14,11 +13,18 @@ export const monthName = (d: string, { long = false } = {}): string => {
 }
 const MINUS = '−'
 
-/** "Apr 15" within the demo year, "Apr 15, 2028" otherwise. `long` always adds the year. */
+// The year a date is shown without: the open demo's (each demo runs at its own clock, clock.ts). One demo is open
+// at a time; its DemoProvider sets this as it opens (features/shared/client.tsx).
+let displayYear = '2027'
+export const setDisplayYear = (year: string) => {
+  displayYear = year
+}
+
+/** "Apr 15" within the open demo's year, "Apr 15, 2028" otherwise. `long` always adds the year. */
 export function formatDate(d: IsoDate, { long = false } = {}): string {
   const [y, m, day] = d.slice(0, 10).split('-').map(Number)
   const base = `${MONTHS[m - 1].slice(0, 3)} ${day}`
-  return long || String(y) !== DISPLAY_YEAR ? `${base}, ${y}` : base
+  return long || String(y) !== displayYear ? `${base}, ${y}` : base
 }
 
 /** "(15 days)" when the date is 0 to 90 days after `from`; otherwise empty. */

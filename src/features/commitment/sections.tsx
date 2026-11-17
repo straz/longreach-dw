@@ -1,4 +1,5 @@
 import { Link } from 'react-router'
+import { dayOf } from '../../domain/dates.ts'
 import { formatDate, formatMetric } from '../../domain/format.ts'
 import type { CommitmentDetail, Origin, TripwireView } from '../../domain/detail.ts'
 import type { CommitmentView } from '../../domain/portfolio.ts'
@@ -8,6 +9,7 @@ import { StateGlyph, StateTag, toneOf } from '../../ui/stateVocabulary.tsx'
 import { useClient } from '../shared/client.tsx'
 import { useRouteState } from '../shared/routeState.ts'
 import { useEvidence } from '../shared/useEvidence.ts'
+import { goodSide } from '../shared/watchRows.ts'
 import type { Indicator } from '../shared/usePortfolio.ts'
 import { usePortfolio } from '../shared/usePortfolio.ts'
 
@@ -21,7 +23,7 @@ export function Rationale({ origin }: { origin: Origin }) {
     <section className="csec">
       <h2 className="csec-title caps-label">Original rationale</h2>
       <p className="rationale-line">
-        <strong>{origin.statement}.</strong> Decided {formatDate(origin.decided_at.slice(0, 10), { long: true })}
+        <strong>{origin.statement}.</strong> Decided {formatDate(dayOf(origin.decided_at), { long: true })}
         {origin.mandate && (
           <>
             {' '}
@@ -35,7 +37,7 @@ export function Rationale({ origin }: { origin: Origin }) {
       {origin.alternatives.length > 0 && (
         <ul className="alternatives">
           {origin.alternatives.map((a) => (
-            <li key={a.slug} className={a.chosen ? 'is-chosen' : ''}>
+            <li key={a.alternative} className={a.chosen ? 'is-chosen' : ''}>
               <span className="alt-tag">{a.chosen ? 'Chosen' : 'Considered'}</span>
               <span className="alt-statement">{a.statement}</span>
               {a.reasons.length > 0 && (
@@ -111,14 +113,14 @@ export function Assumptions({ view, indicators }: { view: CommitmentView; indica
                     points={e.readings.map((r) => ({ x: r.observed_at, y: r.value }))}
                     threshold={b.threshold}
                     hard={b.hard_threshold}
-                    good={b.trend ?? (b.comparator === 'ge' || b.comparator === 'gt' ? 'above' : 'below')}
+                    good={goodSide(b)}
                     tone={tone}
                     label={`${ind?.name ?? b.metric} readings`}
                   />
                   {last && (
                     <span className={`assumption-value tone-${tone}`}>
                       {formatMetric(last.value, ind)}
-                      <small>{formatDate(last.observed_at.slice(0, 10))}</small>
+                      <small>{formatDate(dayOf(last.observed_at))}</small>
                     </span>
                   )}
                 </div>
@@ -145,7 +147,7 @@ export function SuccessCriteria({ tripwires, indicators }: { tripwires: Tripwire
                 {titleCase(t.condition)}.{' '}
                 {t.latest && (
                   <>
-                    Now <strong>{formatMetric(t.latest.value, ind)}</strong> ({formatDate(t.latest.recorded_at.slice(0, 10))})
+                    Now <strong>{formatMetric(t.latest.value, ind)}</strong> ({formatDate(dayOf(t.latest.recorded_at))})
                     {t.fired ? ': reached.' : t.near ? ': close to the line.' : '.'}
                   </>
                 )}
@@ -247,7 +249,7 @@ export function History({ history }: { history: CommitmentDetail['history'] }) {
       <ol className="history">
         {history.map((h, i) => (
           <li key={i}>
-            <span className="history-date">{formatDate(h.at.slice(0, 10), { long: true })}</span>
+            <span className="history-date">{formatDate(dayOf(h.at), { long: true })}</span>
             <span>
               <StateGlyph state={h.kind === 'review' ? 'untested' : 'supported'} size={9} /> {titleCase(h.title)}
               {h.detail && <span className="list-aside"> · {h.detail}</span>}

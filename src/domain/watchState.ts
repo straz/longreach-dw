@@ -1,4 +1,6 @@
 import type { QueryRow } from '../model/generated.ts'
+import { isAtLeast, meets } from './comparator.ts'
+import { dayOf } from './dates.ts'
 
 // The state of a belief as of a date (docs/PLAN.md §2.5), ported from the
 // prototype's rule engine (evalAsm, ruleStance, gapRun). Inputs are the rows
@@ -14,7 +16,7 @@ export type BeliefState = 'contradicting' | 'weakening' | 'supported' | 'on_trac
 
 export const STATE_OF: Record<Stance, BeliefState> = { supports: 'supported', weakens: 'weakening', contradicts: 'contradicting' }
 
-/** Most severe first. */
+/** The belief no longer holds: it is contradicting or weakening. */
 export const isMoved = (s: BeliefState) => s === 'contradicting' || s === 'weakening'
 
 type Belief = QueryRow<'beliefs'>
@@ -91,8 +93,8 @@ export function ruleStance(b: Belief, value: number, previous?: number): Stance 
   const th = b.threshold
   if (th === undefined || !b.comparator) return 'supports'
   const hard = b.hard_threshold ?? th
-  const atLeast = b.comparator === 'ge' || b.comparator === 'gt'
-  const holds = b.comparator === 'ge' ? value >= th : b.comparator === 'gt' ? value > th : b.comparator === 'le' ? value <= th : value < th
+  const atLeast = isAtLeast(b.comparator)
+  const holds = meets(b.comparator, value, th)
   if (holds) {
     const near = Math.abs(value - th) <= Math.abs(th) * 0.03
     const worsening = previous !== undefined && (atLeast ? value < previous : value > previous)
@@ -132,11 +134,11 @@ export function evaluateBelief(b: Belief, claims: MetricClaim[], judgments: Judg
     if (b.kind === 'prediction' && result.state === 'supported') result.state = 'on_track'
     let i = steps.length - 1
     while (i > 0 && steps[i - 1].stance === last.stance) i--
-    result.since = steps[i].at.slice(0, 10)
+    result.since = dayOf(steps[i].at)
     if (last.stance !== 'supports') {
       let j = steps.length - 1
       while (j > 0 && steps[j - 1].stance !== 'supports') j--
-      result.movedSince = steps[j].at.slice(0, 10)
+      result.movedSince = dayOf(steps[j].at)
     }
   }
 

@@ -1,10 +1,11 @@
+import type { BeliefState } from '../domain/watchState.ts'
 import './stateVocabulary.css'
 
 // How each state looks, everywhere: list rows, pills, chart markers, legends
 // (docs/PLAN.md §6.6). Meaning lives in domain/watchState.ts; this file knows
 // only names, glyphs, words and color roles.
 
-export type StateName = 'contradicting' | 'weakening' | 'supported' | 'on_track' | 'untested'
+export type StateName = BeliefState
 
 export const STATE_LABEL: Record<StateName, string> = {
   contradicting: 'Contradicted',

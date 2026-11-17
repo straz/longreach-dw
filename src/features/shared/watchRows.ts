@@ -1,3 +1,5 @@
+import { type Comparator, isAtLeast } from '../../domain/comparator.ts'
+import { dayOf } from '../../domain/dates.ts'
 import { formatDate } from '../../domain/format.ts'
 import type { WatchRow } from '../../domain/materiality.ts'
 import type { GapPoint } from '../../ui/charts/GapChart.tsx'
@@ -35,7 +37,7 @@ export function rowChart(r: WatchRow, ev: Evidence): RowChart | undefined {
     if (!b?.metric) return undefined
     return {
       metric: b.metric,
-      points: r.evaluation.readings.map((x) => ({ date: x.observed_at.slice(0, 10), value: x.value, stance: x.stance })),
+      points: r.evaluation.readings.map((x) => ({ date: dayOf(x.observed_at), value: x.value, stance: x.stance })),
       threshold: b.threshold,
       hard: b.hard_threshold,
       good: goodSide(b),
@@ -47,14 +49,14 @@ export function rowChart(r: WatchRow, ev: Evidence): RowChart | undefined {
       metric,
       points: ev.metricClaims
         .filter((k) => k.metric === metric && k.value !== undefined)
-        .map((k) => ({ date: (k.observed_at ?? k.recorded_at).slice(0, 10), value: k.value!, stance: 'supports' as const })),
+        .map((k) => ({ date: dayOf(k.observed_at ?? k.recorded_at), value: k.value!, stance: 'supports' as const })),
       threshold: r.tripwire.threshold,
-      good: r.tripwire.comparator === 'ge' || r.tripwire.comparator === 'gt' ? 'below' : 'above',
+      good: isAtLeast(r.tripwire.comparator) ? 'below' : 'above',
     }
   }
   return undefined
 }
 
 /** Which side of its line a belief holds on. */
-export const goodSide = (b: { trend?: 'rising' | 'falling'; comparator?: string }): RowChart['good'] =>
-  b.trend ?? (b.comparator === 'ge' || b.comparator === 'gt' ? 'above' : 'below')
+export const goodSide = (b: { trend?: 'rising' | 'falling'; comparator?: Comparator }): RowChart['good'] =>
+  b.trend ?? (isAtLeast(b.comparator) ? 'above' : 'below')

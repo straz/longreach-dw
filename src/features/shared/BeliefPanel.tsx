@@ -216,7 +216,7 @@ function EvidenceGroup({ title, children }: { title: string; children: ReactNode
 
 function JudgmentItem({ j, ev, agent = false, open = false }: { j: Judgment; ev: Evidence; agent?: boolean; open?: boolean }) {
   const k = ev.claim(j.claim)
-  const { readOnly } = useWriteContext()
+  const { readOnly, why } = useWriteContext()
   const run = useService(judge)
   const act = (stance: Judgment['stance'], note: string) => run.mutate({ claim: j.claim, belief: j.belief, stance, note })
   return (
@@ -237,12 +237,12 @@ function JudgmentItem({ j, ev, agent = false, open = false }: { j: Judgment; ev:
           <WriteError error={run.error} />
         </span>
       )}
-      {open && !readOnly && (
+      {open && (
         <span className="bev-actions">
-          <button type="button" className="btn-line is-small" disabled={run.isPending} onClick={() => act(j.stance, `Agreed with the evidence agent: ${j.note ?? ''}`.trim())}>
+          <button type="button" className="btn-line is-small" disabled={readOnly || run.isPending} title={readOnly ? why : undefined} onClick={() => act(j.stance, `Agreed with the evidence agent: ${j.note ?? ''}`.trim())}>
             Agree
           </button>
-          <button type="button" className="btn-quiet is-small" disabled={run.isPending} onClick={() => act('informs', 'Read the agent’s stance; it does not move this assumption.')}>
+          <button type="button" className="btn-quiet is-small" disabled={readOnly || run.isPending} title={readOnly ? why : undefined} onClick={() => act('informs', 'Read the agent’s stance; it does not move this assumption.')}>
             Dismiss
           </button>
         </span>

@@ -1,3 +1,4 @@
+import { avoidableWindow } from './capital.ts'
 import { addDays } from './dates.ts'
 import type { CommitmentView } from './portfolio.ts'
 import type { IsoDate } from '../model/generated.ts'
@@ -25,7 +26,7 @@ export function runwayOf(commitments: CommitmentView[], asOf: IsoDate, months = 
   const rows = commitments
     .filter((c) => c.status === 'active' && c.scale !== 'program' && c.capital && c.capital.total > 0)
     .map((c): RunwayRow => {
-      const until = c.capital!.avoidable > 0 && c.capital!.until && c.capital!.until >= asOf ? c.capital!.until : undefined
+      const until = avoidableWindow(c.capital, asOf)?.date
       return {
         commitment: c.commitment,
         title: c.title,

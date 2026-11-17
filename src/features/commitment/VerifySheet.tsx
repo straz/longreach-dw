@@ -3,9 +3,9 @@ import { FIELD_LABEL, type Field, type FieldState, acceptedCount } from '../../d
 import { currentOrigin } from '../../domain/detail.ts'
 import { originDecisionSlug } from '../../domain/slugs.ts'
 import { formatMoney } from '../../domain/format.ts'
-import { coveringMandates, covers } from '../../domain/mandates.ts'
+import { coveringMandates } from '../../domain/mandates.ts'
 import type { CommitmentView } from '../../domain/portfolio.ts'
-import type { FieldProposal, SampleDocument } from '../../gateway/extractor.ts'
+import type { FieldProposal, SampleDocument } from '../../gateway/documents.ts'
 import { useGatewayQuery } from '../../gateway/react.tsx'
 import { acceptField, activateCommitment, replaceField } from '../../writes.ts'
 import { useClient } from '../shared/client.tsx'
@@ -52,10 +52,10 @@ export default function VerifySheet({ view, doc, focus, onFocus }: Props) {
   const proposalOf = (f: Field) => doc?.fields.find((p) => p.field === f)
   const error = accept.error ?? replace.error ?? activate.error
 
-  // Awaited rather than onSuccess: activation re-renders this page as an
-  // active commitment, which unmounts the sheet before a callback would run.
   const loading = !names.ready || !row || !extractedQ.data || !claimedQ.data
 
+  // Awaited rather than onSuccess: activation re-renders this page as an
+  // active commitment, which unmounts the sheet before a callback would run.
   const doActivate = async () => {
     if (!row) return
     try {
@@ -158,9 +158,11 @@ function useAuthority(view: CommitmentView, decision: string): string | undefine
   const mandates = useGatewayQuery('mandates', {}, asOf).data
   const amount = view.capital?.total
   const m = decisionMandates?.find((x) => x.decision === decision)
-  if (!m || amount === undefined || covers(m, amount)) return undefined
+  // covers() spelled out, so the limit is known to be there below.
+  const limit = m?.limit_amount
+  if (!m || amount === undefined || limit === undefined || amount <= limit) return undefined
   const wider = coveringMandates(mandates ?? [], amount)[0]
-  return `${formatMoney(amount)} is above the ${formatMoney(m.limit_amount!)} limit of ${m.mandate} (${m.holder_name}). Correct the rationale and authorization to a mandate that covers it${wider ? `, such as ${wider.mandate} (${wider.holder_name})` : ''}.`
+  return `${formatMoney(amount)} is above the ${formatMoney(limit)} limit of ${m.mandate} (${m.holder_name}). Correct the rationale and authorization to a mandate that covers it${wider ? `, such as ${wider.mandate} (${wider.holder_name})` : ''}.`
 }
 
 const spanOf = (doc: SampleDocument | undefined, field: Field) => doc?.fields.find((p) => p.field === field)?.span
@@ -184,7 +186,7 @@ function FieldRow({ state, proposal, by, agent, focused, onFocus, editing, disab
   const { field, status, claim, rejected } = state
   const fromOwner = !!claim && !agent
   return (
-    <li className={`vfield is-${status}${focused ? ' is-focused' : ''}`} onMouseEnter={claim?.quote ? onFocus : undefined}>
+    <li className={`vfield is-${status}${focused ? ' is-focused' : ''}`} onMouseEnter={claim?.quote ? onFocus : undefined} onFocus={claim?.quote ? onFocus : undefined}>
       <div className="vfield-head">
         <span className="vfield-label">{FIELD_LABEL[field]}</span>
         {status === 'accepted' && !editing && (

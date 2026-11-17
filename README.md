@@ -35,6 +35,7 @@ is shared only between pages on the same host, so the dev server redirects `loca
 | `pnpm test` | Unit and component tests |
 | `pnpm e2e` | test8's walkthrough and every write, in Chrome against the laptop's tyapi; each test reseeds the demos first (`make rebuild-demos` there) |
 | `pnpm lint` | oxlint |
+| `node scripts/smoke.ts <app> <api>` | Smoke-test a deployed dw as a stranger sees it (the deploy runs it against the pilot) |
 | `pnpm gen:model` | Regenerate `src/model/generated.ts` (query rows) after updating `vendor/ty-core/` from tyapi |
 | `pnpm api:pull` | Copy tyapi's API description into `vendor/tyapi/openapi.yaml` (TYAPI, default ../tyapi) |
 | `pnpm gen:api` | Regenerate `src/model/api.ts` (every route's body and answer) from that copy |
@@ -43,7 +44,7 @@ is shared only between pages on the same host, so the dev server redirects `loca
 
 ## Deploying
 
-A push to `main` runs `.github/workflows/deploy.yml`: test, build with
-`VITE_API_URL=https://api.longreach.ai`, and publish `dist/` to Pages. The repository's Pages source
+A push to `main` runs `.github/workflows/deploy.yml`: lint, test, build with
+`VITE_API_URL=https://api.longreach.ai`, publish `dist/` to Pages, then smoke-test the live site. The repository's Pages source
 must be **GitHub Actions** (Settings → Pages), so only the built app is served. Who may sign in is
 tyapi's `demos/visitors.yaml`.

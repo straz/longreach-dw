@@ -14,6 +14,7 @@ import { useIndicators, usePortfolio } from '../shared/usePortfolio.ts'
 import { useService } from '../shared/useService.ts'
 import DateSpine from './DateSpine.tsx'
 import { useCommitmentDetail } from './hooks.ts'
+import GraphError from '../shared/GraphError.tsx'
 import { Assumptions, Dependencies, History, Options, Rationale, Risks, SuccessCriteria } from './sections.tsx'
 import './CommitmentDetail.css'
 import { useWriteContext } from '../shared/useWriteContext.ts'
@@ -24,8 +25,9 @@ import { useWriteContext } from '../shared/useWriteContext.ts'
 const STATUS_LABEL = { active: 'Active', unverified: 'Needs verification', incomplete: 'In progress', past: 'Past' } as const
 
 export default function CommitmentDetail({ slug }: { slug: string }) {
-  const { detail, isLoading } = useCommitmentDetail(slug)
+  const { detail, isLoading, error } = useCommitmentDetail(slug)
   const { portfolio } = usePortfolio()
+  if (error && !detail) return <GraphError error={error} />
   if (isLoading && !detail) return <DetailSkeleton />
   if (!detail) {
     const exists = portfolio?.commitments.some((c) => c.commitment === slug)
@@ -101,7 +103,7 @@ function Header({ detail }: { detail: Detail }) {
   const { asOf, href } = useRouteState()
   const v = detail.view
   const moved = v.foundations.filter((f) => f.necessary && f.state === 'contradicting')
-  const term = [v.committed_at && formatDate(v.committed_at.slice(0, 10), { long: true }), v.horizon_at && formatDate(v.horizon_at, { long: true })].filter(Boolean).join(' to ')
+  const term = [v.committed_at && formatDate(v.committed_at, { long: true }), v.horizon_at && formatDate(v.horizon_at, { long: true })].filter(Boolean).join(' to ')
   const ev = useEvidence()
   const beliefText = (slug: string) => ev.belief(slug)?.statement ?? slug
 
@@ -120,8 +122,8 @@ function Header({ detail }: { detail: Detail }) {
       <p className="cdetail-meta">
         {v.fields
           ? detail.recordedIn
-            ? `Imported ${formatDate((v.committed_at ?? asOf).slice(0, 10))} from ${detail.recordedIn.title} · fields extracted by the Longreach extraction agent`
-            : `Started ${formatDate((v.committed_at ?? asOf).slice(0, 10))} in Longreach`
+            ? `Imported ${formatDate(v.committed_at ?? asOf)} from ${detail.recordedIn.title} · fields extracted by the Longreach extraction agent`
+            : `Started ${formatDate(v.committed_at ?? asOf)} in Longreach`
           : [v.counterparty, detail.recordedIn?.title, v.owner && `owner ${v.owner.name}`, term].filter(Boolean).join(' · ')}
       </p>
       {v.moved && v.capital && (

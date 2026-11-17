@@ -7,9 +7,9 @@
 import { execFileSync } from 'node:child_process'
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
+import { TYAPI as tyapi } from '../local.ts'
 
 const root = new URL('../', import.meta.url)
-const tyapi = resolve(process.env.TYAPI ?? new URL('../tyapi', root).pathname)
 const run = (cmd: string, args: string[], cwd: string) => execFileSync(cmd, args, { cwd, encoding: 'utf8' })
 
 const commit = run('git', ['rev-parse', '--short', 'HEAD'], tyapi).trim()

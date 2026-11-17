@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { useMemo } from 'react'
+import { type ReactNode, useMemo } from 'react'
 import { Navigate, Outlet, useParams } from 'react-router'
 import { ApiError, answer, client as api } from '../api.ts'
 import { DemoProvider, useClient } from '../features/shared/client.tsx'
@@ -16,63 +16,76 @@ import Chevrons, { PANEL_ID, tabId } from './Chevrons.tsx'
 import { demoFrom } from './demo.ts'
 import HeadlineStrip from './HeadlineStrip.tsx'
 import Navbar from './Navbar.tsx'
-import { type Demo, defaultDemo, useDemos, useSession } from './session.ts'
+import { type DemoListing, defaultDemo, useDemos, useSession, whoIs } from './session.ts'
 import './Shell.css'
 
 // One demo, as the URL names it (#/<org>/…): its content from tyapi (GET /v1/projects/{org}/{project}/demo), and a
 // gateway reading the visitor's sandbox of its graph, around test8's frame. A demo the visitor cannot open goes to
 // their first.
 
+/** The visitor's demos, once listed; until then, saying so, or what went wrong. */
+export function DemosGate({ children }: { children: (demos: DemoListing[]) => ReactNode }) {
+  const demos = useDemos()
+  if (demos.isPending) return <Card lede="Opening your demos…" />
+  if (demos.error) return <Problem what="list your demos" error={demos.error} onRetry={() => void demos.refetch()} />
+  return children(demos.data)
+}
+
 export default function Shell() {
   const { org } = useParams()
-  const demos = useDemos()
-  const listing = demos.data?.find((d) => d.org === org)
+  return (
+    <DemosGate>
+      {(demos) => {
+        const listing = demos.find((d) => d.org === org)
+        return listing ? <OpenDemo key={listing.graph} listing={listing} demos={demos} /> : <FirstDemo demos={demos} />
+      }}
+    </DemosGate>
+  )
+}
+
+/** The sandbox's cached answer: the branch the visitor reads and writes in a demo (Navbar sets it on Start over). */
+export const sandboxKey = (graph: string) => ['sandbox', graph] as const
+
+function OpenDemo({ listing, demos }: { listing: DemoListing; demos: DemoListing[] }) {
   const content = useQuery({
-    queryKey: ['demo', listing?.graph],
-    queryFn: async () =>
-      demoFrom(await answer(api.GET('/v1/projects/{org}/{project}/demo', { params: { path: { org: listing!.org, project: listing!.project } } }))),
-    enabled: !!listing,
+    queryKey: ['demo', listing.graph],
+    queryFn: async () => demoFrom(await answer(api.GET('/v1/projects/{org}/{project}/demo', { params: { path: { org: listing.org, project: listing.project } } }))),
   })
   // The visitor's own branch of the demo, started on opening it so reads and writes always have one (tyapi W11).
   // A visitor who may only read the demo reads its main.
   const sandbox = useQuery({
-    queryKey: ['sandbox', listing?.graph],
+    queryKey: sandboxKey(listing.graph),
     queryFn: async () => {
       try {
-        return (await startSandbox(listing!)).branch
+        return (await startSandbox(listing)).branch
       } catch (e) {
         if (e instanceof ApiError && e.status === 403) return 'main'
         throw e
       }
     },
-    enabled: !!listing,
-    staleTime: Infinity,
   })
   const branch = sandbox.data
-  const gateway = useMemo(() => (listing && branch ? new DwGateway({ ...listing, branch }) : undefined), [listing?.graph, branch])
+  const gateway = useMemo(() => (branch ? new DwGateway({ ...listing, branch }) : undefined), [listing, branch])
 
-  if (demos.isPending) return <Card lede="Opening your demos…" />
-  if (demos.error) return <Problem what="list your demos" error={demos.error} onRetry={() => void demos.refetch()} />
-  if (!listing) return <FirstDemo demos={demos.data} />
   if (sandbox.error) return <Problem what={`open your copy of ${listing.org_name}`} error={sandbox.error} onRetry={() => void sandbox.refetch()} />
-  if (content.isPending || !gateway) return <Card lede={`Opening ${listing.org_name}…`} />
   if (content.error) return <Problem what={`open ${listing.org_name}`} error={content.error} onRetry={() => void content.refetch()} />
+  if (content.isPending || !gateway) return <Card lede={`Opening ${listing.org_name}…`} />
   return (
     <DemoProvider demo={content.data}>
       <GatewayProvider client={gateway}>
-        <Frame listing={listing} demos={demos.data} />
+        <Frame listing={listing} demos={demos} />
       </GatewayProvider>
     </DemoProvider>
   )
 }
 
 /** Where a URL that names no demo the visitor can open goes: their first, or word that they have none. */
-export function FirstDemo({ demos }: { demos: Demo[] }) {
+export function FirstDemo({ demos }: { demos: DemoListing[] }) {
   const { me, signOut } = useSession()
   const first = defaultDemo(demos)
   if (first) return <Navigate to={`/${first.org}`} replace />
   return (
-    <Card lede={`No demo is open to ${me.email ?? me.display_name}. Ask Longreach to add you to Decision Watch's visitors.`}>
+    <Card lede={`No demo is open to ${whoIs(me)}. Ask Longreach to add you to Decision Watch's visitors.`}>
       <button type="button" className="btn-line signin-button" onClick={signOut}>
         Log out
       </button>
@@ -82,7 +95,7 @@ export function FirstDemo({ demos }: { demos: Demo[] }) {
 
 /** The frame every tab shares, from test8 (its docs/PLAN.md §4.1). Counts and headline figures come from the
  *  graph as of the route's date. */
-function Frame({ listing, demos }: { listing: Demo; demos: Demo[] }) {
+function Frame({ listing, demos }: { listing: DemoListing; demos: DemoListing[] }) {
   const { me, signOut } = useSession()
   const { tab } = useRouteState()
   const { portfolio } = usePortfolio()

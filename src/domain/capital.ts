@@ -1,10 +1,10 @@
 import type { IsoDate, QueryRow } from '../model/generated.ts'
+import { compareDates } from './dates.ts'
 import { groupBy } from './groupBy.ts'
 import type { BeliefEvaluation } from './watchState.ts'
 
 // The capital clock and the headline (docs/PLAN.md §1.3). Pure functions of
-// query rows; later these become stored queries (avoidable_capital, §5.3),
-// and these functions then only read their rows.
+// query rows, worked out in the browser.
 
 type Exposure = QueryRow<'exposures'>
 
@@ -21,6 +21,16 @@ export type Capital = {
   total: number
   /** The money unit of the readings. */
   unit?: string
+}
+
+/**
+ * The date a commitment's avoidable capital stops being avoidable, while some
+ * is and that date has not passed. Titled by the option window closing that
+ * day, if `next` is it.
+ */
+export function avoidableWindow(capital: Capital | undefined, asOf: IsoDate, next?: { date: IsoDate; title: string }): { date: IsoDate; title: string } | undefined {
+  if (!capital || capital.avoidable <= 0 || !capital.until || capital.until < asOf) return undefined
+  return { date: capital.until, title: next?.date === capital.until ? next.title : 'Avoidable until' }
 }
 
 /** The newest reading of each kind for one commitment, from the visible exposure rows. */
@@ -96,7 +106,7 @@ export function headline(input: HeadlineInput): Headline {
   return {
     authorized: input.capital.get(input.program)?.authorized ?? 0,
     committed,
-    moved: moved.sort((a, b) => (a.capital.until ?? '9').localeCompare(b.capital.until ?? '9')),
+    moved: moved.sort((a, b) => compareDates(a.capital.until, b.capital.until)),
     movedCapital: moved.reduce((s, m) => s + m.capital.unspent, 0),
     avoidable: moved.reduce((s, m) => s + m.capital.avoidable, 0),
     firstWindow: windows[0] && { date: windows[0].capital.until!, commitment: windows[0].commitment },

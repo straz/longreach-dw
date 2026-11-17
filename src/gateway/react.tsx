@@ -1,4 +1,4 @@
-import { type UseQueryResult, keepPreviousData, useQueries, useQuery } from '@tanstack/react-query'
+import { type UseQueryResult, keepPreviousData, skipToken, useQueries, useQuery } from '@tanstack/react-query'
 import { type ReactNode, createContext, useContext, useMemo, useRef } from 'react'
 import type { IsoDate, QueryName, QueryParams, QueryRow } from '../model/generated.ts'
 import type { GatewayClient } from './client.ts'
@@ -18,19 +18,21 @@ export function useGateway(): GatewayClient {
   return client
 }
 
-/** A cached answer's key: its graph first, so demos never share answers, then the query, its parameters and day. */
-export const queryKey = (graph: string, name: QueryName, params: unknown, asOf?: IsoDate) => [graph, name, params, asOf ?? null] as const
+/** A cached answer's key: its graph first, so demos never share answers and a write refetches all of its graph's
+ *  (features/shared/useService.ts), then the branch read, the query, its parameters and day. */
+export const queryKey = (client: GatewayClient, name: QueryName, params: unknown, asOf?: IsoDate) =>
+  [client.graph, client.branch, name, params, asOf ?? null] as const
 
 /**
- * One stored query, cached by [name, params, asOf]. While a new as-of date
- * loads, the previous answer stays on screen, so moving the slider never
- * blanks the page.
+ * One stored query, cached by queryKey. While a new as-of date loads, the
+ * previous answer stays on screen, so moving the slider never blanks the
+ * page. With `enabled` false it asks nothing (and has no data).
  */
-export function useGatewayQuery<N extends QueryName>(name: N, params: QueryParams<N>, asOf?: IsoDate): UseQueryResult<QueryRow<N>[]> {
+export function useGatewayQuery<N extends QueryName>(name: N, params: QueryParams<N>, asOf?: IsoDate, { enabled = true } = {}): UseQueryResult<QueryRow<N>[]> {
   const client = useGateway()
   return useQuery({
-    queryKey: queryKey(client.graph, name, params, asOf),
-    queryFn: () => client.query(name, params, { asOf }),
+    queryKey: queryKey(client, name, params, asOf),
+    queryFn: enabled ? () => client.query(name, params, { asOf }) : skipToken,
     placeholderData: keepPreviousData,
   })
 }
@@ -58,8 +60,9 @@ export function useQueryRows<const N extends readonly QueryName[]>(names: N, asO
   const client = useGateway()
   const results = useQueries({
     queries: names.map((name) => ({
-      queryKey: queryKey(client.graph, name, {}, asOf),
-      queryFn: () => client.query(name, {} as never, { asOf }),
+      queryKey: queryKey(client, name, {}, asOf),
+      // Every name here is a query without parameters; QueryParams cannot say so for a union of names.
+      queryFn: () => client.query(name, {} as QueryParams<typeof name>, { asOf }),
       placeholderData: keepPreviousData,
     })),
   })

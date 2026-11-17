@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { daysAway, formatDate, formatMetric, formatMoney } from './format.ts'
+import { daysAway, formatDate, formatMetric, formatMoney, setDisplayYear } from './format.ts'
 
 describe('formatMoney', () => {
   it.each([
@@ -26,6 +26,11 @@ describe('formatMoney', () => {
 
 describe('formatDate', () => {
   it('omits the year inside the demo year', () => expect(formatDate('2027-04-15')).toBe('Apr 15'))
+  it("follows the open demo's year", () => {
+    setDisplayYear('2028')
+    expect([formatDate('2028-01-02'), formatDate('2027-12-30')]).toEqual(['Jan 2', 'Dec 30, 2027'])
+    setDisplayYear('2027')
+  })
   it('adds it otherwise', () => expect(formatDate('2028-01-02')).toBe('Jan 2, 2028'))
   it('adds it when asked', () => expect(formatDate('2027-03-31', { long: true })).toBe('Mar 31, 2027'))
 })

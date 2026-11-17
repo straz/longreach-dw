@@ -1,5 +1,6 @@
+import { dayOf } from '../../domain/dates.ts'
 import { formatDate, formatMoney } from '../../domain/format.ts'
-import type { FieldProposal } from '../../gateway/extractor.ts'
+import type { FieldProposal } from '../../gateway/documents.ts'
 import { useDirectory } from '../shared/useDirectory.ts'
 import { useEvidence } from '../shared/useEvidence.ts'
 
@@ -48,7 +49,7 @@ export function FieldValue({ value, names }: { value: FieldProposal; names: Name
         <>
           <span className="fv-text">{value.text}</span>
           <span className="fv-sub">
-            {value.decision.statement}. Decided {formatDate(value.decision.decided_at.slice(0, 10))} by {names.party(value.decision.by)} under{' '}
+            {value.decision.statement}. Decided {formatDate(dayOf(value.decision.decided_at))} by {names.party(value.decision.by)} under{' '}
             <span className="mandate">{value.decision.under}</span>
           </span>
         </>

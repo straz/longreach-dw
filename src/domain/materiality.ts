@@ -1,5 +1,7 @@
 import type { IsoDate, QueryRow } from '../model/generated.ts'
-import { addDays } from './dates.ts'
+import { avoidableWindow } from './capital.ts'
+import { meets } from './comparator.ts'
+import { addDays, compareDates, dayOf } from './dates.ts'
 import { groupBy } from './groupBy.ts'
 import type { CommitmentView } from './portfolio.ts'
 import { type BeliefEvaluation, type BeliefState, isMoved } from './watchState.ts'
@@ -61,10 +63,11 @@ type RowBase = {
   review?: ReviewNote
 }
 
-export type Reading = { value: number; recorded_at: string }
+/** A tripwire's metric as last read. */
+export type LatestReading = { value: number; recorded_at: string }
 
 export type BeliefRow = RowBase & { kind: 'belief'; belief: string; state: BeliefState; evaluation: BeliefEvaluation; next?: { date: IsoDate; source: string } }
-export type TripwireRow = RowBase & { kind: 'tripwire'; tripwire: QueryRow<'tripwires'>; latest?: Reading; fired: boolean; near: boolean }
+export type TripwireRow = RowBase & { kind: 'tripwire'; tripwire: QueryRow<'tripwires'>; latest?: LatestReading; fired: boolean; near: boolean }
 export type DependencyRow = RowBase & { kind: 'dependency'; other: CommitmentView; ends: IsoDate; beliefs: string[] }
 export type RevisitRow = RowBase & { kind: 'revisit' }
 export type WatchRow = BeliefRow | TripwireRow | DependencyRow | RevisitRow
@@ -96,14 +99,14 @@ export type WatchInput = {
 }
 
 /** A tripwire against the newest reading of its metric. */
-export function tripwireStatus(t: QueryRow<'tripwires'>, claims: WatchInput['metricClaims']): { latest?: Reading; fired: boolean; near: boolean } {
+export function tripwireStatus(t: QueryRow<'tripwires'>, claims: WatchInput['metricClaims']): { latest?: LatestReading; fired: boolean; near: boolean } {
   const k = claims
-    .filter((c) => c.metric === t.metric && c.value !== undefined && c.status !== 'rejected')
+    .filter((c): c is typeof c & { value: number } => c.metric === t.metric && c.value !== undefined && c.status !== 'rejected')
     .sort((a, b) => a.recorded_at.localeCompare(b.recorded_at))
     .at(-1)
   if (!k || t.threshold === undefined) return { fired: false, near: false }
-  const v = k.value!
-  const fired = t.comparator === 'ge' ? v >= t.threshold : t.comparator === 'gt' ? v > t.threshold : t.comparator === 'le' ? v <= t.threshold : t.comparator === 'lt' ? v < t.threshold : false
+  const v = k.value
+  const fired = !!t.comparator && meets(t.comparator, v, t.threshold)
   const near = !fired && Math.abs(v - t.threshold) <= Math.abs(t.threshold) * TRIPWIRE_NEAR
   return { latest: { value: v, recorded_at: k.recorded_at }, fired, near }
 }
@@ -121,7 +124,6 @@ function contextOf(input: WatchInput) {
 
   const rester = (c: CommitmentView, necessary: boolean, edgeWatched?: boolean): Rester => {
     const cap = c.capital
-    const avoidableUntil = cap && cap.avoidable > 0 && cap.until && cap.until >= asOf ? { date: cap.until, title: c.nextWindow?.date === cap.until ? c.nextWindow.title : 'Avoidable until' } : undefined
     return {
       commitment: c.commitment,
       title: c.title,
@@ -129,16 +131,16 @@ function contextOf(input: WatchInput) {
       watched: c.watched !== false && edgeWatched !== false,
       unspent: cap?.unspent ?? 0,
       avoidable: cap?.avoidable ?? 0,
-      window: soonest([avoidableUntil, c.nextWindow && { date: c.nextWindow.date, title: c.nextWindow.title }]),
+      window: soonest([avoidableWindow(cap, asOf, c.nextWindow), c.nextWindow && { date: c.nextWindow.date, title: c.nextWindow.title }]),
     }
   }
 
   // Held reviews, one note per review covering every commitment it was held
   // on, and whether a deferral's revisit date has arrived.
   const reviews: ReviewNote[] = []
-  for (const r of input.reviews.filter((r) => r.held_at && r.held_at.slice(0, 10) <= asOf)) {
+  for (const r of input.reviews.filter((r) => r.held_at && dayOf(r.held_at) <= asOf)) {
     const revisit = r.outcome === 'defer' ? active.get(r.commitment)?.revisit_at : undefined
-    const due = !!revisit && revisit <= asOf && revisit >= r.held_at!.slice(0, 10)
+    const due = !!revisit && revisit <= asOf && revisit >= dayOf(r.held_at!)
     const same = reviews.find((a) => a.review === r.review)
     if (same) {
       same.commitments.push(r.commitment)
@@ -163,7 +165,7 @@ function contextOf(input: WatchInput) {
     /** The newest review on any of these commitments held on or after `opened`, and whether it has reopened. */
     lifecycleOf: (commitments: string[], opened: IsoDate | undefined, lastEvidence?: string): Pick<RowBase, 'lifecycle' | 'review'> => {
       const review = reviews
-        .filter((n) => n.commitments.some((c) => commitments.includes(c)) && (!opened || n.held_at.slice(0, 10) >= opened))
+        .filter((n) => n.commitments.some((c) => commitments.includes(c)) && (!opened || dayOf(n.held_at) >= opened))
         .sort((a, b) => a.held_at.localeCompare(b.held_at))
         .at(-1)
       if (!review) return { lifecycle: 'new' }
@@ -191,7 +193,7 @@ function beliefRows(cx: Context): BeliefRow[] {
       belief: b.belief,
       state: evaluation.state,
       evaluation,
-      next: soonest(input.expected.filter((x) => x.belief === b.belief && x.expected).map((x) => ({ date: x.expected!.slice(0, 10), source: x.source }))),
+      next: soonest(input.expected.filter((x) => x.belief === b.belief && x.expected).map((x) => ({ date: x.expected!, source: x.source }))),
     }
 
     // Condition 1: contradicted, necessary, and something still at stake.
@@ -229,6 +231,8 @@ function tripwireRows(cx: Context): TripwireRow[] {
   return [...groupBy(input.tripwires, (t) => t.tripwire)].flatMap(([slug, all]) => {
     const guards = all.filter((t) => cx.active.has(t.commitment))
     if (!guards.length) return []
+    // A tripwire's metric, comparator and threshold are the tripwire's own (one record, guarding
+    // several commitments), so every guard row carries the same ones and the first speaks for all.
     const status = tripwireStatus(guards[0], input.metricClaims)
     if (!status.fired && !status.near) return []
     const resters = guards.map((t) => cx.rester(cx.active.get(t.commitment)!, false))
@@ -238,7 +242,7 @@ function tripwireRows(cx: Context): TripwireRow[] {
       row.flagged = true
       row.conditions.push('tripwire')
       row.commitments = watched.map((r) => r.commitment)
-      row.opened = status.latest!.recorded_at.slice(0, 10)
+      row.opened = dayOf(status.latest!.recorded_at)
       Object.assign(row, cx.lifecycleOf(row.commitments, row.opened))
     } else row.quiet = watched.length ? { code: 'not_fired' } : { code: 'not_watched' }
     return [row]
@@ -295,7 +299,7 @@ export function buildWatch(input: WatchInput): Watch {
   const rows: WatchRow[] = [...beliefRows(cx), ...tripwireRows(cx), ...dependencyRows(cx)]
   rows.push(...revisitRows(cx, rows.filter((r) => r.flagged)))
 
-  const byWindow = (a: WatchRow, b: WatchRow) => (a.firstWindow?.date ?? '9').localeCompare(b.firstWindow?.date ?? '9')
+  const byWindow = (a: WatchRow, b: WatchRow) => compareDates(a.firstWindow?.date, b.firstWindow?.date)
   const severity = (r: WatchRow) => (r.kind === 'belief' ? (r.state === 'contradicting' ? 0 : 1) : 2)
   const flags = rows.filter((r) => r.flagged).sort(byWindow)
   return {

@@ -75,6 +75,14 @@
   --list-w: 17.5rem; /* 280px */
   --spine-w: 16.875rem; /* 270px */
 
+  /* The mind map's facets (tyapi docs/21-new-commitment.md, §2c), marks beside a type label, never alone.
+     The red family is governance's, so gaps and errors use shape, never red. */
+  --facet-blue: #3d5a80;
+  --facet-teal: #2f6f73;
+  --facet-amber: #9a6a1c;
+  --facet-green: #4b7a3c;
+  --facet-red: #9b3d4a;
+
   --shadow-sheet: -8px 0 24px rgb(26 35 50 / 0.08);
   --shadow-popover: 0 8px 24px rgb(26 35 50 / 0.14);
   --shadow-dialog: 0 24px 64px rgb(26 35 50 / 0.28);

@@ -1,5 +1,6 @@
 import { Navigate, type RouteObject, useParams } from 'react-router'
 import CommitmentTab from '../features/commitment/CommitmentTab.tsx'
+import DraftPage from '../features/draft/DraftPage.tsx'
 import ReconsiderTab from '../features/reconsider/ReconsiderTab.tsx'
 import WatchTab from '../features/watch/WatchTab.tsx'
 import Shell, { DemosGate, FirstDemo } from './Shell.tsx'
@@ -14,6 +15,7 @@ export const routes: RouteObject[] = [
     children: [
       { index: true, element: <FirstTab /> },
       { path: 'commitment/:slug?', element: <CommitmentTab /> },
+      { path: 'draft/:slug?', element: <DraftPage /> },
       { path: 'watch/:view?', element: <WatchTab /> },
       { path: 'reconsider/:brief?', element: <ReconsiderTab /> },
       { path: '*', element: <FirstTab /> },

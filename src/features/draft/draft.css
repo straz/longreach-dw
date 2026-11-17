@@ -1,0 +1,735 @@
+/* The drafting page (docs/21-new-commitment.md, §2): the outline beside the coach. Facet color is a stripe beside
+   a type label; gaps are dashed and marked ◌, never red. */
+
+.draft-start {
+  max-width: 44rem;
+  margin: var(--space-6) auto;
+  padding: 0 var(--gutter);
+}
+
+.draft-start h1 {
+  font-family: var(--serif);
+  font-size: var(--size-xl);
+  font-weight: 500;
+  margin: 0 0 var(--space-4);
+}
+
+.start-input {
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font: inherit;
+  font-size: var(--size-md);
+  line-height: 1.45;
+  background: var(--surface);
+  resize: vertical;
+}
+
+.start-input:focus {
+  outline: 2px solid var(--action);
+  outline-offset: 1px;
+}
+
+.start-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: var(--space-3) 0;
+}
+
+.start-example {
+  color: var(--ink-3);
+  font-size: var(--size-sm);
+  line-height: 1.5;
+}
+
+.start-drafts h2 {
+  font-size: var(--size-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-3);
+  margin: var(--space-5) 0 var(--space-2);
+}
+
+.start-drafts ul {
+  margin: 0;
+  padding-left: var(--space-4);
+  line-height: 1.8;
+}
+
+.draft-loading {
+  padding: var(--space-6);
+  color: var(--ink-3);
+}
+
+.draft {
+  padding: var(--space-4) var(--gutter) var(--space-6);
+}
+
+.draft-head {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: end;
+  gap: var(--space-1) var(--space-4);
+  max-width: 78rem;
+  margin: 0 auto var(--space-4);
+}
+
+.draft-eyebrow {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-size: var(--size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-3);
+}
+
+.draft-readonly {
+  color: var(--attention-ink);
+}
+
+.draft-head h1 {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: var(--size-lg);
+  font-weight: 500;
+}
+
+.draft-tools {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.draft-tools kbd {
+  margin-left: var(--space-1);
+  padding: 0 4px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  font-size: var(--size-xs);
+  color: var(--ink-3);
+}
+
+.draft-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 18rem;
+  gap: var(--space-5);
+  max-width: 78rem;
+  margin: 0 auto;
+  align-items: start;
+}
+
+@media (max-width: 860px) {
+  .draft-body {
+    grid-template-columns: 1fr;
+  }
+}
+
+.draft-outline {
+  display: grid;
+  gap: var(--space-4);
+}
+
+/* Facets: a stripe at the left edge, beside a label that says the type. */
+.facet-blue {
+  --facet: var(--facet-blue);
+}
+.facet-teal {
+  --facet: var(--facet-teal);
+}
+.facet-amber {
+  --facet: var(--facet-amber);
+}
+.facet-green {
+  --facet: var(--facet-green);
+}
+.facet-red {
+  --facet: var(--facet-red);
+}
+
+.draft-sentence {
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--facet);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.draft-sentence:focus-within {
+  border-color: var(--ink-3);
+  border-left-color: var(--facet);
+}
+
+.sentence-line {
+  margin: 0;
+  font-size: var(--size-md);
+  line-height: 1.7;
+}
+
+.sentence-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-5);
+  margin: var(--space-3) 0 0;
+  font-size: var(--size-sm);
+  color: var(--ink-2);
+}
+
+.state-word {
+  margin-left: auto;
+  color: var(--ink-3);
+  text-transform: uppercase;
+  font-size: var(--size-xs);
+  letter-spacing: 0.06em;
+}
+
+.inline-text {
+  display: inline;
+  padding: 0 2px;
+  border: 0;
+  border-bottom: 1px dotted var(--line);
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: text;
+}
+
+.inline-text:hover:not(:disabled) {
+  background: var(--canvas);
+  border-bottom-color: var(--ink-3);
+}
+
+.inline-text.is-empty,
+.slot-empty {
+  color: var(--ink-3);
+  font-style: italic;
+}
+
+.inline-input {
+  font: inherit;
+  padding: 2px var(--space-2);
+  border: 1px solid var(--ink-3);
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--ink);
+}
+
+textarea.inline-input {
+  display: block;
+  width: 100%;
+  resize: vertical;
+  line-height: 1.45;
+}
+
+.sentence-statement {
+  min-width: 12rem;
+}
+
+.inline-select {
+  font: inherit;
+  font-size: var(--size-sm);
+  padding: 0 var(--space-1);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--ink);
+}
+
+.inline-select.is-empty {
+  border-style: dashed;
+  color: var(--ink-3);
+}
+
+.parties {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  vertical-align: baseline;
+}
+
+.party-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 0 var(--space-2);
+  border-radius: 999px;
+  background: var(--surface-muted);
+  font-size: 0.92em;
+}
+
+.chip-x {
+  padding: 0 2px;
+  border: 0;
+  background: none;
+  color: var(--ink-3);
+  font-size: var(--size-sm);
+  line-height: 1;
+}
+
+.chip-x:hover {
+  color: var(--ink);
+}
+
+.slot-empty,
+.slot-add {
+  padding: 0 var(--space-1);
+  border: 1px dashed var(--ink-3);
+  border-radius: 4px;
+  background: none;
+  font: inherit;
+}
+
+.slot-add {
+  color: var(--ink-3);
+  font-style: normal;
+}
+
+/* A gap: dashed, marked ◌, never red. */
+.gap-mark {
+  padding: 0 var(--space-2);
+  border: 1px dashed var(--ink-3);
+  border-radius: 999px;
+  background: none;
+  color: var(--ink-2);
+  font-size: var(--size-sm);
+}
+
+.gap-mark:hover:not(:disabled) {
+  border-color: var(--ink);
+  color: var(--ink);
+}
+
+/* Sections. An empty one is one invitation line, not a heading over a blank. */
+.invite {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  border: 1px dashed var(--line);
+  border-left: 3px solid var(--facet);
+  border-radius: 8px;
+  background: none;
+  text-align: left;
+  color: var(--ink-2);
+  transition: background-color var(--dur) var(--ease-out);
+}
+
+.invite:hover:not(:disabled) {
+  background: var(--surface);
+  border-color: var(--ink-3);
+  border-left-color: var(--facet);
+}
+
+.invite-title {
+  min-width: 10rem;
+  font-size: var(--size-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-3);
+}
+
+.invite-text {
+  flex: 1;
+}
+
+.invite-plus {
+  color: var(--ink-3);
+}
+
+.section-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-2);
+  font-size: var(--size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.section-head > button:first-child {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-weight: 600;
+  color: var(--ink-2);
+  text-transform: inherit;
+  letter-spacing: inherit;
+}
+
+.section-count {
+  font-weight: 400;
+  color: var(--ink-3);
+}
+
+.section-add {
+  margin-left: auto;
+  padding: 0 var(--space-2);
+  border: 0;
+  background: none;
+  color: var(--ink-3);
+  font-size: var(--size-md);
+}
+
+.section-add:hover {
+  color: var(--ink);
+}
+
+.section-cards {
+  display: grid;
+  gap: var(--space-2);
+}
+
+/* Cards. */
+.record-card {
+  position: relative;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--facet);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.record-card:focus-within,
+.record-card:focus {
+  outline: none;
+  border-color: var(--ink-3);
+  border-left-color: var(--facet);
+  box-shadow: var(--shadow-card-hover);
+}
+
+.record-card .record-card {
+  margin-top: var(--space-2);
+}
+
+.record-card.is-unsaved {
+  border-style: dashed;
+  border-left-style: solid;
+  background: var(--canvas);
+}
+
+.card-top {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-1);
+}
+
+.card-label {
+  font-size: var(--size-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--facet);
+}
+
+.cross-badge {
+  font-size: var(--size-xs);
+  color: var(--ink-3);
+}
+
+.card-tools {
+  display: flex;
+  gap: var(--space-1);
+  margin-left: auto;
+  opacity: 0;
+  transition: opacity var(--dur) var(--ease-out);
+}
+
+.record-card:hover > .card-top .card-tools,
+.record-card:focus-within > .card-top .card-tools {
+  opacity: 1;
+}
+
+.unsaved-mark {
+  margin-left: auto;
+  padding: 0 var(--space-2);
+  border: 1px dashed var(--ink-3);
+  border-radius: 999px;
+  font-size: var(--size-xs);
+  color: var(--ink-2);
+}
+
+.card-text {
+  line-height: 1.45;
+}
+
+.card-line {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+  padding-left: var(--space-3);
+  border-left: 2px solid var(--line-soft);
+  font-size: var(--size-sm);
+}
+
+.line-verb {
+  min-width: 7.5rem;
+  color: var(--ink-3);
+}
+
+.line-label {
+  font-size: var(--size-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--facet, var(--ink-3));
+}
+
+.line-text {
+  flex: 1;
+  color: var(--ink-2);
+}
+
+.asked {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}
+
+.asked-field {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--size-sm);
+  color: var(--ink-2);
+}
+
+.asked-field input,
+.asked-field select {
+  font: inherit;
+  padding: 1px var(--space-2);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--surface);
+}
+
+.asked-field input[type='number'] {
+  width: 5rem;
+}
+
+.similar {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: var(--space-2);
+  font-size: var(--size-sm);
+  color: var(--ink-3);
+}
+
+.card-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.btn-action.is-small {
+  height: 26px;
+  padding: 0 var(--space-3);
+  font-size: var(--size-xs);
+}
+
+.card-hint {
+  margin-left: auto;
+  font-size: var(--size-xs);
+  color: var(--ink-3);
+}
+
+/* The coach. */
+.coach {
+  position: sticky;
+  top: var(--space-4);
+  display: grid;
+  gap: var(--space-4);
+}
+
+.coach-group h2 {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin: 0 0 var(--space-1);
+  font-size: var(--size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-2);
+}
+
+.coach-count {
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-3);
+}
+
+.coach-why,
+.coach-none,
+.coach-more {
+  margin: 0 0 var(--space-2);
+  font-size: var(--size-xs);
+  color: var(--ink-3);
+}
+
+.coach-q {
+  padding: var(--space-2) var(--space-3);
+  margin-bottom: var(--space-2);
+  border: 1px solid var(--line-soft);
+  border-radius: 6px;
+  background: var(--surface);
+}
+
+.coach-q.is-todo {
+  border-color: var(--line);
+}
+
+.coach-q-text {
+  display: flex;
+  gap: var(--space-2);
+  margin: 0;
+  font-size: var(--size-sm);
+  line-height: 1.4;
+}
+
+.coach-q-mark {
+  color: var(--ink-3);
+}
+
+.coach-q-why {
+  margin: var(--space-1) 0 0;
+  font-size: var(--size-xs);
+  color: var(--ink-3);
+}
+
+.coach-q-actions {
+  display: flex;
+  gap: var(--space-1);
+  margin-top: var(--space-2);
+}
+
+.coach-unsaved {
+  margin: 0;
+  padding-left: var(--space-4);
+  font-size: var(--size-sm);
+  line-height: 1.7;
+}
+
+/* The palette. */
+.palette-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 14vh;
+  background: var(--backdrop);
+}
+
+.palette {
+  width: min(34rem, 92vw);
+  max-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  border-radius: 10px;
+  background: var(--surface);
+  box-shadow: var(--shadow-dialog);
+  overflow: hidden;
+}
+
+.palette-head {
+  padding: var(--space-3) var(--space-4) var(--space-2);
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.palette-on {
+  display: block;
+  margin-bottom: var(--space-1);
+  font-size: var(--size-xs);
+  color: var(--ink-3);
+}
+
+.palette-input {
+  width: 100%;
+  padding: var(--space-1) 0;
+  border: 0;
+  font: inherit;
+  font-size: var(--size-md);
+  outline: none;
+}
+
+.palette-list {
+  margin: 0;
+  padding: var(--space-1);
+  list-style: none;
+  overflow-y: auto;
+}
+
+.palette-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  text-align: left;
+}
+
+.palette-item.is-active {
+  background: var(--action-soft);
+}
+
+.palette-item:disabled {
+  color: var(--ink-3);
+}
+
+.palette-item strong {
+  font-size: var(--size-body);
+  font-weight: 600;
+}
+
+.palette-help {
+  font-size: var(--size-xs);
+  color: var(--ink-3);
+  line-height: 1.35;
+}
+
+.palette-note {
+  padding: var(--space-3);
+  font-size: var(--size-sm);
+  color: var(--ink-3);
+}
+
+.palette-foot {
+  margin: 0;
+  padding: var(--space-2) var(--space-4);
+  border-top: 1px solid var(--line-soft);
+  font-size: var(--size-xs);
+  color: var(--ink-3);
+}
+
+.undo-toast {
+  position: fixed;
+  bottom: var(--space-5);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 50;
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  padding: var(--space-2) var(--space-4);
+  border-radius: 8px;
+  background: var(--ink);
+  color: var(--ink-on-dark);
+  font-size: var(--size-sm);
+  box-shadow: var(--shadow-popover);
+}
+
+.undo-toast .btn-link {
+  color: var(--ink-on-dark);
+}

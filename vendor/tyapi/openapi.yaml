@@ -1,4 +1,4 @@
-# tyapi's API description (`python -m gateway.openapi`) at 1db845d plus its working tree.
+# tyapi's API description (`python -m gateway.openapi`) at 09eb0e2 plus its working tree.
 # Update with `pnpm api:pull`, then `pnpm gen:api`.
 openapi: 3.1.0
 info:
@@ -766,6 +766,405 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
+  /v1/projects/{org}/{project}/model:
+    get:
+      summary: 'The project''s model: every type and link, with fields, defaults and what can be written'
+      operationId: get_model_v1_projects__org___project__model_get
+      parameters:
+      - name: org
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Org
+      - name: project
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Project
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ModelOut'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/projects/{org}/{project}/entities/{type_name}/{slug}:
+    get:
+      summary: One record, every field, on a branch
+      operationId: get_entity_v1_projects__org___project__entities__type_name___slug__get
+      parameters:
+      - name: org
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Org
+      - name: project
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Project
+      - name: type_name
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Type Name
+      - name: slug
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Slug
+      - name: branch
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: The caller's sandbox, or main until it is started
+          title: Branch
+        description: The caller's sandbox, or main until it is started
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecordOut'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    put:
+      summary: Create or change one record, with links sent with it, in the caller's sandbox
+      operationId: put_entity_route_v1_projects__org___project__entities__type_name___slug__put
+      parameters:
+      - name: org
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Org
+      - name: project
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Project
+      - name: type_name
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Type Name
+      - name: slug
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Slug
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EntityIn'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityWriteOut'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      summary: Delete a record and its links; one in main is retired instead
+      operationId: delete_entity_v1_projects__org___project__entities__type_name___slug__delete
+      parameters:
+      - name: org
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Org
+      - name: project
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Project
+      - name: type_name
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Type Name
+      - name: slug
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Slug
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeletedOut'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/projects/{org}/{project}/entities/{type_name}/{slug}/links:
+    get:
+      summary: Every link of one record, both ways, with the record at the other end
+      operationId: get_links_v1_projects__org___project__entities__type_name___slug__links_get
+      parameters:
+      - name: org
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Org
+      - name: project
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Project
+      - name: type_name
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Type Name
+      - name: slug
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Slug
+      - name: branch
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: The caller's sandbox, or main until it is started
+          title: Branch
+        description: The caller's sandbox, or main until it is started
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LinksOut'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/projects/{org}/{project}/entities/{type_name}:
+    post:
+      summary: Create a record whose slug is made from its text
+      operationId: create_entity_v1_projects__org___project__entities__type_name__post
+      parameters:
+      - name: org
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Org
+      - name: project
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Project
+      - name: type_name
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Type Name
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EntityIn'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityWriteOut'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/projects/{org}/{project}/edges/{type_name}:
+    put:
+      summary: Create or change one link in the caller's sandbox
+      operationId: put_edge_v1_projects__org___project__edges__type_name__put
+      parameters:
+      - name: org
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Org
+      - name: project
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Project
+      - name: type_name
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Type Name
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EdgeIn'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EdgeWriteOut'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      summary: Delete one link from the caller's sandbox
+      operationId: delete_edge_v1_projects__org___project__edges__type_name__delete
+      parameters:
+      - name: org
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Org
+      - name: project
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Project
+      - name: type_name
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Type Name
+      - name: from
+        in: query
+        required: true
+        schema:
+          type: string
+          title: From
+      - name: to
+        in: query
+        required: true
+        schema:
+          type: string
+          title: To
+      - name: judged_by
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: 'For a judgment: whose; the persona''s when left out'
+          title: Judged By
+        description: 'For a judgment: whose; the persona''s when left out'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeletedOut'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/projects/{org}/{project}/search:
+    post:
+      summary: Records whose text is like the text sent, most relevant first
+      operationId: search_v1_projects__org___project__search_post
+      parameters:
+      - name: org
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Org
+      - name: project
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Project
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchIn'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchOut'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
   /v1/books/{book}/grants:
     put:
       summary: Grant a role on a book; org admins only
@@ -998,7 +1397,7 @@ paths:
   /v1/healthz:
     get:
       summary: Whether the service can serve graph requests; needs no key
-      operationId: healthz_v1_healthz_get
+      operationId: healthz_v1_healthz_head
       responses:
         '200':
           description: Successful Response
@@ -4948,6 +5347,39 @@ components:
       - rationale
       - approval
       title: DecisionIn
+    DeletedOut:
+      properties:
+        graph:
+          type: string
+          title: Graph
+        branch:
+          type: string
+          title: Branch
+        type:
+          type: string
+          title: Type
+        deleted:
+          type: string
+          title: Deleted
+          description: The record's slug, or the link's ends
+        links_removed:
+          type: integer
+          title: Links Removed
+          description: Links that went with a deleted record
+          default: 0
+        graph_commit_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Graph Commit Id
+      type: object
+      required:
+      - graph
+      - branch
+      - type
+      - deleted
+      - graph_commit_id
+      title: DeletedOut
     DemoListing:
       properties:
         graph:
@@ -5221,6 +5653,106 @@ components:
       - slug
       - scale
       title: DocumentCommitment
+    EdgeIn:
+      properties:
+        from:
+          type: string
+          title: From
+        to:
+          type: string
+          title: To
+        fields:
+          additionalProperties: true
+          type: object
+          title: Fields
+          default: {}
+      type: object
+      required:
+      - from
+      - to
+      title: EdgeIn
+    EdgeOut:
+      properties:
+        name:
+          type: string
+          title: Name
+        from:
+          type: string
+          title: From
+        to:
+          type: string
+          title: To
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Description
+        min:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Min
+          description: Fewest of these one source may have
+        max:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Max
+          description: 'Most of these one source may have; none: any number'
+        key:
+          items:
+            type: string
+          type: array
+          title: Key
+        fields:
+          items:
+            $ref: '#/components/schemas/FieldOut'
+          type: array
+          title: Fields
+        writable:
+          type: boolean
+          title: Writable
+      type: object
+      required:
+      - name
+      - from
+      - to
+      - description
+      - key
+      - fields
+      - writable
+      title: EdgeOut
+    EdgeWriteOut:
+      properties:
+        graph:
+          type: string
+          title: Graph
+        branch:
+          type: string
+          title: Branch
+        type:
+          type: string
+          title: Type
+        from:
+          type: string
+          title: From
+        to:
+          type: string
+          title: To
+        graph_commit_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Graph Commit Id
+      type: object
+      required:
+      - graph
+      - branch
+      - type
+      - from
+      - to
+      - graph_commit_id
+      title: EdgeWriteOut
     Effects:
       properties:
         revisit_at:
@@ -5257,6 +5789,118 @@ components:
           default: []
       type: object
       title: Effects
+    EntityIn:
+      properties:
+        fields:
+          additionalProperties: true
+          type: object
+          title: Fields
+          description: Fields to set; on a change, those left out keep their value and null clears one
+          default: {}
+        links:
+          items:
+            $ref: '#/components/schemas/LinkIn'
+          type: array
+          title: Links
+          description: Links written with the record, in the same load
+          default: []
+      type: object
+      title: EntityIn
+    EntityWriteOut:
+      properties:
+        graph:
+          type: string
+          title: Graph
+        branch:
+          type: string
+          title: Branch
+          description: The caller's sandbox, where it was written
+        type:
+          type: string
+          title: Type
+        slug:
+          type: string
+          title: Slug
+        created:
+          type: boolean
+          title: Created
+        written:
+          type: integer
+          title: Written
+          description: 'Records loaded: the record and its links'
+        graph_commit_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Graph Commit Id
+        record:
+          additionalProperties: true
+          type: object
+          title: Record
+      type: object
+      required:
+      - graph
+      - branch
+      - type
+      - slug
+      - created
+      - written
+      - graph_commit_id
+      - record
+      title: EntityWriteOut
+    FieldOut:
+      properties:
+        name:
+          type: string
+          title: Name
+        type:
+          type: string
+          title: Type
+          description: String, Bool, I32, I64, F64, Date, DateTime, enum, ...
+        required:
+          type: boolean
+          title: Required
+        is_list:
+          type: boolean
+          title: Is List
+          default: false
+        values:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Values
+          description: An enum's values
+        key:
+          type: boolean
+          title: Key
+          default: false
+        searchable:
+          type: boolean
+          title: Searchable
+          default: false
+        range:
+          anyOf:
+          - items:
+              type: number
+            type: array
+          - type: 'null'
+          title: Range
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Description
+        default:
+          title: Default
+          description: What a new record gets when it leaves this out; 'now' is the time of the write
+      type: object
+      required:
+      - name
+      - type
+      - required
+      title: FieldOut
     Frame:
       properties:
         clock:
@@ -5337,6 +5981,27 @@ components:
           title: Detail
       type: object
       title: HTTPValidationError
+    Hit:
+      properties:
+        type:
+          type: string
+          title: Type
+        slug:
+          type: string
+          title: Slug
+        text:
+          type: string
+          title: Text
+        score:
+          type: number
+          title: Score
+      type: object
+      required:
+      - type
+      - slug
+      - text
+      - score
+      title: Hit
     ImportIn:
       properties:
         document:
@@ -5437,6 +6102,101 @@ components:
       - query
       title: KindOfIn
       description: '"Any kind of X": a class, and the project''s stored read to run with it and its subclasses as $terms.'
+    Link:
+      properties:
+        edge:
+          type: string
+          title: Edge
+        direction:
+          type: string
+          title: Direction
+          description: 'out: the record is the link''s source; in: its target'
+        type:
+          type: string
+          title: Type
+          description: The type of the record at the other end
+        slug:
+          type: string
+          title: Slug
+        text:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Text
+          description: The other record's title, name or statement
+        kind:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Kind
+          description: The other record's kind, for a type that has one
+        fields:
+          additionalProperties: true
+          type: object
+          title: Fields
+          description: The link's own fields, as a judgment's judged_by
+          default: {}
+      type: object
+      required:
+      - edge
+      - direction
+      - type
+      - slug
+      title: Link
+    LinkIn:
+      properties:
+        edge:
+          type: string
+          title: Edge
+        to:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: To
+          description: The other end, when the record is the link's source
+        from:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: From
+          description: The other end, when the record is the link's target
+        fields:
+          additionalProperties: true
+          type: object
+          title: Fields
+          default: {}
+      type: object
+      required:
+      - edge
+      title: LinkIn
+    LinksOut:
+      properties:
+        graph:
+          type: string
+          title: Graph
+        branch:
+          type: string
+          title: Branch
+        type:
+          type: string
+          title: Type
+        slug:
+          type: string
+          title: Slug
+        links:
+          items:
+            $ref: '#/components/schemas/Link'
+          type: array
+          title: Links
+          description: Every link of the record, by link type, then the other end
+      type: object
+      required:
+      - graph
+      - branch
+      - type
+      - slug
+      - links
+      title: LinksOut
     Me:
       properties:
         principal_id:
@@ -5533,6 +6293,23 @@ components:
       - mock
       - google
       title: Methods
+    ModelOut:
+      properties:
+        nodes:
+          items:
+            $ref: '#/components/schemas/NodeOut'
+          type: array
+          title: Nodes
+        edges:
+          items:
+            $ref: '#/components/schemas/EdgeOut'
+          type: array
+          title: Edges
+      type: object
+      required:
+      - nodes
+      - edges
+      title: ModelOut
     Narrows:
       properties:
         source:
@@ -5592,6 +6369,59 @@ components:
       required:
       - label
       title: NewVersion
+    NodeOut:
+      properties:
+        name:
+          type: string
+          title: Name
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Description
+        key:
+          type: string
+          title: Key
+        fields:
+          items:
+            $ref: '#/components/schemas/FieldOut'
+          type: array
+          title: Fields
+        writable:
+          type: boolean
+          title: Writable
+        why_not:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Why Not
+        required_links:
+          items:
+            type: string
+          type: array
+          title: Required Links
+          description: Links a new record must be written with, each from it
+        searchable_by:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Searchable By
+          description: 'The field search ranks this type by; none: not searched'
+        retire:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Retire
+          description: Instead of deleting one that is in main (P10)
+      type: object
+      required:
+      - name
+      - description
+      - key
+      - fields
+      - writable
+      - required_links
+      title: NodeOut
     Owner:
       properties:
         text:
@@ -5733,6 +6563,32 @@ components:
       - statement
       - polarity
       title: Reason
+    RecordOut:
+      properties:
+        graph:
+          type: string
+          title: Graph
+        branch:
+          type: string
+          title: Branch
+        type:
+          type: string
+          title: Type
+        slug:
+          type: string
+          title: Slug
+        record:
+          additionalProperties: true
+          type: object
+          title: Record
+      type: object
+      required:
+      - graph
+      - branch
+      - type
+      - slug
+      - record
+      title: RecordOut
     ReplaceIn:
       properties:
         value:
@@ -5804,6 +6660,57 @@ components:
       - branch
       - started
       title: SandboxOut
+    SearchIn:
+      properties:
+        text:
+          type: string
+          maxLength: 500
+          minLength: 1
+          title: Text
+        types:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Types
+          description: Types to search; all searchable types when left out
+        branch:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Branch
+          description: Where to search; the caller's sandbox, or main until it is started
+        limit:
+          type: integer
+          maximum: 50.0
+          minimum: 1.0
+          title: Limit
+          default: 10
+      type: object
+      required:
+      - text
+      title: SearchIn
+    SearchOut:
+      properties:
+        graph:
+          type: string
+          title: Graph
+        branch:
+          type: string
+          title: Branch
+        hits:
+          items:
+            $ref: '#/components/schemas/Hit'
+          type: array
+          title: Hits
+          description: Most relevant first; candidates only, for the caller to judge (P20)
+      type: object
+      required:
+      - graph
+      - branch
+      - hits
+      title: SearchOut
     ServiceAccount:
       properties:
         org:

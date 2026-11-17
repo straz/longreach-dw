@@ -57,6 +57,10 @@ export default function NewCommitment() {
       </button>
       {open && (
         <div id={panelId} className="newc-menu">
+          <button type="button" onClick={() => (setOpen(false), go('/draft'))}>
+            <strong>Draft a commitment</strong>
+            <span>Say what you are committing to; the draft asks what it rests on, what could change it, and who owns it.</span>
+          </button>
           <button type="button" onClick={() => openSheet('import')}>
             <strong>Import a document</strong>
             <span>Investment case, budget approval, vendor contract or architecture decision. Fields are extracted for you to verify.</span>

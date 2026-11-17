@@ -302,6 +302,8 @@ export interface Exposure {
 /** A rated risk borne by a party in a commitment, driven by beliefs: one row of a risk register. */
 export interface Risk {
   slug: string
+  /** What the risk is, in words: what could go wrong, and how */
+  statement?: string
   kind: RiskKind
   level: number
   previous_level?: number
@@ -797,7 +799,7 @@ export const nodeFields: Record<NodeType, Record<string, FieldSpec>> = {
   Tripwire: { slug: 'String', condition: 'String', kind: 'enum:TripwireKind', declared_at: 'DateTime', metric: 'String?', comparator: 'enum:TripwireComparator?', threshold: 'F64?' },
   Resource: { slug: 'String', kind: 'enum:ResourceKind', name: 'String', unit: 'String?', ontology_term: 'String?' },
   Exposure: { slug: 'String', kind: 'enum:ExposureKind', amount: 'F64', unit: 'String', as_of: 'DateTime', irreversible_by: 'DateTime?' },
-  Risk: { slug: 'String', kind: 'enum:RiskKind', level: 'I32', previous_level: 'I32?', changed_at: 'DateTime?' },
+  Risk: { slug: 'String', statement: 'String?', kind: 'enum:RiskKind', level: 'I32', previous_level: 'I32?', changed_at: 'DateTime?' },
   Mandate: { slug: 'String', power: 'enum:MandatePower', scope: 'String', limit_amount: 'F64?', unit: 'String?', valid_from: 'DateTime?', valid_until: 'DateTime?' },
   Contract: { slug: 'String', title: 'String', effective_at: 'DateTime?', ends_at: 'DateTime?', uri: 'String?', ontology_term: 'String?' },
   Opportunity: { slug: 'String', title: 'String', kind: 'enum:OpportunityKind', status: 'enum:OpportunityStatus', opens_at: 'DateTime?', closes_at: 'DateTime?', value_estimate: 'F64?', exercise_cost: 'F64?', unit: 'String?', ontology_term: 'String?' },

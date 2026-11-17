@@ -363,6 +363,111 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/projects/{org}/{project}/model": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The project's model: every type and link, with fields, defaults and what can be written */
+        get: operations["get_model_v1_projects__org___project__model_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/projects/{org}/{project}/entities/{type_name}/{slug}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** One record, every field, on a branch */
+        get: operations["get_entity_v1_projects__org___project__entities__type_name___slug__get"];
+        /** Create or change one record, with links sent with it, in the caller's sandbox */
+        put: operations["put_entity_route_v1_projects__org___project__entities__type_name___slug__put"];
+        post?: never;
+        /** Delete a record and its links; one in main is retired instead */
+        delete: operations["delete_entity_v1_projects__org___project__entities__type_name___slug__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/projects/{org}/{project}/entities/{type_name}/{slug}/links": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Every link of one record, both ways, with the record at the other end */
+        get: operations["get_links_v1_projects__org___project__entities__type_name___slug__links_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/projects/{org}/{project}/entities/{type_name}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create a record whose slug is made from its text */
+        post: operations["create_entity_v1_projects__org___project__entities__type_name__post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/projects/{org}/{project}/edges/{type_name}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Create or change one link in the caller's sandbox */
+        put: operations["put_edge_v1_projects__org___project__edges__type_name__put"];
+        post?: never;
+        /** Delete one link from the caller's sandbox */
+        delete: operations["delete_edge_v1_projects__org___project__edges__type_name__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/projects/{org}/{project}/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Records whose text is like the text sent, most relevant first */
+        post: operations["search_v1_projects__org___project__search_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/books/{book}/grants": {
         parameters: {
             query?: never;
@@ -526,7 +631,7 @@ export interface paths {
             cookie?: never;
         };
         /** Whether the service can serve graph requests; needs no key */
-        get: operations["healthz_v1_healthz_get"];
+        get: operations["healthz_v1_healthz_head"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1139,6 +1244,28 @@ export interface components {
              */
             approval: "own" | "agreed" | "request";
         };
+        /** DeletedOut */
+        DeletedOut: {
+            /** Graph */
+            graph: string;
+            /** Branch */
+            branch: string;
+            /** Type */
+            type: string;
+            /**
+             * Deleted
+             * @description The record's slug, or the link's ends
+             */
+            deleted: string;
+            /**
+             * Links Removed
+             * @description Links that went with a deleted record
+             * @default 0
+             */
+            links_removed: number;
+            /** Graph Commit Id */
+            graph_commit_id: string | null;
+        };
         /** DemoListing */
         DemoListing: {
             /** Graph */
@@ -1284,6 +1411,62 @@ export interface components {
             /** Counterparty */
             counterparty?: string | null;
         };
+        /** EdgeIn */
+        EdgeIn: {
+            /** From */
+            from: string;
+            /** To */
+            to: string;
+            /**
+             * Fields
+             * @default {}
+             */
+            fields: {
+                [key: string]: unknown;
+            };
+        };
+        /** EdgeOut */
+        EdgeOut: {
+            /** Name */
+            name: string;
+            /** From */
+            from: string;
+            /** To */
+            to: string;
+            /** Description */
+            description: string | null;
+            /**
+             * Min
+             * @description Fewest of these one source may have
+             */
+            min?: number | null;
+            /**
+             * Max
+             * @description Most of these one source may have; none: any number
+             */
+            max?: number | null;
+            /** Key */
+            key: string[];
+            /** Fields */
+            fields: components["schemas"]["FieldOut"][];
+            /** Writable */
+            writable: boolean;
+        };
+        /** EdgeWriteOut */
+        EdgeWriteOut: {
+            /** Graph */
+            graph: string;
+            /** Branch */
+            branch: string;
+            /** Type */
+            type: string;
+            /** From */
+            from: string;
+            /** To */
+            to: string;
+            /** Graph Commit Id */
+            graph_commit_id: string | null;
+        };
         /** Effects */
         Effects: {
             /** Revisit At */
@@ -1305,6 +1488,91 @@ export interface components {
              * @default []
              */
             exercises: string[];
+        };
+        /** EntityIn */
+        EntityIn: {
+            /**
+             * Fields
+             * @description Fields to set; on a change, those left out keep their value and null clears one
+             * @default {}
+             */
+            fields: {
+                [key: string]: unknown;
+            };
+            /**
+             * Links
+             * @description Links written with the record, in the same load
+             * @default []
+             */
+            links: components["schemas"]["LinkIn"][];
+        };
+        /** EntityWriteOut */
+        EntityWriteOut: {
+            /** Graph */
+            graph: string;
+            /**
+             * Branch
+             * @description The caller's sandbox, where it was written
+             */
+            branch: string;
+            /** Type */
+            type: string;
+            /** Slug */
+            slug: string;
+            /** Created */
+            created: boolean;
+            /**
+             * Written
+             * @description Records loaded: the record and its links
+             */
+            written: number;
+            /** Graph Commit Id */
+            graph_commit_id: string | null;
+            /** Record */
+            record: {
+                [key: string]: unknown;
+            };
+        };
+        /** FieldOut */
+        FieldOut: {
+            /** Name */
+            name: string;
+            /**
+             * Type
+             * @description String, Bool, I32, I64, F64, Date, DateTime, enum, ...
+             */
+            type: string;
+            /** Required */
+            required: boolean;
+            /**
+             * Is List
+             * @default false
+             */
+            is_list: boolean;
+            /**
+             * Values
+             * @description An enum's values
+             */
+            values?: string[] | null;
+            /**
+             * Key
+             * @default false
+             */
+            key: boolean;
+            /**
+             * Searchable
+             * @default false
+             */
+            searchable: boolean;
+            /** Range */
+            range?: number[] | null;
+            /** Description */
+            description?: string | null;
+            /**
+             * Default
+             * @description What a new record gets when it leaves this out; 'now' is the time of the write
+             */
+            default?: unknown;
         };
         /** Frame */
         Frame: {
@@ -1355,6 +1623,17 @@ export interface components {
         HTTPValidationError: {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
+        };
+        /** Hit */
+        Hit: {
+            /** Type */
+            type: string;
+            /** Slug */
+            slug: string;
+            /** Text */
+            text: string;
+            /** Score */
+            score: number;
         };
         /** ImportIn */
         ImportIn: {
@@ -1418,6 +1697,79 @@ export interface components {
                 [key: string]: unknown;
             };
         };
+        /** Link */
+        Link: {
+            /** Edge */
+            edge: string;
+            /**
+             * Direction
+             * @description out: the record is the link's source; in: its target
+             */
+            direction: string;
+            /**
+             * Type
+             * @description The type of the record at the other end
+             */
+            type: string;
+            /** Slug */
+            slug: string;
+            /**
+             * Text
+             * @description The other record's title, name or statement
+             */
+            text?: string | null;
+            /**
+             * Kind
+             * @description The other record's kind, for a type that has one
+             */
+            kind?: string | null;
+            /**
+             * Fields
+             * @description The link's own fields, as a judgment's judged_by
+             * @default {}
+             */
+            fields: {
+                [key: string]: unknown;
+            };
+        };
+        /** LinkIn */
+        LinkIn: {
+            /** Edge */
+            edge: string;
+            /**
+             * To
+             * @description The other end, when the record is the link's source
+             */
+            to?: string | null;
+            /**
+             * From
+             * @description The other end, when the record is the link's target
+             */
+            from?: string | null;
+            /**
+             * Fields
+             * @default {}
+             */
+            fields: {
+                [key: string]: unknown;
+            };
+        };
+        /** LinksOut */
+        LinksOut: {
+            /** Graph */
+            graph: string;
+            /** Branch */
+            branch: string;
+            /** Type */
+            type: string;
+            /** Slug */
+            slug: string;
+            /**
+             * Links
+             * @description Every link of the record, by link type, then the other end
+             */
+            links: components["schemas"]["Link"][];
+        };
         /**
          * Me
          * @description Who is signed in; orgs and graphs are those of whoever the session's requests are checked as.
@@ -1469,6 +1821,13 @@ export interface components {
             /** Google */
             google: boolean;
         };
+        /** ModelOut */
+        ModelOut: {
+            /** Nodes */
+            nodes: components["schemas"]["NodeOut"][];
+            /** Edges */
+            edges: components["schemas"]["EdgeOut"][];
+        };
         /** Narrows */
         Narrows: {
             /** Source */
@@ -1508,6 +1867,36 @@ export interface components {
              * @description Such as HermiT via ROBOT 1.9.11
              */
             reasoner?: string | null;
+        };
+        /** NodeOut */
+        NodeOut: {
+            /** Name */
+            name: string;
+            /** Description */
+            description: string | null;
+            /** Key */
+            key: string;
+            /** Fields */
+            fields: components["schemas"]["FieldOut"][];
+            /** Writable */
+            writable: boolean;
+            /** Why Not */
+            why_not?: string | null;
+            /**
+             * Required Links
+             * @description Links a new record must be written with, each from it
+             */
+            required_links: string[];
+            /**
+             * Searchable By
+             * @description The field search ranks this type by; none: not searched
+             */
+            searchable_by?: string | null;
+            /**
+             * Retire
+             * @description Instead of deleting one that is in main (P10)
+             */
+            retire?: string | null;
         };
         /** Owner */
         Owner: {
@@ -1591,6 +1980,21 @@ export interface components {
              */
             polarity: "pro" | "con";
         };
+        /** RecordOut */
+        RecordOut: {
+            /** Graph */
+            graph: string;
+            /** Branch */
+            branch: string;
+            /** Type */
+            type: string;
+            /** Slug */
+            slug: string;
+            /** Record */
+            record: {
+                [key: string]: unknown;
+            };
+        };
         /** ReplaceIn */
         ReplaceIn: {
             /** Value */
@@ -1625,6 +2029,38 @@ export interface components {
              * @description Whether the branch exists; until it does, there is only main, the seed
              */
             started: boolean;
+        };
+        /** SearchIn */
+        SearchIn: {
+            /** Text */
+            text: string;
+            /**
+             * Types
+             * @description Types to search; all searchable types when left out
+             */
+            types?: string[] | null;
+            /**
+             * Branch
+             * @description Where to search; the caller's sandbox, or main until it is started
+             */
+            branch?: string | null;
+            /**
+             * Limit
+             * @default 10
+             */
+            limit: number;
+        };
+        /** SearchOut */
+        SearchOut: {
+            /** Graph */
+            graph: string;
+            /** Branch */
+            branch: string;
+            /**
+             * Hits
+             * @description Most relevant first; candidates only, for the caller to judge (P20)
+             */
+            hits: components["schemas"]["Hit"][];
         };
         /** ServiceAccount */
         ServiceAccount: {
@@ -3058,6 +3494,332 @@ export interface operations {
             };
         };
     };
+    get_model_v1_projects__org___project__model_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                project: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ModelOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_entity_v1_projects__org___project__entities__type_name___slug__get: {
+        parameters: {
+            query?: {
+                /** @description The caller's sandbox, or main until it is started */
+                branch?: string | null;
+            };
+            header?: never;
+            path: {
+                org: string;
+                project: string;
+                type_name: string;
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecordOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    put_entity_route_v1_projects__org___project__entities__type_name___slug__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                project: string;
+                type_name: string;
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EntityIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EntityWriteOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_entity_v1_projects__org___project__entities__type_name___slug__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                project: string;
+                type_name: string;
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeletedOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_links_v1_projects__org___project__entities__type_name___slug__links_get: {
+        parameters: {
+            query?: {
+                /** @description The caller's sandbox, or main until it is started */
+                branch?: string | null;
+            };
+            header?: never;
+            path: {
+                org: string;
+                project: string;
+                type_name: string;
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LinksOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_entity_v1_projects__org___project__entities__type_name__post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                project: string;
+                type_name: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EntityIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EntityWriteOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    put_edge_v1_projects__org___project__edges__type_name__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                project: string;
+                type_name: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EdgeIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EdgeWriteOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_edge_v1_projects__org___project__edges__type_name__delete: {
+        parameters: {
+            query: {
+                from: string;
+                to: string;
+                /** @description For a judgment: whose; the persona's when left out */
+                judged_by?: string | null;
+            };
+            header?: never;
+            path: {
+                org: string;
+                project: string;
+                type_name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeletedOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    search_v1_projects__org___project__search_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                project: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SearchIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SearchOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     put_book_grant_v1_books__book__grants_put: {
         parameters: {
             query?: never;
@@ -3363,7 +4125,7 @@ export interface operations {
             };
         };
     };
-    healthz_v1_healthz_get: {
+    healthz_v1_healthz_head: {
         parameters: {
             query?: never;
             header?: never;

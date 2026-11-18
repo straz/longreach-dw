@@ -72,6 +72,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/projects": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The projects the caller can open, with their role and state, and the orgs they may make one in */
+        get: operations["list_projects_v1_projects_get"];
+        put?: never;
+        /** Make a project in an org the caller owns or administers; answered at once, ready when its graph is */
+        post: operations["create_project_v1_projects_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/projects/{graph}": {
         parameters: {
             query?: never;
@@ -2154,6 +2172,23 @@ export interface components {
              */
             visibility: "private" | "org" | "shared" | "public";
         };
+        /** NewProjectIn */
+        NewProjectIn: {
+            /**
+             * Org
+             * @description The org's slug; the caller is an owner or admin of it
+             */
+            org: string;
+            /** Name */
+            name: string;
+            /**
+             * Slug
+             * @description The project's slug in its org; made from the name when left out
+             */
+            slug?: string | null;
+            /** Subtitle */
+            subtitle?: string | null;
+        };
         /** NewUpdateIn */
         NewUpdateIn: {
             /**
@@ -2205,6 +2240,13 @@ export interface components {
              */
             retire?: string | null;
         };
+        /** OrgOut */
+        OrgOut: {
+            /** Org */
+            org: string;
+            /** Name */
+            name: string;
+        };
         /** Owner */
         Owner: {
             /** Text */
@@ -2253,6 +2295,55 @@ export interface components {
             rows: {
                 [key: string]: unknown;
             }[];
+        };
+        /** ProjectOut */
+        ProjectOut: {
+            /** Graph */
+            graph: string;
+            /** Org */
+            org: string;
+            /** Org Name */
+            org_name: string;
+            /** Project */
+            project: string;
+            /** Name */
+            name: string;
+            /** Subtitle */
+            subtitle: string | null;
+            /**
+             * Role
+             * @description The caller's role: read, write, maintain or admin
+             */
+            role: string | null;
+            /**
+             * Demo
+             * @description A Decision Watch demo, opened as its persona; otherwise opened as the caller
+             */
+            demo: boolean;
+            /**
+             * State
+             * @description creating until its graph is made and seeded
+             * @enum {string}
+             */
+            state: "creating" | "ready" | "failed";
+            /**
+             * Error
+             * @description Why making it failed, in the reconciler's words
+             */
+            error?: string | null;
+        };
+        /** ProjectsOut */
+        ProjectsOut: {
+            /**
+             * Projects
+             * @description Every project the caller reads, by org, then name
+             */
+            projects: components["schemas"]["ProjectOut"][];
+            /**
+             * Can Create In
+             * @description Orgs the caller may make a project in: those they own or administer
+             */
+            can_create_in: components["schemas"]["OrgOut"][];
         };
         /** Promise */
         Promise: {
@@ -3363,6 +3454,59 @@ export interface operations {
                 };
                 content: {
                     "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_projects_v1_projects_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProjectsOut"];
+                };
+            };
+        };
+    };
+    create_project_v1_projects_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NewProjectIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProjectOut"];
                 };
             };
             /** @description Validation Error */

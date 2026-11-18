@@ -1,9 +1,10 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
-import { Link, useParams } from 'react-router'
+import { Link } from 'react-router'
 import { say } from '../../app/Card.tsx'
 import { useGateway } from '../../gateway/react.tsx'
 import { isMain } from '../../project.ts'
+import { useBasePath } from '../shared/routeState.ts'
 import { Menu } from '../../ui/Menu.tsx'
 import { type Update, discardUpdate, renameUpdate, startUpdate } from '../../updates.ts'
 import './updates.css'
@@ -17,9 +18,9 @@ const counted = (n: number) => (n === 0 ? 'No changes yet' : n === 1 ? '1 record
 
 export default function UpdateControl({ me }: { me: string }) {
   const gateway = useGateway()
-  const { org } = useParams()
+  const base = useBasePath()
   const queryClient = useQueryClient()
-  const { choose } = useUpdateChoice()
+  const { choose, writer } = useUpdateChoice()
   const updates = useUpdates()
   const current = useCurrentUpdate()
   useUpdateDiffPoll(me)
@@ -27,7 +28,7 @@ export default function UpdateControl({ me }: { me: string }) {
   const [renaming, setRenaming] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const [problem, setProblem] = useState<string | null>(null)
-  if (isMain(gateway.branch)) return null
+  if (!writer) return null
 
   const listKey = updatesQuery(gateway).queryKey
   const act = async (what: () => Promise<unknown>) => {
@@ -52,7 +53,7 @@ export default function UpdateControl({ me }: { me: string }) {
       close()
     })
   const mine = (updates.data ?? []).filter((u) => u.mine)
-  const name = !current || current.sandbox ? 'Sandbox' : current.name
+  const name = isMain(gateway.branch) ? 'main' : !current || current.sandbox ? 'Sandbox' : current.name
   const face = (
     <>
       <span className="update-dot" aria-hidden="true" />
@@ -99,10 +100,15 @@ export default function UpdateControl({ me }: { me: string }) {
             <input className="menu-input" aria-label="Name a new update" placeholder="New update: name it…" value={naming} onChange={(e) => setNaming(e.target.value)} disabled={busy} />
           </form>
           <p className="menu-note">Each update keeps its changes apart from the others, until it is merged or discarded.</p>
-          <div className="menu-sep" aria-hidden="true" />
-          <Link className="menu-item is-plain" to={`/${org}/update`} onClick={close}>
-            See what {current && !current.sandbox ? 'this update' : 'your sandbox'} changes
-          </Link>
+          {!isMain(gateway.branch) && (
+            <>
+              <div className="menu-sep" aria-hidden="true" />
+              <Link className="menu-item is-plain" to={`${base}/update`} onClick={close}>
+                See what {current && !current.sandbox ? 'this update' : 'your sandbox'} changes
+              </Link>
+            </>
+          )}
+          {isMain(gateway.branch) && <p className="menu-note">You are reading main: a change you make starts an update of its own.</p>}
           {current && !current.sandbox && (
             <>
               {renaming === null ? (

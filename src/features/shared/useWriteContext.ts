@@ -1,14 +1,16 @@
-import { useMemo } from 'react'
+import { useContext, useMemo } from 'react'
 import { isLookingBack } from '../../domain/clock.ts'
 import { useGateway } from '../../gateway/react.tsx'
 import { isMain } from '../../project.ts'
+import { UpdateContext } from '../updates/useUpdates.ts'
 import { useClock } from './client.tsx'
 import { useRouteState } from './routeState.ts'
 
 /**
  * Whether changes are on, and the time a change is made at: the demo's today with the wall-clock time, an instant
- * in UTC. Changes are made at the demo's today, so they are off while looking back, and on a branch of the
- * visitor's, so they are off for a visitor who may only read main; `why` says which, for the control that is
+ * in UTC. Changes are made at the demo's today, so they are off while looking back, and only by a writer (a demo's
+ * visitor, or a project's writer, whose change while reading main starts an update), so they are off for one who
+ * may only read; `why` says which, for the control that is
  * turned off. The gateway stamps the records itself; `at` is for a value the user states, such
  * as when a decision was taken.
  */
@@ -16,7 +18,8 @@ export function useWriteContext(): { at: () => string; readOnly: boolean; why?: 
   const clock = useClock()
   const { asOf } = useRouteState()
   const back = isLookingBack(asOf, clock)
-  const reading = isMain(useGateway().branch)
+  const branch = useGateway().branch
+  const reading = !(useContext(UpdateContext)?.writer ?? !isMain(branch))
   return useMemo(
     () => ({
       at: () => `${clock.today}T${new Date().toISOString().slice(11, 19)}Z`,

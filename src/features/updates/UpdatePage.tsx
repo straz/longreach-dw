@@ -43,7 +43,7 @@ export default function UpdatePage() {
   if (merged) {
     return (
       <section className="update-page" aria-label="The update's changes">
-        <MergedNote merged={merged} org={gateway.org} />
+        <MergedNote merged={merged} />
       </section>
     )
   }

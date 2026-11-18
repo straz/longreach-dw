@@ -11,7 +11,7 @@ import NewCommitment from './NewCommitment.tsx'
 afterEach(() => vi.unstubAllGlobals())
 
 const DEMO: OpenDemo = {
-  client: { org: 'fairhaven', graph: 'proj-fairhaven-commitments', user: 'dana', footer: '' },
+  client: { org: 'fairhaven', graph: 'proj-fairhaven-commitments', user: 'dana', footer: '', demo: true },
   clock: { today: '2027-03-31', earliest: '2026-01-01' },
   content: { briefs: [], documents: [], indicators: {} },
 }

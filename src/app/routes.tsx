@@ -4,32 +4,33 @@ import DraftPage from '../features/draft/DraftPage.tsx'
 import ReconsiderTab from '../features/reconsider/ReconsiderTab.tsx'
 import UpdatePage from '../features/updates/UpdatePage.tsx'
 import WatchTab from '../features/watch/WatchTab.tsx'
-import Shell, { DemosGate, FirstDemo } from './Shell.tsx'
+import { basePath } from '../features/shared/routeState.ts'
+import NewProjectPage from './NewProjectPage.tsx'
+import Shell, { DemosGate, FirstDemo, ProjectShell } from './Shell.tsx'
 
-// Hash routes, because GitHub Pages has no server rewrites: #/<org>/<tab>/<selection>?asof=. The demo comes
-// first; under it, test8's routes, whose optional segments carry the selection: a commitment, a Watch view, a
-// brief.
+// Hash routes, because GitHub Pages has no server rewrites: #/<org>/<tab>/<selection>?asof= for a demo, and
+// #/p/<org>/<project>/<tab>/… for a project of the user's own. Under either, test8's routes, whose optional segments
+// carry the selection: a commitment, a Watch view, a brief. #/new-project makes a project.
+const tabs: RouteObject[] = [
+  { index: true, element: <FirstTab /> },
+  { path: 'commitment/:slug?', element: <CommitmentTab /> },
+  { path: 'draft/:slug?', element: <DraftPage /> },
+  { path: 'update', element: <UpdatePage /> },
+  { path: 'watch/:view?', element: <WatchTab /> },
+  { path: 'reconsider/:brief?', element: <ReconsiderTab /> },
+  { path: '*', element: <FirstTab /> },
+]
+
 export const routes: RouteObject[] = [
-  {
-    path: '/:org',
-    element: <Shell />,
-    children: [
-      { index: true, element: <FirstTab /> },
-      { path: 'commitment/:slug?', element: <CommitmentTab /> },
-      { path: 'draft/:slug?', element: <DraftPage /> },
-      { path: 'update', element: <UpdatePage /> },
-      { path: 'watch/:view?', element: <WatchTab /> },
-      { path: 'reconsider/:brief?', element: <ReconsiderTab /> },
-      { path: '*', element: <FirstTab /> },
-    ],
-  },
+  { path: '/new-project', element: <NewProjectPage /> },
+  { path: '/p/:org/:project', element: <ProjectShell />, children: tabs },
+  { path: '/:org', element: <Shell />, children: tabs },
   { path: '*', element: <NoDemoNamed /> },
 ]
 
-/** A demo's first tab. */
+/** A demo's or project's first tab. */
 function FirstTab() {
-  const { org } = useParams()
-  return <Navigate to={`/${org}/commitment`} replace />
+  return <Navigate to={`${basePath(useParams())}/commitment`} replace />
 }
 
 /** A URL that names no demo: the visitor's first. */

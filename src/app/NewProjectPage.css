@@ -1,0 +1,30 @@
+.new-project {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+  text-align: left;
+}
+
+.new-project label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  font-size: var(--size-sm);
+  color: var(--ink-2);
+}
+
+.new-project input,
+.new-project select {
+  height: var(--control-h);
+  padding: 0 var(--space-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  font-size: var(--size-body);
+}
+
+.new-project-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}

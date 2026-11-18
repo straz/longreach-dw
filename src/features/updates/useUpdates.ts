@@ -17,9 +17,12 @@ const POLL_MS = 4000
 export const updatesQuery = (p: Project & { graph: string }) => queryOptions({ queryKey: [p.graph, 'updates'], queryFn: () => listUpdates(p) })
 
 export type UpdateChoice = {
-  /** The visitor's sandbox: where writes go with no update chosen. */
-  sandbox: string
-  /** Work in this update; null for the sandbox. */
+  /** What is read and written with no update chosen: the visitor's sandbox of a demo, or a project's main, where a
+   *  write starts an update of its own (tyapi docs/20, P5). */
+  base: string
+  /** Whether the user may change the project: a demo's visitor, or a project's writer. */
+  writer: boolean
+  /** Work in this update; null for the base. */
   choose: (branch: string | null) => void
 }
 
@@ -33,11 +36,10 @@ export function useUpdateChoice() {
 
 const chosenKey = (graph: string) => `dw:update:${graph}`
 
-/** The branch an open demo reads and writes, given the visitor's sandbox (main for one who may only read): the
- *  update they chose, while it is open, else the sandbox. An update found gone is forgotten. */
-export function useChosenBranch(project: Project & { graph: string }, sandbox: string | undefined): { branch?: string; choice: UpdateChoice } {
+/** The branch an open demo or project reads and writes, given its base (a demo's sandbox, or main): the update the
+ *  user chose, while it is open, else the base. An update found gone is forgotten. */
+export function useChosenBranch(project: Project & { graph: string }, base: string | undefined, writer: boolean): { branch?: string; choice: UpdateChoice } {
   const [chosen, setChosen] = useState<string | null>(() => readStored<string | null>(chosenKey(project.graph), null))
-  const writer = sandbox !== undefined && !isMain(sandbox)
   const open = useQuery({ ...updatesQuery(project), enabled: writer && chosen !== null })
   const gone = chosen !== null && open.data !== undefined && !open.data.some((u) => u.branch === chosen)
   useEffect(() => {
@@ -45,22 +47,24 @@ export function useChosenBranch(project: Project & { graph: string }, sandbox: s
   }, [gone, project.graph])
   const choice = useMemo(
     () => ({
-      sandbox: sandbox ?? MAIN,
+      base: base ?? MAIN,
+      writer,
       choose: (next: string | null) => {
-        const kept = next && next !== sandbox ? next : null
+        const kept = next && next !== base ? next : null
         writeStored(chosenKey(project.graph), kept ?? undefined)
         setChosen(kept)
       },
     }),
-    [sandbox, project.graph],
+    [base, writer, project.graph],
   )
-  return { branch: writer && chosen && !gone ? chosen : sandbox, choice }
+  return { branch: writer && chosen && !gone ? chosen : base, choice }
 }
 
 /** The open updates of the demo, and the sandbox. */
 export function useUpdates() {
   const gateway = useGateway()
-  return useQuery({ ...updatesQuery(gateway), enabled: !isMain(gateway.branch), placeholderData: keepPreviousData })
+  const writer = useContext(UpdateContext)?.writer ?? !isMain(gateway.branch)
+  return useQuery({ ...updatesQuery(gateway), enabled: writer, placeholderData: keepPreviousData })
 }
 
 /** The update being worked in, once listed. */

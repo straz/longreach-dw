@@ -1,8 +1,10 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
+import { Link } from 'react-router'
 import { say } from '../../app/Card.tsx'
 import { textOf } from '../../domain/record.ts'
 import { useGateway } from '../../gateway/react.tsx'
+import { useBasePath } from '../shared/routeState.ts'
 import { type Change, mergeUpdate } from '../../updates.ts'
 import Conflicts from './Conflicts.tsx'
 import { useCurrentUpdate, useReadiness, useUpdateChoice, useUpdateDiff } from './useUpdates.ts'
@@ -31,6 +33,7 @@ const plural = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? o
 
 export default function MergePanel({ onMerged }: { onMerged: (m: Merged) => void }) {
   const gateway = useGateway()
+  const base = useBasePath()
   const queryClient = useQueryClient()
   const { choose } = useUpdateChoice()
   const update = useCurrentUpdate()
@@ -103,7 +106,7 @@ export default function MergePanel({ onMerged }: { onMerged: (m: Merged) => void
                       {typeof row.commitment === 'string' && (
                         <>
                           {' · '}
-                          <a href={`#/${gateway.org}/draft/${row.commitment}`}>Open the draft</a>
+                          <Link to={`${base}/draft/${row.commitment}`}>Open the draft</Link>
                         </>
                       )}
                     </li>
@@ -128,7 +131,8 @@ export default function MergePanel({ onMerged }: { onMerged: (m: Merged) => void
 }
 
 /** After a merge: what main now holds from it (N20). */
-export function MergedNote({ merged, org }: { merged: Merged; org: string }) {
+export function MergedNote({ merged }: { merged: Merged }) {
+  const base = useBasePath()
   const watched = [merged.assumptions && plural(merged.assumptions, 'new assumption'), merged.stopRules && plural(merged.stopRules, 'stop rule')].filter(Boolean)
   return (
     <div className="merged-note" role="status">
@@ -136,7 +140,7 @@ export function MergedNote({ merged, org }: { merged: Merged; org: string }) {
         <strong>{merged.name}</strong> is in main: {plural(merged.records, 'record')} and {plural(merged.links, 'link')}.
       </p>
       {watched.length > 0 && <p>Main now has {watched.join(' and ')} to watch.</p>}
-      {merged.commitment && <a href={`#/${org}/commitment/${merged.commitment}`}>See it in Commitments</a>}
+      {merged.commitment && <Link to={`${base}/commitment/${merged.commitment}`}>See it in Commitments</Link>}
     </div>
   )
 }

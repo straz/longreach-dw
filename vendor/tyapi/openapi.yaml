@@ -1,4 +1,4 @@
-# tyapi's API description (`python -m gateway.openapi`) at c21c31f plus its working tree.
+# tyapi's API description (`python -m gateway.openapi`) at bcd7d85 plus its working tree.
 # Update with `pnpm api:pull`, then `pnpm gen:api`.
 openapi: 3.1.0
 info:
@@ -127,6 +127,39 @@ paths:
           content:
             application/json:
               schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/projects:
+    get:
+      summary: The projects the caller can open, with their role and state, and the orgs they may make one in
+      operationId: list_projects_v1_projects_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectsOut'
+    post:
+      summary: Make a project in an org the caller owns or administers; answered at once, ready when its graph is
+      operationId: create_project_v1_projects_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewProjectIn'
+        required: true
+      responses:
+        '202':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectOut'
         '422':
           description: Validation Error
           content:
@@ -7105,6 +7138,34 @@ components:
       - slug
       - visibility
       title: NewBook
+    NewProjectIn:
+      properties:
+        org:
+          type: string
+          title: Org
+          description: The org's slug; the caller is an owner or admin of it
+        name:
+          type: string
+          maxLength: 120
+          minLength: 1
+          title: Name
+        slug:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Slug
+          description: The project's slug in its org; made from the name when left out
+        subtitle:
+          anyOf:
+          - type: string
+            maxLength: 200
+          - type: 'null'
+          title: Subtitle
+      type: object
+      required:
+      - org
+      - name
+      title: NewProjectIn
     NewUpdateIn:
       properties:
         name:
@@ -7185,6 +7246,19 @@ components:
       - writable
       - required_links
       title: NodeOut
+    OrgOut:
+      properties:
+        org:
+          type: string
+          title: Org
+        name:
+          type: string
+          title: Name
+      type: object
+      required:
+      - org
+      - name
+      title: OrgOut
     Owner:
       properties:
         text:
@@ -7262,6 +7336,83 @@ components:
       - severity
       - rows
       title: PolicyCheck
+    ProjectOut:
+      properties:
+        graph:
+          type: string
+          title: Graph
+        org:
+          type: string
+          title: Org
+        org_name:
+          type: string
+          title: Org Name
+        project:
+          type: string
+          title: Project
+        name:
+          type: string
+          title: Name
+        subtitle:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Subtitle
+        role:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Role
+          description: 'The caller''s role: read, write, maintain or admin'
+        demo:
+          type: boolean
+          title: Demo
+          description: A Decision Watch demo, opened as its persona; otherwise opened as the caller
+        state:
+          type: string
+          enum:
+          - creating
+          - ready
+          - failed
+          title: State
+          description: creating until its graph is made and seeded
+        error:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Error
+          description: Why making it failed, in the reconciler's words
+      type: object
+      required:
+      - graph
+      - org
+      - org_name
+      - project
+      - name
+      - subtitle
+      - role
+      - demo
+      - state
+      title: ProjectOut
+    ProjectsOut:
+      properties:
+        projects:
+          items:
+            $ref: '#/components/schemas/ProjectOut'
+          type: array
+          title: Projects
+          description: Every project the caller reads, by org, then name
+        can_create_in:
+          items:
+            $ref: '#/components/schemas/OrgOut'
+          type: array
+          title: Can Create In
+          description: 'Orgs the caller may make a project in: those they own or administer'
+      type: object
+      required:
+      - projects
+      - can_create_in
+      title: ProjectsOut
     Promise:
       properties:
         text:

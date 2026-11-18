@@ -1,12 +1,14 @@
 import { keepPreviousData, useQueries, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { NESTED } from '../../domain/draft/outline.ts'
 import type { Item } from '../../domain/draft/palette.ts'
 import type { Draft } from '../../domain/draft/questions.ts'
 import { type Ref, refKey } from '../../domain/record.ts'
 import { type Fields, getLinks, getModel, getRecord } from '../../entities.ts'
 import { useGateway } from '../../gateway/react.tsx'
+import { isMain } from '../../project.ts'
 import { readStored, writeStored } from '../../storage.ts'
+import { UpdateContext } from '../updates/useUpdates.ts'
 
 // The drafting page's data (docs/21-new-commitment.md, §2c): the model, the commitment with its links, and the
 // records around it (beliefs, risks, decisions, tripwires) with theirs. Every key but the model's starts with the
@@ -117,6 +119,7 @@ export type Done = { what: string; undo: () => Promise<unknown> }
 export function useUndoableWrites() {
   const gateway = useGateway()
   const queryClient = useQueryClient()
+  const choice = useContext(UpdateContext)
   const [stack, setStack] = useState<Done[]>([])
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<Error | null>(null)
@@ -136,6 +139,9 @@ export function useUndoableWrites() {
         const entry = done?.(result)
         if (entry) setStack((s) => [...s, entry])
         await refresh()
+        // A write made while reading a project's main started an update (tyapi P5): work in it from now on.
+        const started = (result as { branch?: string } | undefined)?.branch
+        if (choice && isMain(gateway.branch) && started && !isMain(started)) choice.choose(started)
         return result
       } catch (e) {
         setError(e instanceof Error ? e : new Error(String(e)))
@@ -144,7 +150,7 @@ export function useUndoableWrites() {
         setBusy(false)
       }
     },
-    [refresh],
+    [refresh, choice, gateway.branch],
   )
 
   const undo = useCallback(async () => {

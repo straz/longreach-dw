@@ -1,15 +1,17 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router'
+import { Link, useNavigate, useParams } from 'react-router'
 import type { Me } from '../api.ts'
 import { formatDate } from '../domain/format.ts'
 import AsOfControl from '../features/shared/AsOfControl.tsx'
+import { useClient } from '../features/shared/client.tsx'
+import { useBasePath } from '../features/shared/routeState.ts'
 import UpdateControl from '../features/updates/UpdateControl.tsx'
 import { useGateway } from '../gateway/react.tsx'
 import { isMain } from '../project.ts'
 import { Menu } from '../ui/Menu.tsx'
 import { startOver } from '../writes.ts'
-import { type DemoListing, whoIs } from './session.ts'
+import { type DemoListing, useProjects, whoIs } from './session.ts'
 import { say } from './Card.tsx'
 import { sandboxKey } from './Shell.tsx'
 import './Navbar.css'
@@ -19,9 +21,10 @@ import './Navbar.css'
 // demo's organization. Below them, Start over (the visitor's changes to this demo are deleted, tyapi W11), the
 // Google account the visitor signed in with, and Log out.
 export default function Navbar({ demo, demos, me, onSignOut }: { demo: DemoListing; demos: DemoListing[]; me: Me; onSignOut: () => void }) {
+  const base = useBasePath()
   return (
     <header className="navbar">
-      <Link className="navbar-brand" to={`/${demo.org}/commitment`} aria-label={`Longreach, back to ${demo.org_name}`}>
+      <Link className="navbar-brand" to={`${base}/commitment`} aria-label={`Longreach, back to ${demo.org_name}`}>
         <img className="navbar-logo" src={`${import.meta.env.BASE_URL}longreach-logo-white.svg`} alt="" width={23} height={28} />
       </Link>
       <span className="navbar-org">{demo.org_name}</span>
@@ -39,7 +42,10 @@ const clockDay = (demo: DemoListing) => formatDate(demo.frame.clock, { long: tru
 function UserMenu({ demo, demos, me, onSignOut }: { demo: DemoListing; demos: DemoListing[]; me: Me; onSignOut: () => void }) {
   const navigate = useNavigate()
   const gateway = useGateway()
+  const client = useClient()
   const queryClient = useQueryClient()
+  const projects = useProjects().data
+  const here = useParams()
   const [resetting, setResetting] = useState(false)
   const [resetError, setResetError] = useState<string | null>(null)
 
@@ -75,9 +81,49 @@ function UserMenu({ demo, demos, me, onSignOut }: { demo: DemoListing; demos: De
     <Menu face={face} label="Open a demo as">
       {(close) => (
         <>
-          <p className="menu-heading">Signed in to {demo.org_name}</p>
+          {projects && (projects.projects.some((p) => !p.demo) || projects.can_create_in.length > 0) && (
+            <>
+              <p className="menu-heading">Your projects</p>
+              {projects.projects
+                .filter((p) => !p.demo)
+                .map((p) => {
+                  const current = here.org === p.org && here.project === p.project
+                  return (
+                    <button
+                      key={p.graph}
+                      type="button"
+                      aria-current={current || undefined}
+                      className={`menu-item${current ? ' is-current' : ''}`}
+                      onClick={() => {
+                        close()
+                        if (!current) navigate(`/p/${p.org}/${p.project}`)
+                      }}
+                    >
+                      <span className="usermenu-avatar is-small" aria-hidden="true">
+                        {initials(p.name)}
+                      </span>
+                      <span>
+                        <strong>{p.name}</strong>
+                        <span>
+                          {p.org_name}
+                          {p.state === 'creating' ? ', being made' : p.state === 'failed' ? ', not made' : ''}
+                        </span>
+                      </span>
+                      {current && <span className="menu-current">Open</span>}
+                    </button>
+                  )
+                })}
+              {projects.can_create_in.length > 0 && (
+                <Link className="menu-item is-plain" to="/new-project" onClick={close}>
+                  New project…
+                </Link>
+              )}
+              <div className="menu-sep" aria-hidden="true" />
+            </>
+          )}
+          <p className="menu-heading">Demos</p>
           {demos.map((d) => {
-            const current = d.org === demo.org
+            const current = !here.project && d.org === demo.org
             return (
               <button
                 key={d.org}
@@ -103,7 +149,7 @@ function UserMenu({ demo, demos, me, onSignOut }: { demo: DemoListing; demos: De
             )
           })}
           <p className="menu-note">Each demo is its own organization, at its own date.</p>
-          {!isMain(gateway.branch) && (
+          {client.demo && !isMain(gateway.branch) && (
             <>
               <div className="menu-sep" aria-hidden="true" />
               <button type="button" className="menu-item is-plain" disabled={resetting} onClick={() => void reset(close)}>

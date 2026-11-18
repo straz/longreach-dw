@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest'
-import { tabOf, withParams } from './routeState.ts'
+import { basePath, tabOf, withParams } from './routeState.ts'
 
 test('withParams adds the parameters given, leaving out undefined ones', () => {
   expect(withParams('/commitment/c3', { view: 'map', n: 2, skip: undefined })).toBe('/commitment/c3?view=map&n=2')
@@ -18,4 +18,11 @@ test("tabOf reads the segment after the demo's, and falls back to the first tab"
   expect(tabOf('/fairhaven')).toBe('commitment')
   expect(tabOf('/fairhaven/elsewhere')).toBe('commitment')
   expect(tabOf('/')).toBe('commitment')
+})
+
+test('a project’s paths start /p/<org>/<project>, and its tab is the segment after them', () => {
+  expect(basePath({ org: 'fairhaven' })).toBe('/fairhaven')
+  expect(basePath({ org: 'longreach', project: 'ihealth' })).toBe('/p/longreach/ihealth')
+  expect(tabOf('/p/longreach/ihealth/watch/flags')).toBe('watch')
+  expect(tabOf('/fairhaven/reconsider')).toBe('reconsider')
 })

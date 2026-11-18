@@ -7,7 +7,7 @@ import { type Ref, refKey } from '../../domain/record.ts'
 import { createRecord, putRecord } from '../../entities.ts'
 import { useGateway } from '../../gateway/react.tsx'
 import { useClient, useClock } from '../shared/client.tsx'
-import { useRouteState } from '../shared/routeState.ts'
+import { useBasePath, useRouteState } from '../shared/routeState.ts'
 import { usePortfolio } from '../shared/usePortfolio.ts'
 import { useWriteContext } from '../shared/useWriteContext.ts'
 import WriteError from '../shared/WriteError.tsx'
@@ -41,6 +41,7 @@ const titleOf = (text: string) => {
 function Start() {
   const gateway = useGateway()
   const client = useClient()
+  const base = useBasePath()
   const { go } = useRouteState()
   const { readOnly, why } = useWriteContext()
   const { portfolio } = usePortfolio()
@@ -78,9 +79,11 @@ function Start() {
         <button type="button" className="btn-action" onClick={() => void start()} disabled={!text.trim() || writes.busy || readOnly} title={readOnly ? why : undefined}>
           {writes.busy ? 'Starting…' : 'Start drafting'}
         </button>
-        <RouterLink className="btn-quiet as-link" to={`/${gateway.org}/commitment?new=import`}>
-          or import a sample document
-        </RouterLink>
+        {client.demo && (
+          <RouterLink className="btn-quiet as-link" to={`${base}/commitment?new=import`}>
+            or import a sample document
+          </RouterLink>
+        )}
       </div>
       <WriteError error={writes.error} />
       <p className="start-example">
@@ -93,7 +96,7 @@ function Start() {
           <ul>
             {drafts.map((d) => (
               <li key={d.commitment}>
-                <RouterLink to={`/${gateway.org}/draft/${d.commitment}`}>{d.title}</RouterLink>
+                <RouterLink to={`${base}/draft/${d.commitment}`}>{d.title}</RouterLink>
               </li>
             ))}
           </ul>
@@ -105,6 +108,8 @@ function Start() {
 
 function Drafting({ slug }: { slug: string }) {
   const gateway = useGateway()
+  const client = useClient()
+  const base = useBasePath()
   const clock = useClock()
   const { readOnly } = useWriteContext()
   const demos = useDemos()
@@ -187,7 +192,7 @@ function Drafting({ slug }: { slug: string }) {
       <div className="draft-start">
         <h1>No draft here</h1>
         <p>
-          There is no commitment {slug} in your copy of this demo. <RouterLink to={`/${gateway.org}/draft`}>Start a new one</RouterLink>.
+          There is no commitment {slug} here. <RouterLink to={`${base}/draft`}>Start a new one</RouterLink>.
         </p>
       </div>
     )
@@ -202,7 +207,7 @@ function Drafting({ slug }: { slug: string }) {
       <div className="draft">
         <header className="draft-head">
           <p className="draft-eyebrow">
-            Draft · proposed · in your copy of the demo
+            Draft · proposed · {client.demo ? 'in your copy of the demo' : 'in your update'}
             {readOnly && <span className="draft-readonly"> · read only</span>}
           </p>
           <h1>
@@ -228,7 +233,7 @@ function Drafting({ slug }: { slug: string }) {
               Undo{writes.last ? `: ${writes.last.what}` : ''}
             </button>
             <CopyLink />
-            <RouterLink className="btn-quiet is-small as-link" to={`/${gateway.org}/commitment/${slug}`}>
+            <RouterLink className="btn-quiet is-small as-link" to={`${base}/commitment/${slug}`}>
               Open in Commitments
             </RouterLink>
           </div>

@@ -5,9 +5,10 @@ import { setDisplayYear } from '../../domain/format.ts'
 import type { SampleDocument } from '../../gateway/documents.ts'
 import type { Indicator } from './usePortfolio.ts'
 
-// The demo open: who it is signed in as, its clock, and its content besides the records (briefs, sample
-// documents, indicators), from tyapi's GET /v1/projects/{org}/{project}/demo. app/Shell.tsx provides it for the
-// demo the URL names; switching demos changes the URL, and with it every value here.
+// The demo or project open: who it is signed in as, its clock, and its content besides the records (briefs, sample
+// documents, indicators), from tyapi's GET /v1/projects/{org}/{project}/demo for a demo, and none for a project of
+// the user's own (app/demo.ts). app/Shell.tsx provides it for the one the URL names; switching changes the URL, and
+// with it every value here.
 
 /** The organization the demo is signed in as, and its persona. */
 export type Client = {
@@ -18,6 +19,8 @@ export type Client = {
   user: string
   /** What the footer says about the data. */
   footer: string
+  /** A Decision Watch demo, opened as its persona in a sandbox; otherwise a project of the user's own. */
+  demo: boolean
 }
 
 export type DemoContent = { briefs: BriefSpec[]; documents: SampleDocument[]; indicators: Record<string, Indicator> }

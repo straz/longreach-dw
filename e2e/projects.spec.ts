@@ -25,4 +25,21 @@ test('a project made, opened empty, and a first change that starts an update', a
   await expect(page.getByRole('heading', { level: 1 })).toContainText('We will move patient records')
   await expect(page.getByRole('button', { name: /^Working in/ })).toContainText('Commitment: We will move patient records')
   await expect(page.getByRole('complementary', { name: 'What is not done' })).toContainText('Who is accountable for this?')
+
+  // Back to main, from the same control: the draft is the update's, not main's yet.
+  await page.getByRole('button', { name: /^Working in/ }).click()
+  await page.getByRole('group', { name: 'Your updates' }).getByRole('button', { name: /^main/ }).click()
+  await expect(page.getByRole('button', { name: /^Working in/ })).toContainText('Working in: main')
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('No draft here')
+})
+
+test('an owner gives the org’s consent to model providers, and withdraws it', async ({ page }) => {
+  await open(page, 'commitment')
+  await page.goto(`${LOCAL_APP}/#/model-consent`)
+  const org = page.getByRole('region', { name: "Longreach's consent" })
+  await org.getByRole('checkbox', { name: /Anthropic/ }).check()
+  await org.getByRole('button', { name: /^(Consent|Change consent)$/ }).click()
+  await expect(org).toContainText('Consented to anthropic by')
+  await org.getByRole('button', { name: 'Withdraw' }).click()
+  await expect(org).toContainText('No consent')
 })

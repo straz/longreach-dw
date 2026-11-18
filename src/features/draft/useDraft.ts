@@ -1,14 +1,14 @@
 import { keepPreviousData, useQueries, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { NESTED } from '../../domain/draft/outline.ts'
 import type { Item } from '../../domain/draft/palette.ts'
 import type { Draft } from '../../domain/draft/questions.ts'
 import { type Ref, refKey } from '../../domain/record.ts'
 import { type Fields, getLinks, getModel, getRecord } from '../../entities.ts'
 import { useGateway } from '../../gateway/react.tsx'
-import { isMain } from '../../project.ts'
+import { keys } from '../../queryKeys.ts'
 import { readStored, writeStored } from '../../storage.ts'
-import { UpdateContext } from '../updates/useUpdates.ts'
+import { useFollowWrite } from '../updates/useUpdates.ts'
 
 // The drafting page's data (docs/21-new-commitment.md, §2c): the model, the commitment with its links, and the
 // records around it (beliefs, risks, decisions, tripwires) with theirs. Every key but the model's starts with the
@@ -19,12 +19,12 @@ import { UpdateContext } from '../updates/useUpdates.ts'
  *  refetched by a write. */
 export function useModel() {
   const gateway = useGateway()
-  return useQuery({ queryKey: ['model', gateway.org, gateway.project], queryFn: () => getModel(gateway), staleTime: Infinity })
+  return useQuery({ queryKey: keys.model(gateway.org, gateway.project), queryFn: () => getModel(gateway), staleTime: Infinity })
 }
 
 export function useDraft(slug: string): { draft?: Draft; error?: Error | null; missing: boolean; retry: () => void } {
   const gateway = useGateway()
-  const key = [gateway.graph, gateway.branch, 'draft', slug] as const
+  const key = [...keys.draft(gateway.graph, gateway.branch), slug] as const
   const record = useQuery({ queryKey: [...key, 'record'], queryFn: () => getRecord(gateway, 'Commitment', slug), placeholderData: keepPreviousData, retry: false })
   const links = useQuery({ queryKey: [...key, 'links'], queryFn: () => getLinks(gateway, 'Commitment', slug), placeholderData: keepPreviousData, retry: false })
   const nested = (links.data?.links ?? []).filter((l) => NESTED.has(l.type))
@@ -63,15 +63,8 @@ export type Unsaved = {
 }
 
 export function useUnsaved(storageKey: string) {
+  // The page is made afresh for another draft or branch (DraftPage keys it), so the key never changes here.
   const [cards, setCards] = useState<Unsaved[]>(() => readStored(storageKey, []))
-  // A different draft reads its own.
-  const loaded = useRef(storageKey)
-  useEffect(() => {
-    if (loaded.current !== storageKey) {
-      loaded.current = storageKey
-      setCards(readStored(storageKey, []))
-    }
-  })
   const save = useCallback(
     (next: (cards: Unsaved[]) => Unsaved[]) =>
       setCards((prev) => {
@@ -112,22 +105,22 @@ export function useDismissed(storageKey: string) {
 }
 
 /** One write the user made in this session, and how to take it back. */
-export type Done = { what: string; undo: () => Promise<unknown> }
+type Done = { what: string; undo: () => Promise<unknown> }
 
 /** Writes that can be undone (§2c): run a write, refetch the graph's answers, and keep how to undo it. ⌘Z undoes
  *  the user's own last write. */
 export function useUndoableWrites() {
   const gateway = useGateway()
   const queryClient = useQueryClient()
-  const choice = useContext(UpdateContext)
+  const follow = useFollowWrite()
   const [stack, setStack] = useState<Done[]>([])
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<Error | null>(null)
   // The draft's own answers first, awaited, so a saved card replaces its unsaved one at once; then the rest of the
   // graph's (the portfolio, the headline), in the background.
   const refresh = useCallback(async () => {
-    await queryClient.invalidateQueries({ queryKey: [gateway.graph, gateway.branch, 'draft'] })
-    void queryClient.invalidateQueries({ queryKey: [gateway.graph] })
+    await queryClient.invalidateQueries({ queryKey: keys.draft(gateway.graph, gateway.branch) })
+    void queryClient.invalidateQueries({ queryKey: keys.graph(gateway.graph) })
   }, [queryClient, gateway.graph, gateway.branch])
 
   const run = useCallback(
@@ -139,9 +132,7 @@ export function useUndoableWrites() {
         const entry = done?.(result)
         if (entry) setStack((s) => [...s, entry])
         await refresh()
-        // A write made while reading a project's main started an update (tyapi P5): work in it from now on.
-        const started = (result as { branch?: string } | undefined)?.branch
-        if (choice && isMain(gateway.branch) && started && !isMain(started)) choice.choose(started)
+        follow(result)
         return result
       } catch (e) {
         setError(e instanceof Error ? e : new Error(String(e)))
@@ -150,7 +141,7 @@ export function useUndoableWrites() {
         setBusy(false)
       }
     },
-    [refresh, choice, gateway.branch],
+    [refresh, follow],
   )
 
   const undo = useCallback(async () => {

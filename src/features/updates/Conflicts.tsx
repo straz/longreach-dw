@@ -1,11 +1,12 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { ApiError } from '../../api.ts'
-import { say } from '../../app/Card.tsx'
 import { formatValue } from '../../domain/format.ts'
 import { textOf } from '../../domain/record.ts'
 import { useGateway } from '../../gateway/react.tsx'
-import { type Conflict, type Resolution, resolveConflicts } from '../../updates.ts'
+import { keys } from '../../queryKeys.ts'
+import { type Conflict, type Resolution, changeId, resolveConflicts } from '../../updates.ts'
+import { useAction } from '../shared/useAction.ts'
 
 // Resolving conflicts with main (tyapi docs/20, Phase 4): take main's version, then edit. For each record both
 // sides changed, the fields each side changed, with main's version and the user's changes laid over it proposed
@@ -14,8 +15,6 @@ import { type Conflict, type Resolution, resolveConflicts } from '../../updates.
 // update asks first, naming them.
 
 type Choice = Record<string, unknown> | null | undefined
-
-const idOf = (c: Pick<Conflict, 'kind' | 'type' | 'id'>) => `${c.kind}:${c.type}:${c.id}`
 
 /** What was typed, as the field's own type: a number stays a number, an empty field is no value. */
 export function typed(text: string, like: unknown): unknown {
@@ -26,33 +25,30 @@ export function typed(text: string, like: unknown): unknown {
 }
 
 /** The first choice for each conflict: the proposal where there is one; nothing yet where a side deleted it. */
-const firstChoices = (conflicts: Conflict[]) => Object.fromEntries(conflicts.map((c) => [idOf(c), c.proposed ?? undefined])) as Record<string, Choice>
+const firstChoices = (conflicts: Conflict[]) => Object.fromEntries(conflicts.map((c) => [changeId(c), c.proposed ?? undefined])) as Record<string, Choice>
 
 export default function Conflicts({ conflicts, mine }: { conflicts: Conflict[]; mine: boolean }) {
   const gateway = useGateway()
   const queryClient = useQueryClient()
   const [choices, setChoices] = useState(() => firstChoices(conflicts))
-  const [busy, setBusy] = useState(false)
-  const [problem, setProblem] = useState<string | null>(null)
+  const { busy, problem, run } = useAction()
   const [confirming, setConfirming] = useState<string | null>(null)
-  const choose = (c: Conflict, record: Choice) => setChoices((all) => ({ ...all, [idOf(c)]: record }))
-  const decided = conflicts.every((c) => choices[idOf(c)] !== undefined)
+  const choose = (c: Conflict, record: Choice) => setChoices((all) => ({ ...all, [changeId(c)]: record }))
+  const decided = conflicts.every((c) => choices[changeId(c)] !== undefined)
 
-  const resolve = async (confirm = false) => {
-    setBusy(true)
-    setProblem(null)
-    try {
-      const records: Resolution[] = conflicts.map((c) => ({ kind: c.kind, type: c.type, id: c.id, record: choices[idOf(c)] ?? null }))
-      await resolveConflicts(gateway, gateway.branch, records, confirm)
+  const resolve = (confirm = false) =>
+    run(async () => {
+      const records: Resolution[] = conflicts.map((c) => ({ kind: c.kind, type: c.type, id: c.id, record: choices[changeId(c)] ?? null }))
+      try {
+        await resolveConflicts(gateway, gateway.branch, records, confirm)
+      } catch (e) {
+        // Letting a record go that has links added on the update asks first, naming them.
+        if (e instanceof ApiError && e.code === 'confirm') return setConfirming(e.message)
+        throw e
+      }
       setConfirming(null)
-      await queryClient.invalidateQueries({ queryKey: [gateway.graph] })
-    } catch (e) {
-      if (e instanceof ApiError && e.code === 'confirm') setConfirming(e.message)
-      else setProblem(say(e))
-    } finally {
-      setBusy(false)
-    }
-  }
+      await queryClient.invalidateQueries({ queryKey: keys.graph(gateway.graph) })
+    })
 
   return (
     <div className="conflicts">
@@ -61,11 +57,11 @@ export default function Conflicts({ conflicts, mine }: { conflicts: Conflict[]; 
         your changes: check each below, then resolve them together.
       </p>
       {conflicts.map((c) => (
-        <ConflictCard key={idOf(c)} conflict={c} choice={choices[idOf(c)]} onChoose={(r) => choose(c, r)} disabled={!mine || busy} />
+        <ConflictCard key={changeId(c)} conflict={c} choice={choices[changeId(c)]} onChoose={(r) => choose(c, r)} disabled={!mine || busy !== null} />
       ))}
       {mine ? (
         <div className="merge-actions">
-          <button type="button" className="btn-action" disabled={!decided || busy} onClick={() => void resolve()}>
+          <button type="button" className="btn-action" disabled={!decided || busy !== null} onClick={() => void resolve()}>
             {busy ? 'Resolving…' : 'Resolve conflicts'}
           </button>
           {!decided && <span className="update-field">Choose for each record first.</span>}
@@ -76,7 +72,7 @@ export default function Conflicts({ conflicts, mine }: { conflicts: Conflict[]; 
       {confirming && (
         <div className="merge-conflict" role="alert">
           <p>{confirming}.</p>
-          <button type="button" className="btn-line is-small" disabled={busy} onClick={() => void resolve(true)}>
+          <button type="button" className="btn-line is-small" disabled={busy !== null} onClick={() => void resolve(true)}>
             Let them go too
           </button>
         </div>

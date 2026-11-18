@@ -3,7 +3,7 @@ import type { Link } from '../../entities.ts'
 // The draft as an outline by ty-core's five questions (docs/21-new-commitment.md, §2c, N3): which section each of
 // the commitment's links goes in, the words an empty section invites with, and each card's plain label.
 
-export type SectionId = 'why' | 'rests' | 'depends' | 'change' | 'possible' | 'authority'
+type SectionId = 'why' | 'rests' | 'depends' | 'change' | 'possible' | 'authority'
 
 export type Facet = 'blue' | 'teal' | 'amber' | 'green' | 'red'
 

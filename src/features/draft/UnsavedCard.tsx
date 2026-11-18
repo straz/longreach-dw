@@ -27,7 +27,7 @@ export function UnsavedCards({ focus, filter = () => true }: { focus: Ref; filte
 /** A card being written: its text and the few fields nothing else gives, with records like it already in the
  *  graph offered for linking instead (§3, before duplicating). Kept in the browser until it is saved. */
 export function UnsavedCard({ card }: { card: Unsaved }) {
-  const { draft, nodes, project, writes, unsaved, today, persona, linksOf, recordOf, readOnly } = useDraftState()
+  const { draft, nodes, project, writes, unsaved, today, who, linksOf, recordOf, readOnly } = useDraftState()
   const linkExisting = useLinkExisting()
   const node = nodes.get(card.item.type)
   const asked = useMemo(() => (node ? askedFields(node, card.item) : []), [node, card.item])
@@ -48,7 +48,7 @@ export function UnsavedCard({ card }: { card: Unsaved }) {
     const notes = notesOf(draft.slug)
     if (card.item.type === 'Claim' && !draft.links.some((l) => l.edge === 'RecordedIn' && l.slug === notes)) {
       const made = await writes.run(() =>
-        putRecord(project, { type: 'Source', slug: notes, fields: { kind: 'other', title: `Notes by ${persona}, ${formatDate(today, { long: true })}` }, links: [{ edge: 'RecordedIn', from: draft.slug }] }),
+        putRecord(project, { type: 'Source', slug: notes, fields: { kind: 'other', title: `Notes by ${who}, ${formatDate(today, { long: true })}` }, links: [{ edge: 'RecordedIn', from: draft.slug }] }),
       )
       if (!made) return
     }

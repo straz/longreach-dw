@@ -6,12 +6,14 @@ import UpdatePage from '../features/updates/UpdatePage.tsx'
 import WatchTab from '../features/watch/WatchTab.tsx'
 import { basePath } from '../features/shared/routeState.ts'
 import ConnectAiPage from './ConnectAiPage.tsx'
+import ConsentPage from './ConsentPage.tsx'
 import NewProjectPage from './NewProjectPage.tsx'
-import Shell, { DemosGate, FirstDemo, ProjectShell } from './Shell.tsx'
+import DemoShell, { DemosGate, FirstDemo, ProjectShell } from './Shell.tsx'
 
 // Hash routes, because GitHub Pages has no server rewrites: #/<org>/<tab>/<selection>?asof= for a demo, and
 // #/p/<org>/<project>/<tab>/… for a project of the user's own. Under either, test8's routes, whose optional segments
-// carry the selection: a commitment, a Watch view, a brief. #/new-project makes a project, and #/connect-ai connects the user's AI assistant.
+// carry the selection: a commitment, a Watch view, a brief. #/new-project makes a project, #/connect-ai connects
+// the user's AI assistant, and #/model-consent is an org's consent to model providers.
 const tabs: RouteObject[] = [
   { index: true, element: <FirstTab /> },
   { path: 'commitment/:slug?', element: <CommitmentTab /> },
@@ -25,8 +27,9 @@ const tabs: RouteObject[] = [
 export const routes: RouteObject[] = [
   { path: '/new-project', element: <NewProjectPage /> },
   { path: '/connect-ai', element: <ConnectAiPage /> },
+  { path: '/model-consent', element: <ConsentPage /> },
   { path: '/p/:org/:project', element: <ProjectShell />, children: tabs },
-  { path: '/:org', element: <Shell />, children: tabs },
+  { path: '/:org', element: <DemoShell />, children: tabs },
   { path: '*', element: <NoDemoNamed /> },
 ]
 

@@ -5,13 +5,13 @@ import { MemoryRouter, Route, Routes } from 'react-router'
 import { afterEach, expect, test, vi } from 'vitest'
 import type { GatewayClient } from '../../gateway/client.ts'
 import { GatewayProvider } from '../../gateway/react.tsx'
-import { DemoProvider, type OpenDemo } from '../shared/client.tsx'
+import { type Opened, OpenedProvider } from '../shared/client.tsx'
 import NewCommitment from './NewCommitment.tsx'
 
 afterEach(() => vi.unstubAllGlobals())
 
-const DEMO: OpenDemo = {
-  client: { org: 'fairhaven', graph: 'proj-fairhaven-commitments', user: 'dana', footer: '', demo: true },
+const DEMO: Opened = {
+  client: { org: 'fairhaven', graph: 'proj-fairhaven-commitments', user: 'dana', who: 'Dana Whitlock', footer: '', demo: true },
   clock: { today: '2027-03-31', earliest: '2026-01-01' },
   content: { briefs: [], documents: [], indicators: {} },
 }
@@ -24,13 +24,13 @@ test('starting blank shows it is under way, and what the gateway said when it re
   render(
     <QueryClientProvider client={queryClient}>
       <GatewayProvider client={GATEWAY}>
-        <DemoProvider demo={DEMO}>
+        <OpenedProvider opened={DEMO}>
           <MemoryRouter initialEntries={['/fairhaven/commitment']}>
             <Routes>
               <Route path="/:org/*" element={<NewCommitment />} />
             </Routes>
           </MemoryRouter>
-        </DemoProvider>
+        </OpenedProvider>
       </GatewayProvider>
     </QueryClientProvider>,
   )

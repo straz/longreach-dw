@@ -12,7 +12,7 @@ import { useClock } from './client.tsx'
 export const TABS = ['commitment', 'watch', 'reconsider'] as const
 export type Tab = (typeof TABS)[number]
 
-export type RouteState = {
+type RouteState = {
   tab: Tab
   asOf: IsoDate
   /** Go to a path, keeping the as-of date. */

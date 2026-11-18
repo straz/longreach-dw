@@ -1,12 +1,16 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
-import { Card, Problem, say } from '../../app/Card.tsx'
 import { useSession } from '../../app/session.ts'
 import { useGateway } from '../../gateway/react.tsx'
 import { formatValue, plural } from '../../domain/format.ts'
 import { textOf } from '../../domain/record.ts'
 import { isMain } from '../../project.ts'
-import { type Change, changeId, revertRecords, reviewChanges } from '../../updates.ts'
+import { keys } from '../../queryKeys.ts'
+import { PanelNote, PanelProblem } from '../../ui/Notice.tsx'
+import { type Change, asRecordRef, changeId, revertRecords, reviewChanges } from '../../updates.ts'
+import { useClient } from '../shared/client.tsx'
+import { useAction } from '../shared/useAction.ts'
+import { FailedJobs, Uploads } from './Documents.tsx'
 import MergePanel, { type Merged, MergedNote } from './MergePanel.tsx'
 import { useCurrentUpdate, useUpdateDiff } from './useUpdates.ts'
 import './updates.css'
@@ -15,7 +19,8 @@ import './updates.css'
 // changed in it, who wrote it, and Put back, which writes the record as it was where the update started (its
 // author only). A change an assistant wrote says so, and waits for its author's review before the update merges
 // (tyapi P14, P16): Reviewed, one by one or all at once. Kept current by the navbar's poll. Below the changes,
-// Merge into main (MergePanel).
+// Merge into main (MergePanel). Documents uploaded to it, and the assistant's failed jobs, are listed too
+// (Documents.tsx).
 
 const OP = { added: 'Added', changed: 'Changed', removed: 'Removed', unchanged: 'Unchanged' } as const
 /** A change's words: a link's ends, or the record's text, else its key. */
@@ -37,8 +42,8 @@ export default function UpdatePage() {
   const { me } = useSession()
   const update = useCurrentUpdate()
   const changes = useUpdateDiff()
-  const [busy, setBusy] = useState<string | null>(null)
-  const [problem, setProblem] = useState<string | null>(null)
+  const { busy, problem, run } = useAction()
+  const { demo } = useClient()
   const [merged, setMerged] = useState<Merged | null>(null)
 
   if (merged) {
@@ -48,31 +53,23 @@ export default function UpdatePage() {
       </section>
     )
   }
-  if (isMain(gateway.branch)) return <Card lede="You are reading main: there are no changes of yours here." />
-  if (changes.error) return <Problem what="read the update's changes" error={changes.error} onRetry={() => void changes.refetch()} />
-  if (!changes.data) return <Card lede="Reading the update's changes…" />
+  if (isMain(gateway.branch)) return <PanelNote>You are reading main: there are no changes of yours here.</PanelNote>
+  if (changes.error) return <PanelProblem what="read the update's changes" error={changes.error} onRetry={() => void changes.refetch()} />
+  if (!changes.data) return <PanelNote>Reading the update's changes…</PanelNote>
 
-  const act = async (id: string, what: () => Promise<unknown>) => {
-    setBusy(id)
-    setProblem(null)
-    try {
+  const act = (id: string, what: () => Promise<unknown>) =>
+    run(async () => {
       await what()
-      await queryClient.invalidateQueries({ queryKey: [gateway.graph] })
-    } catch (e) {
-      setProblem(say(e))
-    } finally {
-      setBusy(null)
-    }
-  }
-  const ref = (c: Change) => ({ kind: c.kind, type: c.type, id: c.id })
-  const putBack = (c: Change) => act(changeId(c), () => revertRecords(gateway, gateway.branch, [ref(c)]))
-  const review = (c: Change) => act(`review:${changeId(c)}`, () => reviewChanges(gateway, gateway.branch, [ref(c)]))
+      await queryClient.invalidateQueries({ queryKey: keys.graph(gateway.graph) })
+    }, id)
+  const putBack = (c: Change) => act(changeId(c), () => revertRecords(gateway, gateway.branch, [asRecordRef(c)]))
+  const review = (c: Change) => act(`review:${changeId(c)}`, () => reviewChanges(gateway, gateway.branch, [asRecordRef(c)]))
   const reviewAll = () => act('review:all', () => reviewChanges(gateway, gateway.branch, [], true))
   const unreviewed = changes.data.changes.filter((c) => c.ai && !c.reviewed)
   const mine = update?.mine !== false
   const nodes = changes.data.changes.filter((c) => c.kind === 'node')
   const links = changes.data.changes.filter((c) => c.kind === 'edge')
-  const title = !update || update.sandbox ? 'Your sandbox' : update.name
+  const title = update ? (update.sandbox ? 'Your sandbox' : update.name) : demo ? 'Your sandbox' : 'Your update'
   const row = (c: Change) => (
     <li key={changeId(c)} className="update-row">
       <span className={`update-op is-${c.op}`}>{OP[c.op]}</span>
@@ -109,8 +106,9 @@ export default function UpdatePage() {
       <p className="update-lede">
         {changes.data.changes.length === 0
           ? 'No changes yet: main and this update are the same.'
-          : `${nodes.length} ${nodes.length === 1 ? 'record' : 'records'} and ${links.length} ${links.length === 1 ? 'link' : 'links'} differ from main.`}
+          : `${plural(nodes.length, 'record')} and ${plural(links.length, 'link')} differ from main.`}
       </p>
+      <FailedJobs mine={mine} />
       {unreviewed.length > 0 && (
         <p className="update-review-all">
           {plural(unreviewed.length, 'change')} by {[...new Set(unreviewed.map((c) => c.ai))].join(', ')} not reviewed yet: read each, then mark it reviewed or put it back.
@@ -133,6 +131,7 @@ export default function UpdatePage() {
           <ul className="update-list">{links.map(row)}</ul>
         </>
       )}
+      <Uploads />
       {update && !update.sandbox && <MergePanel onMerged={setMerged} />}
     </section>
   )

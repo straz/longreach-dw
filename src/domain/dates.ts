@@ -17,3 +17,14 @@ export const addDays = (d: IsoDate, days: number): IsoDate => fromUtc(toUtc(d) +
 
 /** Orders dates (or moments) oldest first, with a missing one last. */
 export const compareDates = (a: string | undefined, b: string | undefined) => (a === b ? 0 : a === undefined ? 1 : b === undefined ? -1 : a < b ? -1 : 1)
+
+/** Today as the user's own calendar says, not UTC's: an evening in the US is still today. */
+export const localToday = (now = new Date()): IsoDate =>
+  `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+
+/** The same day a year before; the 29th of February goes to the 28th. */
+export const yearBefore = (d: IsoDate): IsoDate => {
+  const [y, m, day] = dayOf(d).split('-').map(Number)
+  const last = new Date(Date.UTC(y - 1, m, 0)).getUTCDate()
+  return `${y - 1}-${String(m).padStart(2, '0')}-${String(Math.min(day, last)).padStart(2, '0')}`
+}

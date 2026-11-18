@@ -4,9 +4,9 @@
 // claim is evidence, and whether a belief is falsified is a judgment someone records.
 
 /** One thing a card offers to add: the record at the link's other end, of this kind. */
-export type Offer = { label: string; kind?: string }
+type Offer = { label: string; kind?: string }
 
-export type Verb = {
+type Verb = {
   /** The link read from its source ("rests on"), and from its target ("underpins"). */
   out: string
   in: string

@@ -1,7 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
-import type { Me } from '../api.ts'
 import { formatDate } from '../domain/format.ts'
 import AsOfControl from '../features/shared/AsOfControl.tsx'
 import { useClient } from '../features/shared/client.tsx'
@@ -10,27 +9,30 @@ import UpdateControl from '../features/updates/UpdateControl.tsx'
 import { useGateway } from '../gateway/react.tsx'
 import { isMain } from '../project.ts'
 import { Menu } from '../ui/Menu.tsx'
+import { keys } from '../queryKeys.ts'
+import { say } from '../ui/Notice.tsx'
 import { startOver } from '../writes.ts'
-import { type DemoListing, sandboxKey, useProjects, whoIs } from './session.ts'
-import { say } from './Card.tsx'
+import type { Heading } from './demo.ts'
+import { type DemoListing, useDemos, useProjects, useSession, whoIs } from './session.ts'
 import './Navbar.css'
 
-// The bar every screen shares, from test8's (docs/PLAN.md §2). The user menu is a disclosure (ui/Menu.tsx). The organization is the demo open, then the
-// as-of control; the user menu lists every demo the visitor can open, each as its persona at its own clock, and switching opens that
-// demo's organization. Below them, Start over (the visitor's changes to this demo are deleted, tyapi W11), the
-// Google account the visitor signed in with, and Log out.
-export default function Navbar({ demo, demos, me, onSignOut }: { demo: DemoListing; demos: DemoListing[]; me: Me; onSignOut: () => void }) {
+// The bar every screen shares, from test8's (docs/PLAN.md §2). The user menu is a disclosure (ui/Menu.tsx). The
+// organization is the demo or project open, then the update control and the as-of control; the user menu lists the
+// user's projects, then every demo they can open, each as its persona at its own clock, and switching opens it.
+// Below them, in a demo, Start over (the visitor's changes to it are deleted, tyapi W11); Connect your AI; the Google
+// account the user signed in with, and Log out.
+export default function Navbar({ heading }: { heading: Heading }) {
   const base = useBasePath()
   return (
     <header className="navbar">
-      <Link className="navbar-brand" to={`${base}/commitment`} aria-label={`Longreach, back to ${demo.org_name}`}>
+      <Link className="navbar-brand" to={`${base}/commitment`} aria-label={`Longreach, back to ${heading.orgName}`}>
         <img className="navbar-logo" src={`${import.meta.env.BASE_URL}longreach-logo-white.svg`} alt="" width={23} height={28} />
       </Link>
-      <span className="navbar-org">{demo.org_name}</span>
+      <span className="navbar-org">{heading.orgName}</span>
       <span className="navbar-space" />
-      <UpdateControl me={me.principal_id} />
+      <UpdateControl />
       <AsOfControl />
-      <UserMenu demo={demo} demos={demos} me={me} onSignOut={onSignOut} />
+      <UserMenu heading={heading} />
     </header>
   )
 }
@@ -38,7 +40,9 @@ export default function Navbar({ demo, demos, me, onSignOut }: { demo: DemoListi
 /** A demo's clock, the day its screens are as of. */
 const clockDay = (demo: DemoListing) => formatDate(demo.frame.clock, { long: true })
 
-function UserMenu({ demo, demos, me, onSignOut }: { demo: DemoListing; demos: DemoListing[]; me: Me; onSignOut: () => void }) {
+function UserMenu({ heading }: { heading: Heading }) {
+  const { me, signOut } = useSession()
+  const demos = useDemos().data ?? []
   const navigate = useNavigate()
   const gateway = useGateway()
   const client = useClient()
@@ -49,14 +53,14 @@ function UserMenu({ demo, demos, me, onSignOut }: { demo: DemoListing; demos: De
   const [resetError, setResetError] = useState<string | null>(null)
 
   const reset = async (close: () => void) => {
-    if (!window.confirm(`Start over in ${demo.org_name}? Every change you made to it is deleted, and it goes back to how it began.`)) return
+    if (!window.confirm(`Start over in ${heading.orgName}? Every change you made to it is deleted, and it goes back to how it began.`)) return
     setResetting(true)
     setResetError(null)
     try {
       // The branch the gateway started is the one to read from now on, whatever its name.
       const sandbox = await startOver(gateway)
-      queryClient.setQueryData(sandboxKey(gateway.graph), sandbox.branch)
-      await queryClient.invalidateQueries({ queryKey: [gateway.graph] })
+      queryClient.setQueryData(keys.sandbox(gateway.graph), sandbox.branch)
+      await queryClient.invalidateQueries({ queryKey: keys.graph(gateway.graph) })
       close()
     } catch (e) {
       setResetError(say(e))
@@ -65,19 +69,19 @@ function UserMenu({ demo, demos, me, onSignOut }: { demo: DemoListing; demos: De
     }
   }
 
-  const persona = demo.persona
+  const who = heading.who
   const face = (
     <>
       <span className="usermenu-avatar" aria-hidden="true">
-        {initials(persona.name)}
+        {initials(who.name)}
       </span>
       <span>
-        {persona.name}, {persona.title}
+        {who.name}, {who.title}
       </span>
     </>
   )
   return (
-    <Menu face={face} label="Open a demo as">
+    <Menu face={face} label="Your projects and demos">
       {(close) => (
         <>
           {projects && (projects.projects.some((p) => !p.demo) || projects.can_create_in.length > 0) && (
@@ -122,7 +126,7 @@ function UserMenu({ demo, demos, me, onSignOut }: { demo: DemoListing; demos: De
           )}
           <p className="menu-heading">Demos</p>
           {demos.map((d) => {
-            const current = !here.project && d.org === demo.org
+            const current = !here.project && d.org === heading.org
             return (
               <button
                 key={d.org}
@@ -152,7 +156,7 @@ function UserMenu({ demo, demos, me, onSignOut }: { demo: DemoListing; demos: De
             <>
               <div className="menu-sep" aria-hidden="true" />
               <button type="button" className="menu-item is-plain" disabled={resetting} onClick={() => void reset(close)}>
-                {resetting ? 'Starting over…' : `Start over in ${demo.org_name}`}
+                {resetting ? 'Starting over…' : `Start over in ${heading.orgName}`}
               </button>
               <p className="menu-note">Your changes are yours alone; starting over deletes them.</p>
               {resetError && (
@@ -166,8 +170,13 @@ function UserMenu({ demo, demos, me, onSignOut }: { demo: DemoListing; demos: De
           <Link className="menu-item is-plain" to="/connect-ai" onClick={close}>
             Connect your AI…
           </Link>
+          {projects && projects.can_create_in.length > 0 && (
+            <Link className="menu-item is-plain" to="/model-consent" onClick={close}>
+              Model providers…
+            </Link>
+          )}
           <p className="menu-note">Google account: {whoIs(me)}</p>
-          <button type="button" className="menu-item is-plain" onClick={onSignOut}>
+          <button type="button" className="menu-item is-plain" onClick={signOut}>
             Log out
           </button>
         </>

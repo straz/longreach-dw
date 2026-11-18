@@ -1,4 +1,4 @@
-# tyapi's API description (`python -m gateway.openapi`) at 3f26d88 plus its working tree.
+# tyapi's API description (`python -m gateway.openapi`) at e2caf95 plus its working tree.
 # Update with `pnpm api:pull`, then `pnpm gen:api`.
 openapi: 3.1.0
 info:
@@ -55,7 +55,7 @@ paths:
   /v1/healthz:
     get:
       summary: Whether the service can serve graph requests; needs no key
-      operationId: healthz_v1_healthz_head
+      operationId: healthz_v1_healthz_get
       responses:
         '200':
           description: Successful Response
@@ -461,9 +461,11 @@ paths:
           anyOf:
           - type: string
           - type: 'null'
-          description: The caller's update to write (GET .../branches); their sandbox when left out
+          description: 'The caller''s update to write (GET .../branches). Left out: in a demo, their sandbox; in any other
+            project, a new update of theirs'
           title: Branch
-        description: The caller's update to write (GET .../branches); their sandbox when left out
+        description: 'The caller''s update to write (GET .../branches). Left out: in a demo, their sandbox; in any other project,
+          a new update of theirs'
       requestBody:
         required: true
         content:
@@ -507,9 +509,11 @@ paths:
           anyOf:
           - type: string
           - type: 'null'
-          description: The caller's update to write (GET .../branches); their sandbox when left out
+          description: 'The caller''s update to write (GET .../branches). Left out: in a demo, their sandbox; in any other
+            project, a new update of theirs'
           title: Branch
-        description: The caller's update to write (GET .../branches); their sandbox when left out
+        description: 'The caller''s update to write (GET .../branches). Left out: in a demo, their sandbox; in any other project,
+          a new update of theirs'
       responses:
         '200':
           description: Successful Response
@@ -567,9 +571,11 @@ paths:
           anyOf:
           - type: string
           - type: 'null'
-          description: The caller's update to write (GET .../branches); their sandbox when left out
+          description: 'The caller''s update to write (GET .../branches). Left out: in a demo, their sandbox; in any other
+            project, a new update of theirs'
           title: Branch
-        description: The caller's update to write (GET .../branches); their sandbox when left out
+        description: 'The caller''s update to write (GET .../branches). Left out: in a demo, their sandbox; in any other project,
+          a new update of theirs'
       responses:
         '200':
           description: Successful Response
@@ -627,9 +633,11 @@ paths:
           anyOf:
           - type: string
           - type: 'null'
-          description: The caller's update to write (GET .../branches); their sandbox when left out
+          description: 'The caller''s update to write (GET .../branches). Left out: in a demo, their sandbox; in any other
+            project, a new update of theirs'
           title: Branch
-        description: The caller's update to write (GET .../branches); their sandbox when left out
+        description: 'The caller''s update to write (GET .../branches). Left out: in a demo, their sandbox; in any other project,
+          a new update of theirs'
       requestBody:
         required: true
         content:
@@ -679,9 +687,11 @@ paths:
           anyOf:
           - type: string
           - type: 'null'
-          description: The caller's update to write (GET .../branches); their sandbox when left out
+          description: 'The caller''s update to write (GET .../branches). Left out: in a demo, their sandbox; in any other
+            project, a new update of theirs'
           title: Branch
-        description: The caller's update to write (GET .../branches); their sandbox when left out
+        description: 'The caller''s update to write (GET .../branches). Left out: in a demo, their sandbox; in any other project,
+          a new update of theirs'
       responses:
         '200':
           description: Successful Response
@@ -725,9 +735,11 @@ paths:
           anyOf:
           - type: string
           - type: 'null'
-          description: The caller's update to write (GET .../branches); their sandbox when left out
+          description: 'The caller''s update to write (GET .../branches). Left out: in a demo, their sandbox; in any other
+            project, a new update of theirs'
           title: Branch
-        description: The caller's update to write (GET .../branches); their sandbox when left out
+        description: 'The caller''s update to write (GET .../branches). Left out: in a demo, their sandbox; in any other project,
+          a new update of theirs'
       requestBody:
         required: true
         content:
@@ -771,9 +783,11 @@ paths:
           anyOf:
           - type: string
           - type: 'null'
-          description: The caller's update to write (GET .../branches); their sandbox when left out
+          description: 'The caller''s update to write (GET .../branches). Left out: in a demo, their sandbox; in any other
+            project, a new update of theirs'
           title: Branch
-        description: The caller's update to write (GET .../branches); their sandbox when left out
+        description: 'The caller''s update to write (GET .../branches). Left out: in a demo, their sandbox; in any other project,
+          a new update of theirs'
       requestBody:
         required: true
         content:
@@ -817,9 +831,11 @@ paths:
           anyOf:
           - type: string
           - type: 'null'
-          description: The caller's update to write (GET .../branches); their sandbox when left out
+          description: 'The caller''s update to write (GET .../branches). Left out: in a demo, their sandbox; in any other
+            project, a new update of theirs'
           title: Branch
-        description: The caller's update to write (GET .../branches); their sandbox when left out
+        description: 'The caller''s update to write (GET .../branches). Left out: in a demo, their sandbox; in any other project,
+          a new update of theirs'
       requestBody:
         required: true
         content:
@@ -863,9 +879,11 @@ paths:
           anyOf:
           - type: string
           - type: 'null'
-          description: The caller's update to write (GET .../branches); their sandbox when left out
+          description: 'The caller''s update to write (GET .../branches). Left out: in a demo, their sandbox; in any other
+            project, a new update of theirs'
           title: Branch
-        description: The caller's update to write (GET .../branches); their sandbox when left out
+        description: 'The caller''s update to write (GET .../branches). Left out: in a demo, their sandbox; in any other project,
+          a new update of theirs'
       requestBody:
         required: true
         content:
@@ -915,9 +933,11 @@ paths:
           anyOf:
           - type: string
           - type: 'null'
-          description: The caller's update to write (GET .../branches); their sandbox when left out
+          description: 'The caller''s update to write (GET .../branches). Left out: in a demo, their sandbox; in any other
+            project, a new update of theirs'
           title: Branch
-        description: The caller's update to write (GET .../branches); their sandbox when left out
+        description: 'The caller''s update to write (GET .../branches). Left out: in a demo, their sandbox; in any other project,
+          a new update of theirs'
       responses:
         '200':
           description: Successful Response
@@ -1048,9 +1068,11 @@ paths:
           anyOf:
           - type: string
           - type: 'null'
-          description: The caller's update to write (GET .../branches); their sandbox when left out
+          description: 'The caller''s update to write (GET .../branches). Left out: in a demo, their sandbox; in any other
+            project, a new update of theirs'
           title: Branch
-        description: The caller's update to write (GET .../branches); their sandbox when left out
+        description: 'The caller''s update to write (GET .../branches). Left out: in a demo, their sandbox; in any other project,
+          a new update of theirs'
       requestBody:
         required: true
         content:
@@ -1105,9 +1127,11 @@ paths:
           anyOf:
           - type: string
           - type: 'null'
-          description: The caller's update to write (GET .../branches); their sandbox when left out
+          description: 'The caller''s update to write (GET .../branches). Left out: in a demo, their sandbox; in any other
+            project, a new update of theirs'
           title: Branch
-        description: The caller's update to write (GET .../branches); their sandbox when left out
+        description: 'The caller''s update to write (GET .../branches). Left out: in a demo, their sandbox; in any other project,
+          a new update of theirs'
       responses:
         '200':
           description: Successful Response
@@ -1203,9 +1227,11 @@ paths:
           anyOf:
           - type: string
           - type: 'null'
-          description: The caller's update to write (GET .../branches); their sandbox when left out
+          description: 'The caller''s update to write (GET .../branches). Left out: in a demo, their sandbox; in any other
+            project, a new update of theirs'
           title: Branch
-        description: The caller's update to write (GET .../branches); their sandbox when left out
+        description: 'The caller''s update to write (GET .../branches). Left out: in a demo, their sandbox; in any other project,
+          a new update of theirs'
       requestBody:
         required: true
         content:
@@ -1255,9 +1281,11 @@ paths:
           anyOf:
           - type: string
           - type: 'null'
-          description: The caller's update to write (GET .../branches); their sandbox when left out
+          description: 'The caller''s update to write (GET .../branches). Left out: in a demo, their sandbox; in any other
+            project, a new update of theirs'
           title: Branch
-        description: The caller's update to write (GET .../branches); their sandbox when left out
+        description: 'The caller''s update to write (GET .../branches). Left out: in a demo, their sandbox; in any other project,
+          a new update of theirs'
       requestBody:
         required: true
         content:
@@ -1318,9 +1346,9 @@ paths:
           anyOf:
           - type: string
           - type: 'null'
-          description: 'For a judgment: whose; the persona''s when left out'
+          description: 'For a judgment: whose; the write''s actor when left out'
           title: Judged By
-        description: 'For a judgment: whose; the persona''s when left out'
+        description: 'For a judgment: whose; the write''s actor when left out'
       - name: branch
         in: query
         required: false
@@ -1328,9 +1356,11 @@ paths:
           anyOf:
           - type: string
           - type: 'null'
-          description: The caller's update to write (GET .../branches); their sandbox when left out
+          description: 'The caller''s update to write (GET .../branches). Left out: in a demo, their sandbox; in any other
+            project, a new update of theirs'
           title: Branch
-        description: The caller's update to write (GET .../branches); their sandbox when left out
+        description: 'The caller''s update to write (GET .../branches). Left out: in a demo, their sandbox; in any other project,
+          a new update of theirs'
       responses:
         '200':
           description: Successful Response
@@ -1788,6 +1818,410 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MergeQueueOut'
+  /v1/projects/{org}/{project}/sources/uploads:
+    post:
+      summary: 'Start an upload: a presigned PUT for the file'
+      operationId: start_upload_v1_projects__org___project__sources_uploads_post
+      parameters:
+      - name: org
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Org
+      - name: project
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Project
+      - name: branch
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: 'The caller''s update to write (GET .../branches). Left out: in a demo, their sandbox; in any other
+            project, a new update of theirs'
+          title: Branch
+        description: 'The caller''s update to write (GET .../branches). Left out: in a demo, their sandbox; in any other project,
+          a new update of theirs'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UploadIn'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PutOut'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/projects/{org}/{project}/branches/{branch}/uploads:
+    get:
+      summary: The uploads made on an update
+      operationId: list_uploads_v1_projects__org___project__branches__branch__uploads_get
+      parameters:
+      - name: org
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Org
+      - name: project
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Project
+      - name: branch
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Branch
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadsOut'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/projects/{org}/{project}/sources/uploads/{upload_id}:
+    get:
+      summary: An upload, and a presigned GET of its original
+      operationId: get_upload_v1_projects__org___project__sources_uploads__upload_id__get
+      parameters:
+      - name: org
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Org
+      - name: project
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Project
+      - name: upload_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Upload Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadOut'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/projects/{org}/{project}/sources/uploads/{upload_id}/converted:
+    post:
+      summary: A presigned PUT for an upload's converted document
+      operationId: converted_url_v1_projects__org___project__sources_uploads__upload_id__converted_post
+      parameters:
+      - name: org
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Org
+      - name: project
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Project
+      - name: upload_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Upload Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConvertedIn'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PutOut'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/projects/{org}/{project}/sources/uploads/{upload_id}/complete:
+    post:
+      summary: Complete an upload into a Source on its update
+      operationId: complete_upload_v1_projects__org___project__sources_uploads__upload_id__complete_post
+      parameters:
+      - name: org
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Org
+      - name: project
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Project
+      - name: upload_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Upload Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompleteIn'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompleteOut'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/orgs/{org}/model-consent:
+    get:
+      summary: An org's consent to outside model providers
+      operationId: get_consent_v1_orgs__org__model_consent_get
+      parameters:
+      - name: org
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Org
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConsentOut'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    put:
+      summary: Consent for an org to model providers; owners and admins
+      operationId: give_consent_v1_orgs__org__model_consent_put
+      parameters:
+      - name: org
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Org
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConsentIn'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConsentOut'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      summary: Withdraw an org's consent to model providers; owners and admins
+      operationId: withdraw_consent_v1_orgs__org__model_consent_delete
+      parameters:
+      - name: org
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Org
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConsentOut'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/delegations:
+    post:
+      summary: A token for a client to act for the caller on one update, for an hour
+      operationId: delegate_v1_delegations_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DelegationIn'
+        required: true
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DelegationOut'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/assist/job-reports:
+    post:
+      summary: Report a failed dw-assist job; svc-dw-assist only
+      operationId: report_job_v1_assist_job_reports_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JobReportIn'
+        required: true
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobReport'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/projects/{org}/{project}/branches/{branch}/jobs:
+    get:
+      summary: An update's failed assistant jobs, not dismissed
+      operationId: branch_jobs_v1_projects__org___project__branches__branch__jobs_get
+      parameters:
+      - name: org
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Org
+      - name: project
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Project
+      - name: branch
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Branch
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobReportsOut'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/projects/{org}/{project}/branches/{branch}/jobs/{report}/dismiss:
+    post:
+      summary: Dismiss a failed job's report; its user
+      operationId: dismiss_job_v1_projects__org___project__branches__branch__jobs__report__dismiss_post
+      parameters:
+      - name: org
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Org
+      - name: project
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Project
+      - name: branch
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Branch
+      - name: report
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Report
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobReport'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
   /v1/books/{book}/grants:
     put:
       summary: Grant a role on a book; org admins only
@@ -6003,6 +6437,55 @@ components:
       - changes
       - cursor
       title: ChangesOut
+    CompleteIn:
+      properties:
+        title:
+          type: string
+          maxLength: 500
+          minLength: 1
+          title: Title
+        kind:
+          type: string
+          enum:
+          - meeting
+          - document
+          - contract
+          - filing
+          - email
+          - thread
+          - dataset
+          - web
+          - other
+          title: Kind
+          default: document
+        occurred_at:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Occurred At
+      type: object
+      required:
+      - title
+      title: CompleteIn
+    CompleteOut:
+      properties:
+        upload:
+          $ref: '#/components/schemas/Upload'
+        source:
+          type: string
+          title: Source
+        graph_commit_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Graph Commit Id
+      type: object
+      required:
+      - upload
+      - source
+      - graph_commit_id
+      title: CompleteOut
     Conflict:
       properties:
         kind:
@@ -6064,6 +6547,100 @@ components:
       - fields
       - proposed
       title: Conflict
+    ConsentIn:
+      properties:
+        providers:
+          items:
+            type: string
+            enum:
+            - anthropic
+            - typesafe
+          type: array
+          minItems: 1
+          title: Providers
+        terms_version:
+          type: string
+          title: Terms Version
+          description: The version of the terms shown, as GET answered it
+      type: object
+      required:
+      - providers
+      - terms_version
+      title: ConsentIn
+    ConsentNow:
+      properties:
+        providers:
+          items:
+            type: string
+          type: array
+          title: Providers
+        terms_version:
+          type: string
+          title: Terms Version
+        by:
+          type: string
+          title: By
+        by_name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: By Name
+        at:
+          type: string
+          title: At
+      type: object
+      required:
+      - providers
+      - terms_version
+      - by
+      - by_name
+      - at
+      title: ConsentNow
+    ConsentOut:
+      properties:
+        org:
+          type: string
+          title: Org
+        offered:
+          items:
+            $ref: '#/components/schemas/ProviderOut'
+          type: array
+          title: Offered
+          description: The providers an org may consent to
+        terms_version:
+          type: string
+          title: Terms Version
+        terms:
+          type: string
+          title: Terms
+          description: What consenting agrees to, as shown; consent names this version
+        consent:
+          anyOf:
+          - $ref: '#/components/schemas/ConsentNow'
+          - type: 'null'
+          description: The org's consent now; null when it has none, or withdrew it
+        can_change:
+          type: boolean
+          title: Can Change
+          description: 'Whether the caller may give or withdraw it: an owner or admin of the org'
+      type: object
+      required:
+      - org
+      - offered
+      - terms_version
+      - terms
+      - consent
+      - can_change
+      title: ConsentOut
+    ConvertedIn:
+      properties:
+        content_type:
+          type: string
+          maxLength: 200
+          title: Content Type
+          default: text/markdown
+      type: object
+      title: ConvertedIn
     DecisionIn:
       properties:
         brief:
@@ -6114,6 +6691,70 @@ components:
       - rationale
       - approval
       title: DecisionIn
+    DelegationIn:
+      properties:
+        client:
+          type: string
+          title: Client
+          description: 'One of the clients the gateway lists: dw-assist'
+        project:
+          type: string
+          title: Project
+          description: org/project
+        branch:
+          type: string
+          title: Branch
+          description: An update of the caller's
+        scope:
+          type: string
+          enum:
+          - read
+          - write
+          title: Scope
+          default: write
+      type: object
+      required:
+      - client
+      - project
+      - branch
+      title: DelegationIn
+    DelegationOut:
+      properties:
+        token:
+          type: string
+          title: Token
+          description: Sent as a bearer token by the client; an hour long
+        expires_at:
+          type: string
+          title: Expires At
+        client:
+          type: string
+          title: Client
+        graph:
+          type: string
+          title: Graph
+        branch:
+          type: string
+          title: Branch
+        scope:
+          type: string
+          title: Scope
+        providers:
+          items:
+            type: string
+          type: array
+          title: Providers
+          description: 'The model providers the client may call: the org''s consent'
+      type: object
+      required:
+      - token
+      - expires_at
+      - client
+      - graph
+      - branch
+      - scope
+      - providers
+      title: DelegationOut
     DeletedOut:
       properties:
         graph:
@@ -6601,7 +7242,7 @@ components:
         branch:
           type: string
           title: Branch
-          description: 'Where it was written: the update named, or the caller''s sandbox'
+          description: 'Where it was written: the update named, the caller''s sandbox, or the update the write started'
         type:
           type: string
           title: Type
@@ -6865,6 +7506,138 @@ components:
       - decimals
       - group
       title: Indicator
+    JobReport:
+      properties:
+        id:
+          type: integer
+          title: Id
+        job:
+          type: string
+          title: Job
+        branch:
+          type: string
+          title: Branch
+        user:
+          type: string
+          title: User
+        source:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Source
+        reason:
+          type: string
+          title: Reason
+        message:
+          type: string
+          title: Message
+        started_at:
+          type: string
+          title: Started At
+        ended_at:
+          type: string
+          title: Ended At
+        written:
+          type: integer
+          title: Written
+        reported_at:
+          type: string
+          title: Reported At
+      type: object
+      required:
+      - id
+      - job
+      - branch
+      - user
+      - source
+      - reason
+      - message
+      - started_at
+      - ended_at
+      - written
+      - reported_at
+      title: JobReport
+    JobReportIn:
+      properties:
+        job:
+          type: string
+          maxLength: 100
+          minLength: 1
+          title: Job
+        project:
+          type: string
+          title: Project
+          description: org/project
+        branch:
+          type: string
+          title: Branch
+        user:
+          type: string
+          title: User
+          description: The principal id of the user the job ran for
+        source:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Source
+          description: The upload the job read, if it read one
+        reason:
+          type: string
+          maxLength: 100
+          minLength: 1
+          title: Reason
+          description: timeout, or what failed
+        message:
+          type: string
+          maxLength: 4000
+          minLength: 1
+          title: Message
+          description: What the user is told, with the upstream's status and text
+        started_at:
+          type: string
+          format: date-time
+          title: Started At
+        ended_at:
+          type: string
+          format: date-time
+          title: Ended At
+        written:
+          type: integer
+          minimum: 0.0
+          title: Written
+          description: How many records it wrote before it stopped; they stay, unreviewed
+          default: 0
+      type: object
+      required:
+      - job
+      - project
+      - branch
+      - user
+      - reason
+      - message
+      - started_at
+      - ended_at
+      title: JobReportIn
+    JobReportsOut:
+      properties:
+        graph:
+          type: string
+          title: Graph
+        branch:
+          type: string
+          title: Branch
+        jobs:
+          items:
+            $ref: '#/components/schemas/JobReport'
+          type: array
+          title: Jobs
+          description: Failed jobs not dismissed, the latest first
+      type: object
+      required:
+      - graph
+      - branch
+      - jobs
+      title: JobReportsOut
     JudgeIn:
       properties:
         claim:
@@ -7510,6 +8283,39 @@ components:
       - field
       - title
       title: Promise
+    ProviderOut:
+      properties:
+        id:
+          type: string
+          title: Id
+        name:
+          type: string
+          title: Name
+      type: object
+      required:
+      - id
+      - name
+      title: ProviderOut
+    PutOut:
+      properties:
+        upload:
+          $ref: '#/components/schemas/Upload'
+        url:
+          type: string
+          title: Url
+          description: A presigned PUT, for this one file, for fifteen minutes
+        headers:
+          additionalProperties:
+            type: string
+          type: object
+          title: Headers
+          description: 'Send exactly these headers with the PUT: the URL is signed with them'
+      type: object
+      required:
+      - upload
+      - url
+      - headers
+      title: PutOut
     QueuedUpdate:
       properties:
         org:
@@ -7539,7 +8345,15 @@ components:
           type: string
           title: Created At
         readiness:
-          $ref: '#/components/schemas/ReadinessOut'
+          anyOf:
+          - $ref: '#/components/schemas/ReadinessOut'
+          - type: 'null'
+          description: Null when it could not be read; error says why
+        error:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Error
       type: object
       required:
       - org
@@ -8176,6 +8990,111 @@ components:
       - graph
       - updates
       title: UpdatesOut
+    Upload:
+      properties:
+        id:
+          type: string
+          title: Id
+        graph:
+          type: string
+          title: Graph
+        branch:
+          type: string
+          title: Branch
+        filename:
+          type: string
+          title: Filename
+        content_type:
+          type: string
+          title: Content Type
+        size:
+          type: integer
+          title: Size
+        state:
+          type: string
+          enum:
+          - uploading
+          - completed
+          - merged
+          - discarded
+          - deleted
+          title: State
+        source:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Source
+          description: The Source it was completed into
+        created_at:
+          type: string
+          title: Created At
+      type: object
+      required:
+      - id
+      - graph
+      - branch
+      - filename
+      - content_type
+      - size
+      - state
+      - source
+      - created_at
+      title: Upload
+    UploadIn:
+      properties:
+        filename:
+          type: string
+          maxLength: 255
+          minLength: 1
+          title: Filename
+        content_type:
+          type: string
+          maxLength: 200
+          minLength: 1
+          title: Content Type
+        size:
+          type: integer
+          exclusiveMinimum: 0.0
+          title: Size
+          description: In bytes
+      type: object
+      required:
+      - filename
+      - content_type
+      - size
+      title: UploadIn
+    UploadOut:
+      properties:
+        upload:
+          $ref: '#/components/schemas/Upload'
+        original_url:
+          type: string
+          title: Original Url
+          description: A presigned GET of the original, for fifteen minutes
+      type: object
+      required:
+      - upload
+      - original_url
+      title: UploadOut
+    UploadsOut:
+      properties:
+        graph:
+          type: string
+          title: Graph
+        branch:
+          type: string
+          title: Branch
+        uploads:
+          items:
+            $ref: '#/components/schemas/Upload'
+          type: array
+          title: Uploads
+      type: object
+      required:
+      - graph
+      - branch
+      - uploads
+      title: UploadsOut
     ValidationError:
       properties:
         loc:

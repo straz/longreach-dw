@@ -1,0 +1,10 @@
+.connect-snippet {
+  overflow-x: auto;
+  padding: var(--space-3);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius);
+  background: var(--canvas);
+  font-size: var(--size-xs);
+  white-space: pre-wrap;
+  word-break: break-all;
+}

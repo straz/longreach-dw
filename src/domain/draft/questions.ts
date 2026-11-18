@@ -7,7 +7,7 @@ import { type Ref, refKey } from '../record.ts'
 // GraphPolicy will check before a merge are to do (they block it); the rest are suggestions, which never block.
 
 /** The records around the commitment, each with its own fields and links. */
-export type Around = { record?: Fields; links: Link[] }
+type Around = { record?: Fields; links: Link[] }
 
 export type Draft = { slug: string; record: Fields; links: Link[]; around: Record<string, Around> }
 

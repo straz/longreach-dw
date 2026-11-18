@@ -139,7 +139,7 @@ test('the user menu lists every demo, and opens another at its own clock', async
   serve({ 'GET /auth/me': [200, STEVE], 'GET /v1/demos': [200, { demos: DEMOS }] })
   open()
   fireEvent.click(await screen.findByRole('button', { name: /Dana Whitlock, CFO/ }))
-  const menu = screen.getByRole('group', { name: 'Open a demo as' })
+  const menu = screen.getByRole('group', { name: 'Your projects and demos' })
   expect(within(menu).getAllByRole('button', { name: /as of/ }).map((item) => item.textContent)).toEqual([
     'RCRhea CastilloProvost, Alder College, as of Nov 15, 2027',
     'DWDana WhitlockCFO, Fairhaven Systems, as of Mar 31, 2027Signed in',
@@ -207,7 +207,7 @@ test('a failed start over says why and keeps the menu open', async () => {
   fireEvent.click(await screen.findByRole('button', { name: /Dana Whitlock, CFO/ }))
   fireEvent.click(screen.getByRole('button', { name: 'Start over in Fairhaven Systems' }))
   expect(await screen.findByRole('alert')).toHaveTextContent('Could not start over: the graph service is not reachable')
-  expect(screen.getByRole('group', { name: 'Open a demo as' })).toBeInTheDocument()
+  expect(screen.getByRole('group', { name: 'Your projects and demos' })).toBeInTheDocument()
 })
 
 test('Escape closes the user menu and puts focus back on its button', async () => {

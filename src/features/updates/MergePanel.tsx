@@ -1,12 +1,13 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { useState } from 'react'
 import { Link } from 'react-router'
-import { say } from '../../app/Card.tsx'
 import { plural } from '../../domain/format.ts'
 import { textOf } from '../../domain/record.ts'
 import { useGateway } from '../../gateway/react.tsx'
+import { keys } from '../../queryKeys.ts'
+import { say } from '../../ui/Notice.tsx'
+import { type Change, changeId, mergeUpdate } from '../../updates.ts'
 import { useBasePath } from '../shared/routeState.ts'
-import { type Change, mergeUpdate } from '../../updates.ts'
+import { useAction } from '../shared/useAction.ts'
 import Conflicts from './Conflicts.tsx'
 import { useCurrentUpdate, useReadiness, useUpdateChoice, useUpdateDiff } from './useUpdates.ts'
 
@@ -38,28 +39,17 @@ export default function MergePanel({ onMerged }: { onMerged: (m: Merged) => void
   const update = useCurrentUpdate()
   const readiness = useReadiness()
   const diff = useUpdateDiff()
-  const [busy, setBusy] = useState(false)
-  const [problem, setProblem] = useState<string | null>(null)
+  const { busy, problem, run } = useAction()
   const found = readiness.data
 
-  const act = async (what: () => Promise<unknown>) => {
-    setBusy(true)
-    setProblem(null)
-    try {
-      await what()
-    } catch (e) {
-      setProblem(say(e))
-    } finally {
-      setBusy(false)
-    }
-  }
+  // The page says what was merged before it goes back to main, which unmounts this panel.
   const merge = () =>
-    act(async () => {
+    run(async () => {
       const summary = mergedSummary(update?.name ?? gateway.branch, diff.data?.changes ?? [])
       await mergeUpdate(gateway, gateway.branch)
-      choose(null)
-      await queryClient.invalidateQueries({ queryKey: [gateway.graph] })
       onMerged(summary)
+      choose(null)
+      await queryClient.invalidateQueries({ queryKey: keys.graph(gateway.graph) })
     })
 
   return (
@@ -89,7 +79,7 @@ export default function MergePanel({ onMerged }: { onMerged: (m: Merged) => void
               ))}
           </ul>
           {found.conflicts.length > 0 && (
-            <Conflicts key={found.conflicts.map((c) => `${c.kind}:${c.type}:${c.id}`).join()} conflicts={found.conflicts} mine={update?.mine ?? false} />
+            <Conflicts key={found.conflicts.map(changeId).join()} conflicts={found.conflicts} mine={update?.mine ?? false} />
           )}
           {found.policies
             .filter((p) => p.severity === 'error')
@@ -114,7 +104,7 @@ export default function MergePanel({ onMerged }: { onMerged: (m: Merged) => void
               </div>
             ))}
           <div className="merge-actions">
-            <button type="button" className="btn-action" disabled={!found.ready || busy} title={found.ready ? undefined : found.reasons.join('; ')} onClick={() => void merge()}>
+            <button type="button" className="btn-action" disabled={!found.ready || busy !== null} title={found.ready ? undefined : found.reasons.join('; ')} onClick={() => void merge()}>
               {busy ? 'Merging…' : 'Merge'}
             </button>
             {problem && (

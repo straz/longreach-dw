@@ -1,16 +1,22 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link as RouterLink, useParams } from 'react-router'
-import { useDemos } from '../../app/session.ts'
-import { Problem } from '../../app/Card.tsx'
 import { type Item, itemKey, palette } from '../../domain/draft/palette.ts'
 import { type Ref, refKey } from '../../domain/record.ts'
 import { createRecord, putRecord } from '../../entities.ts'
 import { useGateway } from '../../gateway/react.tsx'
+import { isMain } from '../../project.ts'
+import { PanelProblem } from '../../ui/Notice.tsx'
+import { keys } from '../../queryKeys.ts'
+import { uploadFile } from '../../sources.ts'
+import { startUpdate } from '../../updates.ts'
 import { useClient, useClock } from '../shared/client.tsx'
 import { useBasePath, useRouteState } from '../shared/routeState.ts'
 import { usePortfolio } from '../shared/usePortfolio.ts'
 import { useWriteContext } from '../shared/useWriteContext.ts'
+import { useAction } from '../shared/useAction.ts'
 import WriteError from '../shared/WriteError.tsx'
+import { useCurrentUpdate, useFollowWrite, useIsWriter, useUpdateChoice } from '../updates/useUpdates.ts'
 import Coach from './Coach.tsx'
 import { DraftContext, type DraftState, useDraftState } from './context.ts'
 import { InlineText } from './Inline.tsx'
@@ -20,10 +26,12 @@ import { Sentence } from './Sentence.tsx'
 import { useDismissed, useDraft, useModel, useUndoableWrites, useUnsaved } from './useDraft.ts'
 import './draft.css'
 
-// New commitment as a page, not a menu (docs/21-new-commitment.md, N1, phase A): #/<org>/draft asks what is being
-// committed to, and #/<org>/draft/<slug> is the drafting page, the outline beside the coach. Phase A runs in the
-// branch the visitor works in (an update of theirs, or their sandbox), on tyapi's generic record routes; Review and
-// Merge come with tyapi docs/20, phase 4.
+// New commitment as a page, not a menu (docs/21-new-commitment.md, N1, phase A): …/draft asks what is being
+// committed to, and …/draft/<slug> is the drafting page, the outline beside the coach, on tyapi's generic record
+// routes, in the branch the user works in: an update of theirs, or their sandbox of a demo. Starting a draft while
+// reading a project's main starts an update for it; a draft opened from main is read there, and edited in an update
+// started for it, so the page never changes branch under the user's hands. Review and Merge are the update's page
+// (features/updates/).
 
 export default function DraftPage() {
   const { slug } = useParams()
@@ -84,6 +92,7 @@ function Start() {
             or import a sample document
           </RouterLink>
         )}
+        <UploadButton disabled={readOnly} />
       </div>
       <WriteError error={writes.error} />
       <p className="start-example">
@@ -111,8 +120,13 @@ function Drafting({ slug }: { slug: string }) {
   const client = useClient()
   const base = useBasePath()
   const clock = useClock()
-  const { readOnly } = useWriteContext()
-  const demos = useDemos()
+  const writeContext = useWriteContext()
+  const writer = useIsWriter()
+  const { choose } = useUpdateChoice()
+  const current = useCurrentUpdate()
+  const onMain = isMain(gateway.branch) && writer
+  const readOnly = writeContext.readOnly || onMain
+  const starting = useAction()
   const model = useModel()
   const { draft, error, missing, retry } = useDraft(slug)
   const writes = useUndoableWrites()
@@ -122,7 +136,6 @@ function Drafting({ slug }: { slug: string }) {
   const [focus, setFocus] = useState<Ref>({ type: 'Commitment', slug })
   const [paletteOn, setPaletteOn] = useState<Ref | null>(null)
   const [editing, setEditing] = useState<string | null>(null)
-  const persona = demos.data?.find((d) => d.graph === gateway.graph)?.persona.name ?? 'you'
 
   const linksOf = useCallback((r: Ref) => (!draft ? [] : r.type === 'Commitment' && r.slug === draft.slug ? draft.links : (draft.around[refKey(r)]?.links ?? [])), [draft])
   const recordOf = useCallback((r: Ref) => (!draft ? undefined : r.type === 'Commitment' && r.slug === draft.slug ? draft.record : draft.around[refKey(r)]?.record), [draft])
@@ -170,7 +183,7 @@ function Drafting({ slug }: { slug: string }) {
             project: gateway,
             today: clock.today,
             readOnly,
-            persona,
+            who: client.who,
             writes,
             unsaved,
             focus,
@@ -184,7 +197,7 @@ function Drafting({ slug }: { slug: string }) {
             recordOf,
           }
         : null,
-    [model.data, draft, gateway, clock.today, readOnly, persona, writes, unsaved, focus, addCard, addByKey, editing, linksOf, recordOf],
+    [model.data, draft, gateway, clock.today, readOnly, client.who, writes, unsaved, focus, addCard, addByKey, editing, linksOf, recordOf],
   )
 
   if (missing) {
@@ -198,7 +211,7 @@ function Drafting({ slug }: { slug: string }) {
     )
   }
   if (error || model.error) {
-    return <Problem what="open the draft" error={error ?? model.error} onRetry={() => (model.error ? void model.refetch() : retry())} />
+    return <PanelProblem what="open the draft" error={error ?? model.error} onRetry={() => (model.error ? void model.refetch() : retry())} />
   }
   if (!state) return <p className="draft-loading">Opening the draft…</p>
   const r = state.draft.record
@@ -207,9 +220,23 @@ function Drafting({ slug }: { slug: string }) {
       <div className="draft">
         <header className="draft-head">
           <p className="draft-eyebrow">
-            Draft · proposed · {client.demo ? 'in your copy of the demo' : 'in your update'}
+            Draft · proposed · {isMain(gateway.branch) ? 'on main' : current?.sandbox ? 'in your copy of the demo' : 'in your update'}
             {readOnly && <span className="draft-readonly"> · read only</span>}
           </p>
+          {onMain && !writeContext.readOnly && (
+            <p className="draft-on-main">
+              You are reading main. Edit this draft in an update of yours, and merge it when it is ready.{' '}
+              <button
+                type="button"
+                className="btn-line is-small"
+                disabled={starting.busy !== null}
+                onClick={() => void starting.run(async () => choose((await startUpdate(gateway, `Draft: ${String(r.title ?? slug)}`)).branch))}
+              >
+                {starting.busy ? 'Starting an update…' : 'Edit in a new update'}
+              </button>
+              {starting.problem && <span role="alert"> Could not start one: {starting.problem}</span>}
+            </p>
+          )}
           <h1>
             <InlineText
               value={r.title as string}
@@ -290,5 +317,46 @@ function UndoToast() {
         Undo
       </button>
     </div>
+  )
+}
+
+/** Upload a document to read a draft from (tyapi P18): to the update worked in, or a new one named for the file.
+ *  Decision Watch's assistant reads it into a draft; until it does, the update's page lists it, kept. */
+function UploadButton({ disabled }: { disabled: boolean }) {
+  const gateway = useGateway()
+  const { go } = useRouteState()
+  const follow = useFollowWrite()
+  const queryClient = useQueryClient()
+  const input = useRef<HTMLInputElement>(null)
+  const { busy, problem, run } = useAction()
+  const send = (file: File) =>
+    run(async () => {
+      const made = await uploadFile(gateway, file)
+      await queryClient.invalidateQueries({ queryKey: keys.graph(gateway.graph) })
+      follow(made)
+      go('/update')
+    })
+  return (
+    <>
+      <input
+        ref={input}
+        type="file"
+        hidden
+        aria-label="A document to upload"
+        onChange={(e) => {
+          const file = e.target.files?.[0]
+          e.target.value = ''
+          if (file) void send(file)
+        }}
+      />
+      <button type="button" className="btn-quiet" disabled={disabled || busy !== null} onClick={() => input.current?.click()}>
+        {busy ? 'Uploading…' : 'or upload a document'}
+      </button>
+      {problem && (
+        <p role="alert" className="write-error">
+          Could not upload it: {problem}
+        </p>
+      )}
+    </>
   )
 }

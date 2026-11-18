@@ -1,0 +1,10 @@
+.panel-note {
+  max-width: 34rem;
+  margin: var(--space-6) auto;
+  padding: 0 var(--gutter);
+  color: var(--ink-2);
+}
+
+.panel-note p {
+  margin-bottom: var(--space-2);
+}

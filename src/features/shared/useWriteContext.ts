@@ -1,9 +1,7 @@
-import { useContext, useMemo } from 'react'
+import { useMemo } from 'react'
 import { isLookingBack } from '../../domain/clock.ts'
-import { useGateway } from '../../gateway/react.tsx'
-import { isMain } from '../../project.ts'
-import { UpdateContext } from '../updates/useUpdates.ts'
-import { useClock } from './client.tsx'
+import { useIsWriter } from '../updates/useUpdates.ts'
+import { useClient, useClock } from './client.tsx'
 import { useRouteState } from './routeState.ts'
 
 /**
@@ -18,14 +16,14 @@ export function useWriteContext(): { at: () => string; readOnly: boolean; why?: 
   const clock = useClock()
   const { asOf } = useRouteState()
   const back = isLookingBack(asOf, clock)
-  const branch = useGateway().branch
-  const reading = !(useContext(UpdateContext)?.writer ?? !isMain(branch))
+  const reading = !useIsWriter()
+  const demo = useClient().demo
   return useMemo(
     () => ({
       at: () => `${clock.today}T${new Date().toISOString().slice(11, 19)}Z`,
       readOnly: back || reading,
-      why: back ? 'Changes are turned off while looking back' : reading ? 'You can read this demo, not change it' : undefined,
+      why: back ? 'Changes are turned off while looking back' : reading ? `You can read this ${demo ? 'demo' : 'project'}, not change it` : undefined,
     }),
-    [clock.today, back, reading],
+    [clock.today, back, reading, demo],
   )
 }

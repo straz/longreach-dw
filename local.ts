@@ -6,6 +6,8 @@ import { fileURLToPath } from 'node:url'
 
 /** dw's dev server: the origin tyapi's gateway allows on a laptop. */
 export const LOCAL_APP = 'https://127.0.0.1:5173'
+/** Who the laptop's mock sign-in signs in as: the browser tests' visitor. */
+export const MOCK_VISITOR = 'steve@strassmann.com'
 /** The laptop's tyapi gateway. */
 export const LOCAL_API = 'https://127.0.0.1:8100'
 /** The tyapi checkout: TYAPI, or ../tyapi beside this repository. */

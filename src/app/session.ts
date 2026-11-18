@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { createContext, useContext } from 'react'
 import { answer, client, type Me, type Schemas } from '../api.ts'
+import { keys } from '../queryKeys.ts'
 import { fromApi } from '../wire.ts'
 
 // Who is signed in, the demos they can open (docs/PLAN.md §3, phase 2), and the projects of their own orgs (tyapi
@@ -10,13 +11,13 @@ import { fromApi } from '../wire.ts'
 /** A demo as the user menu lists it, its dates as days (src/wire.ts). */
 export type DemoListing = Schemas['DemoListing']
 
-export const useMe = () => useQuery({ queryKey: ['me'], queryFn: () => answer(client.GET('/auth/me')) })
+export const useMe = () => useQuery({ queryKey: keys.me, queryFn: () => answer(client.GET('/auth/me')) })
 
 /** How to name who is signed in: their email, or their name when they have none. */
 export const whoIs = (me: Me) => me.email ?? me.display_name
 
 export const useDemos = () =>
-  useQuery({ queryKey: ['demos'], queryFn: async () => fromApi((await answer(client.GET('/v1/demos'))).demos) })
+  useQuery({ queryKey: keys.demos, queryFn: async () => fromApi((await answer(client.GET('/v1/demos'))).demos) })
 
 /** A project the user can open (tyapi docs/20, P1), with their role and its state. */
 export type ProjectListing = Schemas['ProjectOut']
@@ -24,7 +25,7 @@ export type ProjectListing = Schemas['ProjectOut']
 /** The projects the user can open, and the orgs they may make one in. Polled while one is being made. */
 export const useProjects = () =>
   useQuery({
-    queryKey: ['projects'],
+    queryKey: keys.projects,
     queryFn: () => answer(client.GET('/v1/projects')),
     refetchInterval: (q) => (q.state.data?.projects.some((p) => p.state === 'creating') ? 2000 : false),
   })
@@ -32,8 +33,11 @@ export const useProjects = () =>
 /** Whether a role may change a project: write, maintain or admin. */
 export const writes = (role: string | null | undefined) => role === 'write' || role === 'maintain' || role === 'admin'
 
-/** The sandbox's cached answer: the branch the visitor reads and writes in a demo (Navbar sets it on Start over). */
-export const sandboxKey = (graph: string) => ['sandbox', graph] as const
+/** Make a project in an org the user owns or administers (tyapi P2); its graph is made after. */
+export const createProject = (org: string, name: string) => answer(client.POST('/v1/projects', { body: { org, name } }))
+
+/** Make an API key for the signed-in user, shown once: what an assistant connects to /v1/mcp with. */
+export const makeApiKey = () => answer(client.POST('/v1/api-keys'))
 
 /** The demo to open when the URL names none: the first with briefs, which has all of Decision Watch to show. */
 export const defaultDemo = (demos: DemoListing[]): DemoListing | undefined => demos.find((d) => d.briefs > 0) ?? demos[0]

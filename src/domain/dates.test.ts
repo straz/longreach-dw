@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { addDays, compareDates, dayOf, daysBetween } from './dates.ts'
+import { addDays, compareDates, dayOf, daysBetween, localToday, yearBefore } from './dates.ts'
 
 describe('dates', () => {
   it('dayOf takes the day of a moment', () => {
@@ -23,5 +23,15 @@ describe('dates', () => {
   it('compareDates sorts oldest first with missing dates last', () => {
     expect(['2027-05-01', undefined, '2027-04-01', undefined].sort(compareDates)).toEqual(['2027-04-01', '2027-05-01', undefined, undefined])
     expect(compareDates('2027-04-01', '2027-04-01')).toBe(0)
+  })
+})
+
+describe('the calendar day', () => {
+  it('is the local day, not UTC', () => {
+    expect(localToday(new Date(2026, 10, 17, 23, 30))).toBe('2026-11-17')
+  })
+  it('a year before keeps the day, and a leap day goes to the 28th', () => {
+    expect(yearBefore('2026-11-17')).toBe('2025-11-17')
+    expect(yearBefore('2028-02-29')).toBe('2027-02-28')
   })
 })

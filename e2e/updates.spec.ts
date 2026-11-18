@@ -1,17 +1,11 @@
-import { expect, type Page, test } from '@playwright/test'
-import { asKey, asVisitor, keyFor, mcp, open, reseed } from './helpers.ts'
+import { expect, test } from '@playwright/test'
+import { MOCK_VISITOR } from '../local.ts'
+import { FAIRHAVEN, addCard, asKey, asVisitor, keyFor, mcp, open, reseed, updateControl as control, updatesMenu as menu, writeCard } from './helpers.ts'
 
 // Updates (tyapi docs/20-projects-and-branches.md, Phase 2): the mock visitor starts an update, drafts in it, sees
 // its changes with pending marks, puts one back, finds the sandbox untouched, and discards the update.
 
 test.beforeEach(reseed)
-
-const control = (page: Page) => page.getByRole('button', { name: /^Working in/ })
-
-async function menu(page: Page) {
-  await control(page).click()
-  return page.getByRole('group', { name: 'Your updates' })
-}
 
 test('an update keeps its changes apart, lists them, puts one back, and is discarded', async ({ page }) => {
   await open(page, 'draft')
@@ -25,13 +19,8 @@ test('an update keeps its changes apart, lists them, puts one back, and is disca
   await page.getByRole('textbox', { name: 'What are you committing to?' }).fill('We will move patient records to the new platform by Q3.')
   await page.keyboard.press('Enter')
   await expect(page.getByRole('heading', { level: 1 })).toContainText('We will move patient records')
-  await page.getByRole('region', { name: 'The commitment' }).focus()
-  await page.keyboard.press('/')
-  await page.getByRole('dialog').getByRole('textbox').fill('assumption')
-  await page.keyboard.press('Enter')
-  const card = page.locator('.record-card.is-unsaved').last()
-  await card.getByRole('textbox').first().fill('The vendor certifies HIPAA by May')
-  await card.getByRole('textbox').first().press('Enter')
+  await addCard(page, 'assumption')
+  await writeCard(page, 'The vendor certifies HIPAA by May')
   const belief = page.locator('.record-card', { hasText: 'The vendor certifies HIPAA by May' }).first()
   await expect(belief.locator('.update-dot')).toBeVisible()
 
@@ -76,13 +65,8 @@ test('the readiness list says what blocks a merge, and clears as it is fixed', a
   await expect(panel.getByRole('button', { name: 'Merge' })).toBeDisabled()
 
   await panel.getByRole('link', { name: 'Open the draft' }).click()
-  await page.getByRole('region', { name: 'The commitment' }).focus()
-  await page.keyboard.press('/')
-  await page.getByRole('dialog').getByRole('textbox').fill('who owns')
-  await page.keyboard.press('Enter')
-  const card = page.locator('.record-card.is-unsaved').last()
-  await card.getByRole('textbox').first().fill('Priya Natarajan')
-  await card.getByRole('textbox').first().press('Enter')
+  await addCard(page, 'who owns')
+  await writeCard(page, 'Priya Natarajan')
   await expect(page.getByRole('region', { name: 'The commitment' })).toContainText('Priya Natarajan')
 
   await (await menu(page)).getByRole('link', { name: 'See what this update changes' }).click()
@@ -120,10 +104,10 @@ test('an assistant’s changes wait for my review before the update merges', asy
   await open(page, 'draft')
   // The assistant connects with my key, starts an update and proposes a commitment in it.
   const ai = await playwright.request.newContext({ ignoreHTTPSErrors: true })
-  const key = keyFor('steve@strassmann.com')
+  const key = keyFor(MOCK_VISITOR)
   await mcp(ai, key, 'initialize', { protocolVersion: '2025-06-18', clientInfo: { name: 'claude-code', title: 'Claude Code' } })
   const call = async (name: string, args: Record<string, unknown>) => JSON.parse((await mcp(ai, key, 'tools/call', { name, arguments: args }))!.content![0].text)
-  const project = 'fairhaven/commitments'
+  const project = FAIRHAVEN
   const { branch } = await call('start_update', { project, name: 'Drafted by Claude' })
   await call('put_record', {
     project,
@@ -147,4 +131,12 @@ test('an assistant’s changes wait for my review before the update merges', asy
   await expect(view.locator('.update-row', { hasText: 'Second data center' })).toContainText('reviewed')
   await expect(view.locator('.update-row', { hasText: 'Second data center' })).not.toContainText('not reviewed')
   await expect(panel).not.toContainText('not reviewed')
+})
+
+test('a document uploaded from the browser goes to the bucket and waits on the update to be read', async ({ page }) => {
+  await open(page, 'draft')
+  await page.getByLabel('A document to upload').setInputFiles({ name: 'RFP notes.txt', mimeType: 'text/plain', buffer: Buffer.from('We will move patient records by Q3.') })
+  const documents = page.getByRole('region', { name: 'Documents' })
+  await expect(documents).toContainText('RFP notes.txt')
+  await expect(documents).toContainText('kept; waiting to be read')
 })

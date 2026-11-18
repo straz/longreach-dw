@@ -15,8 +15,8 @@ export type DraftState = {
   project: Project
   today: string
   readOnly: boolean
-  /** Who signed in as the demo's persona, for the draft's notes. */
-  persona: string
+  /** Who the user works as (a demo's persona, or themselves), for the draft's notes. */
+  who: string
   writes: ReturnType<typeof useUndoableWrites>
   unsaved: ReturnType<typeof useUnsaved>
   focus: Ref

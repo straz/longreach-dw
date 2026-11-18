@@ -44,7 +44,7 @@ export interface paths {
             cookie?: never;
         };
         /** Whether the service can serve graph requests; needs no key */
-        get: operations["healthz_v1_healthz_head"];
+        get: operations["healthz_v1_healthz_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -686,6 +686,178 @@ export interface paths {
         get: operations["merge_queue_v1_merge_queue_get"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/projects/{org}/{project}/sources/uploads": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Start an upload: a presigned PUT for the file */
+        post: operations["start_upload_v1_projects__org___project__sources_uploads_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/projects/{org}/{project}/branches/{branch}/uploads": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The uploads made on an update */
+        get: operations["list_uploads_v1_projects__org___project__branches__branch__uploads_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/projects/{org}/{project}/sources/uploads/{upload_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** An upload, and a presigned GET of its original */
+        get: operations["get_upload_v1_projects__org___project__sources_uploads__upload_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/projects/{org}/{project}/sources/uploads/{upload_id}/converted": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** A presigned PUT for an upload's converted document */
+        post: operations["converted_url_v1_projects__org___project__sources_uploads__upload_id__converted_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/projects/{org}/{project}/sources/uploads/{upload_id}/complete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Complete an upload into a Source on its update */
+        post: operations["complete_upload_v1_projects__org___project__sources_uploads__upload_id__complete_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orgs/{org}/model-consent": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** An org's consent to outside model providers */
+        get: operations["get_consent_v1_orgs__org__model_consent_get"];
+        /** Consent for an org to model providers; owners and admins */
+        put: operations["give_consent_v1_orgs__org__model_consent_put"];
+        post?: never;
+        /** Withdraw an org's consent to model providers; owners and admins */
+        delete: operations["withdraw_consent_v1_orgs__org__model_consent_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/delegations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** A token for a client to act for the caller on one update, for an hour */
+        post: operations["delegate_v1_delegations_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/assist/job-reports": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Report a failed dw-assist job; svc-dw-assist only */
+        post: operations["report_job_v1_assist_job_reports_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/projects/{org}/{project}/branches/{branch}/jobs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** An update's failed assistant jobs, not dismissed */
+        get: operations["branch_jobs_v1_projects__org___project__branches__branch__jobs_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/projects/{org}/{project}/branches/{branch}/jobs/{report}/dismiss": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Dismiss a failed job's report; its user */
+        post: operations["dismiss_job_v1_projects__org___project__branches__branch__jobs__report__dismiss_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1476,6 +1648,27 @@ export interface components {
              */
             cursor: string;
         };
+        /** CompleteIn */
+        CompleteIn: {
+            /** Title */
+            title: string;
+            /**
+             * Kind
+             * @default document
+             * @enum {string}
+             */
+            kind: "meeting" | "document" | "contract" | "filing" | "email" | "thread" | "dataset" | "web" | "other";
+            /** Occurred At */
+            occurred_at?: string | null;
+        };
+        /** CompleteOut */
+        CompleteOut: {
+            upload: components["schemas"]["Upload"];
+            /** Source */
+            source: string;
+            /** Graph Commit Id */
+            graph_commit_id: string | null;
+        };
         /** Conflict */
         Conflict: {
             /**
@@ -1521,6 +1714,61 @@ export interface components {
                 [key: string]: unknown;
             } | null;
         };
+        /** ConsentIn */
+        ConsentIn: {
+            /** Providers */
+            providers: ("anthropic" | "typesafe")[];
+            /**
+             * Terms Version
+             * @description The version of the terms shown, as GET answered it
+             */
+            terms_version: string;
+        };
+        /** ConsentNow */
+        ConsentNow: {
+            /** Providers */
+            providers: string[];
+            /** Terms Version */
+            terms_version: string;
+            /** By */
+            by: string;
+            /** By Name */
+            by_name: string | null;
+            /** At */
+            at: string;
+        };
+        /** ConsentOut */
+        ConsentOut: {
+            /** Org */
+            org: string;
+            /**
+             * Offered
+             * @description The providers an org may consent to
+             */
+            offered: components["schemas"]["ProviderOut"][];
+            /** Terms Version */
+            terms_version: string;
+            /**
+             * Terms
+             * @description What consenting agrees to, as shown; consent names this version
+             */
+            terms: string;
+            /** @description The org's consent now; null when it has none, or withdrew it */
+            consent: components["schemas"]["ConsentNow"] | null;
+            /**
+             * Can Change
+             * @description Whether the caller may give or withdraw it: an owner or admin of the org
+             */
+            can_change: boolean;
+        };
+        /** ConvertedIn */
+        ConvertedIn: {
+            /**
+             * Content Type
+             * @default text/markdown
+             */
+            content_type: string;
+        };
         /** DecisionIn */
         DecisionIn: {
             /** Brief */
@@ -1545,6 +1793,53 @@ export interface components {
              * @enum {string}
              */
             approval: "own" | "agreed" | "request";
+        };
+        /** DelegationIn */
+        DelegationIn: {
+            /**
+             * Client
+             * @description One of the clients the gateway lists: dw-assist
+             */
+            client: string;
+            /**
+             * Project
+             * @description org/project
+             */
+            project: string;
+            /**
+             * Branch
+             * @description An update of the caller's
+             */
+            branch: string;
+            /**
+             * Scope
+             * @default write
+             * @enum {string}
+             */
+            scope: "read" | "write";
+        };
+        /** DelegationOut */
+        DelegationOut: {
+            /**
+             * Token
+             * @description Sent as a bearer token by the client; an hour long
+             */
+            token: string;
+            /** Expires At */
+            expires_at: string;
+            /** Client */
+            client: string;
+            /** Graph */
+            graph: string;
+            /** Branch */
+            branch: string;
+            /** Scope */
+            scope: string;
+            /**
+             * Providers
+             * @description The model providers the client may call: the org's consent
+             */
+            providers: string[];
         };
         /** DeletedOut */
         DeletedOut: {
@@ -1823,7 +2118,7 @@ export interface components {
             graph: string;
             /**
              * Branch
-             * @description Where it was written: the update named, or the caller's sandbox
+             * @description Where it was written: the update named, the caller's sandbox, or the update the write started
              */
             branch: string;
             /** Type */
@@ -1990,6 +2285,91 @@ export interface components {
             prefix?: string | null;
             /** Suffix */
             suffix?: string | null;
+        };
+        /** JobReport */
+        JobReport: {
+            /** Id */
+            id: number;
+            /** Job */
+            job: string;
+            /** Branch */
+            branch: string;
+            /** User */
+            user: string;
+            /** Source */
+            source: string | null;
+            /** Reason */
+            reason: string;
+            /** Message */
+            message: string;
+            /** Started At */
+            started_at: string;
+            /** Ended At */
+            ended_at: string;
+            /** Written */
+            written: number;
+            /** Reported At */
+            reported_at: string;
+        };
+        /** JobReportIn */
+        JobReportIn: {
+            /** Job */
+            job: string;
+            /**
+             * Project
+             * @description org/project
+             */
+            project: string;
+            /** Branch */
+            branch: string;
+            /**
+             * User
+             * @description The principal id of the user the job ran for
+             */
+            user: string;
+            /**
+             * Source
+             * @description The upload the job read, if it read one
+             */
+            source?: string | null;
+            /**
+             * Reason
+             * @description timeout, or what failed
+             */
+            reason: string;
+            /**
+             * Message
+             * @description What the user is told, with the upstream's status and text
+             */
+            message: string;
+            /**
+             * Started At
+             * Format: date-time
+             */
+            started_at: string;
+            /**
+             * Ended At
+             * Format: date-time
+             */
+            ended_at: string;
+            /**
+             * Written
+             * @description How many records it wrote before it stopped; they stay, unreviewed
+             * @default 0
+             */
+            written: number;
+        };
+        /** JobReportsOut */
+        JobReportsOut: {
+            /** Graph */
+            graph: string;
+            /** Branch */
+            branch: string;
+            /**
+             * Jobs
+             * @description Failed jobs not dismissed, the latest first
+             */
+            jobs: components["schemas"]["JobReport"][];
         };
         /** JudgeIn */
         JudgeIn: {
@@ -2402,6 +2782,29 @@ export interface components {
             /** Title */
             title: string;
         };
+        /** ProviderOut */
+        ProviderOut: {
+            /** Id */
+            id: string;
+            /** Name */
+            name: string;
+        };
+        /** PutOut */
+        PutOut: {
+            upload: components["schemas"]["Upload"];
+            /**
+             * Url
+             * @description A presigned PUT, for this one file, for fifteen minutes
+             */
+            url: string;
+            /**
+             * Headers
+             * @description Send exactly these headers with the PUT: the URL is signed with them
+             */
+            headers: {
+                [key: string]: string;
+            };
+        };
         /** QueuedUpdate */
         QueuedUpdate: {
             /** Org */
@@ -2420,7 +2823,10 @@ export interface components {
             author_name: string | null;
             /** Created At */
             created_at: string;
-            readiness: components["schemas"]["ReadinessOut"];
+            /** @description Null when it could not be read; error says why */
+            readiness: components["schemas"]["ReadinessOut"] | null;
+            /** Error */
+            error?: string | null;
         };
         /** Rationale */
         Rationale: {
@@ -2802,6 +3208,63 @@ export interface components {
              * @description Open updates, the most recently changed first
              */
             updates: components["schemas"]["UpdateOut"][];
+        };
+        /** Upload */
+        Upload: {
+            /** Id */
+            id: string;
+            /** Graph */
+            graph: string;
+            /** Branch */
+            branch: string;
+            /** Filename */
+            filename: string;
+            /** Content Type */
+            content_type: string;
+            /** Size */
+            size: number;
+            /**
+             * State
+             * @enum {string}
+             */
+            state: "uploading" | "completed" | "merged" | "discarded" | "deleted";
+            /**
+             * Source
+             * @description The Source it was completed into
+             */
+            source: string | null;
+            /** Created At */
+            created_at: string;
+        };
+        /** UploadIn */
+        UploadIn: {
+            /** Filename */
+            filename: string;
+            /** Content Type */
+            content_type: string;
+            /**
+             * Size
+             * @description In bytes
+             */
+            size: number;
+        };
+        /** UploadOut */
+        UploadOut: {
+            upload: components["schemas"]["Upload"];
+            /**
+             * Original Url
+             * @description A presigned GET of the original, for fifteen minutes
+             */
+            original_url: string;
+        };
+        /** UploadsOut */
+        UploadsOut: {
+            /** Graph */
+            graph: string;
+            /** Branch */
+            branch: string;
+            /** Uploads */
+            uploads: components["schemas"]["Upload"][];
         };
         /** ValidationError */
         ValidationError: {
@@ -3436,7 +3899,7 @@ export interface operations {
             };
         };
     };
-    healthz_v1_healthz_head: {
+    healthz_v1_healthz_get: {
         parameters: {
             query?: never;
             header?: never;
@@ -3949,7 +4412,7 @@ export interface operations {
     import_document_v1_projects__org___project__imports_post: {
         parameters: {
             query?: {
-                /** @description The caller's update to write (GET .../branches); their sandbox when left out */
+                /** @description The caller's update to write (GET .../branches). Left out: in a demo, their sandbox; in any other project, a new update of theirs */
                 branch?: string | null;
             };
             header?: never;
@@ -3988,7 +4451,7 @@ export interface operations {
     start_blank_v1_projects__org___project__commitments_post: {
         parameters: {
             query?: {
-                /** @description The caller's update to write (GET .../branches); their sandbox when left out */
+                /** @description The caller's update to write (GET .../branches). Left out: in a demo, their sandbox; in any other project, a new update of theirs */
                 branch?: string | null;
             };
             header?: never;
@@ -4023,7 +4486,7 @@ export interface operations {
     accept_field_v1_projects__org___project__commitments__slug__fields__field__accept_post: {
         parameters: {
             query?: {
-                /** @description The caller's update to write (GET .../branches); their sandbox when left out */
+                /** @description The caller's update to write (GET .../branches). Left out: in a demo, their sandbox; in any other project, a new update of theirs */
                 branch?: string | null;
             };
             header?: never;
@@ -4060,7 +4523,7 @@ export interface operations {
     replace_field_v1_projects__org___project__commitments__slug__fields__field__replace_post: {
         parameters: {
             query?: {
-                /** @description The caller's update to write (GET .../branches); their sandbox when left out */
+                /** @description The caller's update to write (GET .../branches). Left out: in a demo, their sandbox; in any other project, a new update of theirs */
                 branch?: string | null;
             };
             header?: never;
@@ -4101,7 +4564,7 @@ export interface operations {
     activate_v1_projects__org___project__commitments__slug__activate_post: {
         parameters: {
             query?: {
-                /** @description The caller's update to write (GET .../branches); their sandbox when left out */
+                /** @description The caller's update to write (GET .../branches). Left out: in a demo, their sandbox; in any other project, a new update of theirs */
                 branch?: string | null;
             };
             header?: never;
@@ -4137,7 +4600,7 @@ export interface operations {
     watch_v1_projects__org___project__commitments__slug__watch_put: {
         parameters: {
             query?: {
-                /** @description The caller's update to write (GET .../branches); their sandbox when left out */
+                /** @description The caller's update to write (GET .../branches). Left out: in a demo, their sandbox; in any other project, a new update of theirs */
                 branch?: string | null;
             };
             header?: never;
@@ -4177,7 +4640,7 @@ export interface operations {
     judge_v1_projects__org___project__judgments_post: {
         parameters: {
             query?: {
-                /** @description The caller's update to write (GET .../branches); their sandbox when left out */
+                /** @description The caller's update to write (GET .../branches). Left out: in a demo, their sandbox; in any other project, a new update of theirs */
                 branch?: string | null;
             };
             header?: never;
@@ -4216,7 +4679,7 @@ export interface operations {
     review_flag_v1_projects__org___project__reviews_post: {
         parameters: {
             query?: {
-                /** @description The caller's update to write (GET .../branches); their sandbox when left out */
+                /** @description The caller's update to write (GET .../branches). Left out: in a demo, their sandbox; in any other project, a new update of theirs */
                 branch?: string | null;
             };
             header?: never;
@@ -4255,7 +4718,7 @@ export interface operations {
     record_decision_v1_projects__org___project__decisions_post: {
         parameters: {
             query?: {
-                /** @description The caller's update to write (GET .../branches); their sandbox when left out */
+                /** @description The caller's update to write (GET .../branches). Left out: in a demo, their sandbox; in any other project, a new update of theirs */
                 branch?: string | null;
             };
             header?: never;
@@ -4294,7 +4757,7 @@ export interface operations {
     approve_decision_v1_projects__org___project__decisions__decision__approve_post: {
         parameters: {
             query?: {
-                /** @description The caller's update to write (GET .../branches); their sandbox when left out */
+                /** @description The caller's update to write (GET .../branches). Left out: in a demo, their sandbox; in any other project, a new update of theirs */
                 branch?: string | null;
             };
             header?: never;
@@ -4399,7 +4862,7 @@ export interface operations {
     put_entity_route_v1_projects__org___project__entities__type_name___slug__put: {
         parameters: {
             query?: {
-                /** @description The caller's update to write (GET .../branches); their sandbox when left out */
+                /** @description The caller's update to write (GET .../branches). Left out: in a demo, their sandbox; in any other project, a new update of theirs */
                 branch?: string | null;
             };
             header?: never;
@@ -4440,7 +4903,7 @@ export interface operations {
     delete_entity_v1_projects__org___project__entities__type_name___slug__delete: {
         parameters: {
             query?: {
-                /** @description The caller's update to write (GET .../branches); their sandbox when left out */
+                /** @description The caller's update to write (GET .../branches). Left out: in a demo, their sandbox; in any other project, a new update of theirs */
                 branch?: string | null;
             };
             header?: never;
@@ -4514,7 +4977,7 @@ export interface operations {
     create_entity_v1_projects__org___project__entities__type_name__post: {
         parameters: {
             query?: {
-                /** @description The caller's update to write (GET .../branches); their sandbox when left out */
+                /** @description The caller's update to write (GET .../branches). Left out: in a demo, their sandbox; in any other project, a new update of theirs */
                 branch?: string | null;
             };
             header?: never;
@@ -4554,7 +5017,7 @@ export interface operations {
     put_edge_v1_projects__org___project__edges__type_name__put: {
         parameters: {
             query?: {
-                /** @description The caller's update to write (GET .../branches); their sandbox when left out */
+                /** @description The caller's update to write (GET .../branches). Left out: in a demo, their sandbox; in any other project, a new update of theirs */
                 branch?: string | null;
             };
             header?: never;
@@ -4596,9 +5059,9 @@ export interface operations {
             query: {
                 from: string;
                 to: string;
-                /** @description For a judgment: whose; the persona's when left out */
+                /** @description For a judgment: whose; the write's actor when left out */
                 judged_by?: string | null;
-                /** @description The caller's update to write (GET .../branches); their sandbox when left out */
+                /** @description The caller's update to write (GET .../branches). Left out: in a demo, their sandbox; in any other project, a new update of theirs */
                 branch?: string | null;
             };
             header?: never;
@@ -5037,6 +5500,415 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["MergeQueueOut"];
+                };
+            };
+        };
+    };
+    start_upload_v1_projects__org___project__sources_uploads_post: {
+        parameters: {
+            query?: {
+                /** @description The caller's update to write (GET .../branches). Left out: in a demo, their sandbox; in any other project, a new update of theirs */
+                branch?: string | null;
+            };
+            header?: never;
+            path: {
+                org: string;
+                project: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UploadIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PutOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_uploads_v1_projects__org___project__branches__branch__uploads_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                project: string;
+                branch: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UploadsOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_upload_v1_projects__org___project__sources_uploads__upload_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                project: string;
+                upload_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UploadOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    converted_url_v1_projects__org___project__sources_uploads__upload_id__converted_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                project: string;
+                upload_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ConvertedIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PutOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    complete_upload_v1_projects__org___project__sources_uploads__upload_id__complete_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                project: string;
+                upload_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CompleteIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CompleteOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_consent_v1_orgs__org__model_consent_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConsentOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    give_consent_v1_orgs__org__model_consent_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ConsentIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConsentOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    withdraw_consent_v1_orgs__org__model_consent_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConsentOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delegate_v1_delegations_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DelegationIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DelegationOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    report_job_v1_assist_job_reports_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["JobReportIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JobReport"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    branch_jobs_v1_projects__org___project__branches__branch__jobs_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                project: string;
+                branch: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JobReportsOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    dismiss_job_v1_projects__org___project__branches__branch__jobs__report__dismiss_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                project: string;
+                branch: string;
+                report: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JobReport"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

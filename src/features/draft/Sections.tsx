@@ -2,6 +2,7 @@ import { useRef, useState } from 'react'
 import { NESTED, SECTIONS, type Section, cardLabel, facetOf, sectionOf, stableOrder } from '../../domain/draft/outline.ts'
 import { textField } from '../../domain/draft/records.ts'
 import { verbOf } from '../../domain/draft/verbs.ts'
+import { plural } from '../../domain/format.ts'
 import { type Ref, refKey } from '../../domain/record.ts'
 import type { Link } from '../../entities.ts'
 import { usePending } from '../updates/useUpdates.ts'
@@ -101,7 +102,7 @@ function RecordCard({ link, parent }: { link: Link; parent: Ref }) {
         <span className="card-label" title={`${link.type} · ${verbOf(link)}`}>
           {label}
         </span>
-        {shared > 0 && <span className="cross-badge">also underpins {shared} other {shared === 1 ? 'commitment' : 'commitments'}</span>}
+        {shared > 0 && <span className="cross-badge">also underpins {plural(shared, 'other commitment')}</span>}
         <span className="card-tools">
           {!readOnly && kinds.length > 0 && link.type !== 'Party' && record && (
             <InlineSelect value={(record.kind as string) ?? link.kind ?? undefined} values={kinds} label={`${label}: kind`} onSave={(v) => v && saveField(ref, 'kind', v, record.kind)} />

@@ -106,3 +106,7 @@ a {
   border-radius: 50%;
   background: var(--update);
 }
+
+.update-dot.is-main {
+  background: var(--ink-3);
+}

@@ -89,6 +89,13 @@
   color: var(--attention-ink);
 }
 
+.draft-on-main {
+  grid-column: 1 / -1;
+  margin: var(--space-2) 0 0;
+  font-size: var(--size-sm);
+  color: var(--ink-2);
+}
+
 .draft-head h1 {
   margin: 0;
   font-family: var(--serif);

@@ -8,8 +8,8 @@ import { toApi } from './wire.ts'
 
 // Decision Watch's writes (docs/PLAN.md §2: no planners here). Each is one of tyapi's domain routes, which reads
 // what it needs from the graph and builds the records on the server, as the demo's persona, at the demo's clock
-// (tyapi docs/18-dw-backend.md §3). dw sends only the intent; features/shared/useService.ts then refetches the
-// demo's answers. The screens work in calendar days; a day in a body goes out as its midnight in UTC, the form a
+// (tyapi docs/18-dw-backend.md §3). These routes are a demo's; a project of the user's own is written through
+// src/entities.ts. dw sends only the intent; features/shared/useService.ts then refetches the demo's answers. The screens work in calendar days; a day in a body goes out as its midnight in UTC, the form a
 // calendar day is stored in (tyapi W14; src/wire.ts).
 
 export type Written = Schemas['WriteOut']

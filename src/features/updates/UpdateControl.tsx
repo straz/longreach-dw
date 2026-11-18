@@ -1,48 +1,43 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { Link } from 'react-router'
-import { say } from '../../app/Card.tsx'
+import { plural } from '../../domain/format.ts'
 import { useGateway } from '../../gateway/react.tsx'
-import { isMain } from '../../project.ts'
-import { useBasePath } from '../shared/routeState.ts'
+import { MAIN, isMain } from '../../project.ts'
+import { keys } from '../../queryKeys.ts'
 import { Menu } from '../../ui/Menu.tsx'
 import { type Update, discardUpdate, renameUpdate, startUpdate } from '../../updates.ts'
+import { useClient } from '../shared/client.tsx'
+import { useBasePath } from '../shared/routeState.ts'
+import { useAction } from '../shared/useAction.ts'
 import './updates.css'
-import { updatesQuery, useCurrentUpdate, useUpdateChoice, useUpdateDiffPoll, useUpdates } from './useUpdates.ts'
+import { useCurrentUpdate, useUpdateChoice, useUpdates } from './useUpdates.ts'
 
-// The update control (tyapi docs/20, §3 and P5): which of the visitor's updates the demo is read and written in.
-// A navbar menu: the visitor's updates and their sandbox, each with how many records it changes; a new update,
-// named; and for the one open, its changes, Rename and Discard.
+// The update control (tyapi docs/20, §3 and P5): which of the user's updates the demo or project is read and
+// written in. A navbar menu: in a project, main; the user's updates (and their sandbox of a demo), each with how
+// many records it changes; a new update, named; and for the one open, its changes, Rename and Discard.
 
-const counted = (n: number) => (n === 0 ? 'No changes yet' : n === 1 ? '1 record changed' : `${n} records changed`)
+const counted = (n: number) => (n === 0 ? 'No changes yet' : `${plural(n, 'record')} changed`)
 
-export default function UpdateControl({ me }: { me: string }) {
+export default function UpdateControl() {
   const gateway = useGateway()
   const base = useBasePath()
   const queryClient = useQueryClient()
-  const { choose, writer } = useUpdateChoice()
+  const { choose, writer, base: start } = useUpdateChoice()
+  const { demo } = useClient()
   const updates = useUpdates()
   const current = useCurrentUpdate()
-  useUpdateDiffPoll(me)
   const [naming, setNaming] = useState('')
   const [renaming, setRenaming] = useState<string | null>(null)
-  const [busy, setBusy] = useState(false)
-  const [problem, setProblem] = useState<string | null>(null)
+  const { busy, problem, run } = useAction()
   if (!writer) return null
 
-  const listKey = updatesQuery(gateway).queryKey
-  const act = async (what: () => Promise<unknown>) => {
-    setBusy(true)
-    setProblem(null)
-    try {
+  const listKey = keys.updates(gateway.graph)
+  const act = (what: () => Promise<unknown>) =>
+    run(async () => {
       await what()
       await queryClient.invalidateQueries({ queryKey: listKey })
-    } catch (e) {
-      setProblem(say(e))
-    } finally {
-      setBusy(false)
-    }
-  }
+    })
   // A new update is in the list before it is chosen, so it is never taken for one discarded.
   const begin = (name: string, close: () => void) =>
     act(async () => {
@@ -52,8 +47,9 @@ export default function UpdateControl({ me }: { me: string }) {
       choose(made.branch)
       close()
     })
-  const mine = (updates.data ?? []).filter((u) => u.mine)
-  const name = isMain(gateway.branch) ? 'main' : !current || current.sandbox ? 'Sandbox' : current.name
+  const mine = updates.data ?? []
+  const name = isMain(gateway.branch) ? 'main' : current ? (current.sandbox ? 'Sandbox' : current.name) : demo ? 'Sandbox' : 'an update'
+  const onMain = isMain(gateway.branch)
   const face = (
     <>
       <span className="update-dot" aria-hidden="true" />
@@ -67,6 +63,24 @@ export default function UpdateControl({ me }: { me: string }) {
     <Menu face={face} label="Your updates">
       {(close) => (
         <>
+          {start === MAIN && (
+            <button
+              type="button"
+              aria-current={onMain || undefined}
+              className={`menu-item${onMain ? ' is-current' : ''}`}
+              onClick={() => {
+                choose(null)
+                close()
+              }}
+            >
+              <span className="update-dot is-main" aria-hidden="true" />
+              <span>
+                <strong>main</strong>
+                <span>What everyone reads; a change made here starts an update</span>
+              </span>
+              {onMain && <span className="menu-current">Open</span>}
+            </button>
+          )}
           <p className="menu-heading">Your updates</p>
           {mine.map((u) => {
             const here = u.branch === gateway.branch
@@ -97,7 +111,7 @@ export default function UpdateControl({ me }: { me: string }) {
               if (naming.trim()) void begin(naming.trim(), close)
             }}
           >
-            <input className="menu-input" aria-label="Name a new update" placeholder="New update: name it…" value={naming} onChange={(e) => setNaming(e.target.value)} disabled={busy} />
+            <input className="menu-input" aria-label="Name a new update" placeholder="New update: name it…" value={naming} onChange={(e) => setNaming(e.target.value)} disabled={busy !== null} />
           </form>
           <p className="menu-note">Each update keeps its changes apart from the others, until it is merged or discarded.</p>
           {!isMain(gateway.branch) && (
@@ -108,7 +122,7 @@ export default function UpdateControl({ me }: { me: string }) {
               </Link>
             </>
           )}
-          {isMain(gateway.branch) && <p className="menu-note">You are reading main: a change you make starts an update of its own.</p>}
+
           {current && !current.sandbox && (
             <>
               {renaming === null ? (
@@ -130,9 +144,9 @@ export default function UpdateControl({ me }: { me: string }) {
               <button
                 type="button"
                 className="menu-item is-plain"
-                disabled={busy}
+                disabled={busy !== null}
                 onClick={() => {
-                  if (!window.confirm(`Discard “${current.name}”? Its ${current.changes === 1 ? 'change is' : `${current.changes} changes are`} deleted.`)) return
+                  if (!window.confirm(`Discard “${current.name}”? ${current.changes === 1 ? 'Its change is' : `Its ${plural(current.changes, 'change')} are`} deleted.`)) return
                   void act(async () => {
                     await discardUpdate(gateway, current.branch)
                     choose(null)

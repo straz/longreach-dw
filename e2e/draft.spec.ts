@@ -1,32 +1,11 @@
-import { expect, type Page, test } from '@playwright/test'
-import { open, reseed } from './helpers.ts'
+import { expect, test } from '@playwright/test'
+import { addCard as add, open, reseed, writeCard as write } from './helpers.ts'
 
 // The drafting page, phase A (tyapi docs/21-new-commitment.md, §7): a commitment written from the keyboard with an
 // owner, two assumptions, evidence for one, a stop rule and a risk, in the mock visitor's sandbox of Fairhaven; and
 // an unsaved card that a reload keeps.
 
 test.beforeEach(reseed)
-
-/** Open the palette on the commitment, or on a card, and choose what to add by typing part of its words. */
-async function add(page: Page, what: string, on?: string) {
-  if (on) await page.locator('.record-card', { hasText: on }).first().focus()
-  else await page.getByRole('region', { name: 'The commitment' }).focus()
-  await page.keyboard.press('/')
-  const palette = page.getByRole('dialog')
-  await expect(palette).toBeVisible()
-  await palette.getByRole('textbox').fill(what)
-  await page.keyboard.press('Enter')
-  await expect(palette).toBeHidden()
-}
-
-/** Type a new card's text and save it with Enter. */
-async function write(page: Page, text: string) {
-  const card = page.locator('.record-card.is-unsaved').last()
-  await card.getByRole('textbox').first().fill(text)
-  await card.getByRole('textbox').first().press('Enter')
-  await expect(page.locator('.record-card.is-unsaved')).toHaveCount(0)
-  await expect(page.getByRole('article')).toContainText(text)
-}
 
 test('a commitment drafted from the keyboard, its gaps asked for as it grows', async ({ page }) => {
   await open(page, 'draft')

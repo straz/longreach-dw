@@ -2,7 +2,9 @@ import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/reac
 import { useState } from 'react'
 import { createHashRouter, RouterProvider } from 'react-router'
 import { ApiError, answer, client as api, type Me, signInUrl } from '../api.ts'
-import { Card, Problem, say } from './Card.tsx'
+import { keys } from '../queryKeys.ts'
+import { say } from '../ui/Notice.tsx'
+import { Card, Problem } from './Card.tsx'
 import { routes } from './routes.tsx'
 import { SessionContext, takeSigninRefusal, useMe } from './session.ts'
 
@@ -57,7 +59,7 @@ function Signed({ me }: { me: Me }) {
       await answer(api.POST('/auth/logout'))
       // Forget every answer but who is signed in, then ask that again: its 401 shows the sign-in.
       queryClient.removeQueries({ predicate: (q) => q.queryKey[0] !== 'me' })
-      await queryClient.invalidateQueries({ queryKey: ['me'] })
+      await queryClient.invalidateQueries({ queryKey: keys.me })
     } catch (e) {
       setProblem(say(e))
     }

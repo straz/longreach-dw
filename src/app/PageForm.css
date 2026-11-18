@@ -1,4 +1,4 @@
-.new-project {
+.page-form {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
@@ -6,7 +6,7 @@
   text-align: left;
 }
 
-.new-project label {
+.page-form label {
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
@@ -14,8 +14,8 @@
   color: var(--ink-2);
 }
 
-.new-project input,
-.new-project select {
+.page-form input,
+.page-form select {
   height: var(--control-h);
   padding: 0 var(--space-2);
   border: 1px solid var(--line);
@@ -23,19 +23,29 @@
   font-size: var(--size-body);
 }
 
-.connect-snippet {
-  overflow-x: auto;
-  padding: var(--space-3);
-  border: 1px solid var(--line-soft);
-  border-radius: var(--radius);
-  background: var(--canvas);
-  font-size: var(--size-xs);
-  white-space: pre-wrap;
-  word-break: break-all;
-}
-
-.new-project-actions {
+.page-form-actions {
   display: flex;
   align-items: center;
   gap: var(--space-3);
+}
+
+.page-form-problem {
+  font-size: var(--size-sm);
+  color: var(--attention-ink);
+}
+
+.page-form .page-form-check {
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--ink);
+}
+
+.page-form .page-form-check input {
+  height: auto;
+}
+
+.page-form-terms {
+  font-size: var(--size-sm);
+  color: var(--ink-3);
 }

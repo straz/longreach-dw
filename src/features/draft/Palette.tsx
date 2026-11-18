@@ -65,7 +65,7 @@ export default function Palette({ focus, onClose }: { focus: Ref; onClose: () =>
     const ways = items.filter((i) => i.type === hit.type && !i.full)
     // One way to link it: link it. Several (an assumption, a prediction…): the verbs differ only by kind, so
     // the edges decide; ask when there is more than one edge.
-    const edges = [...new Map(ways.map((w) => [`${w.edge}:${w.direction}`, w])).values()]
+    const edges = oneEach(ways)
     if (edges.length === 1) void link(edges[0], hit)
     else setChoosing(hit)
   }
@@ -112,10 +112,7 @@ export default function Palette({ focus, onClose }: { focus: Ref; onClose: () =>
         </div>
         {choosing ? (
           <ul className="palette-list" role="listbox" aria-label={`How ${choosing.text} relates`}>
-            {items
-              .filter((i) => i.type === choosing.type && !i.full)
-              .filter((i, n, all) => all.findIndex((o) => o.edge === i.edge && o.direction === i.direction) === n)
-              .map((i) => (
+            {oneEach(items.filter((i) => i.type === choosing.type && !i.full)).map((i) => (
                 <li key={itemKey(i)}>
                   <button type="button" className="palette-item" onClick={() => void link(i, choosing)}>
                     <strong>
@@ -167,3 +164,6 @@ export default function Palette({ focus, onClose }: { focus: Ref; onClose: () =>
     </div>
   )
 }
+
+/** One item per edge and direction: the ways to link a record, which differ by kind only within an edge. */
+const oneEach = (items: Item[]) => [...new Map(items.map((i) => [`${i.edge}:${i.direction}`, i])).values()]

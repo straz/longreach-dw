@@ -1,11 +1,12 @@
-// The project a call goes to, and the branch of it the visitor works in (tyapi docs/20-projects-and-branches.md,
-// P5): an update of theirs, their sandbox of a demo, or main for a visitor who may only read it.
+// The project a call goes to, and the branch of it the user works in (tyapi docs/20-projects-and-branches.md, P5):
+// an update of theirs, their sandbox of a demo, or main.
 
 export type Project = { org: string; project: string; branch?: string }
 
 export const MAIN = 'main'
 
-/** Whether a branch is main: read only here, since every change goes to an update or a sandbox. */
+/** Whether a branch is main: what everyone reads. A demo's visitor writes their sandbox or an update; a project's
+ *  writer reading main starts an update with their first change (tyapi P5). */
 export const isMain = (branch: string | undefined) => !branch || branch === MAIN
 
 /** A call's path parameters. */

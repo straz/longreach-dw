@@ -1,7 +1,9 @@
 import type { ReactNode } from 'react'
+import { say } from '../ui/Notice.tsx'
 import './SignIn.css'
 
-// The page outside a demo: signing in, waiting, and what went wrong, in the API's own words.
+// The page outside a demo or project: signing in, waiting, and what went wrong, in the API's own words. Inside the
+// frame, a screen says the same with ui/Notice.tsx.
 
 export function Card({ lede, children }: { lede?: string; children?: ReactNode }) {
   return (
@@ -15,8 +17,6 @@ export function Card({ lede, children }: { lede?: string; children?: ReactNode }
     </main>
   )
 }
-
-export const say = (e: unknown) => (e instanceof Error ? e.message : String(e))
 
 /** What did not happen, why, and a way to try again. */
 export function Problem({ what, error, onRetry }: { what: string; error: unknown; onRetry?: () => void }) {

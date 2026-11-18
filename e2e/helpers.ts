@@ -41,3 +41,11 @@ export const asKey = async (request: APIRequestContext, key: string, method: str
 /** The same, as the signed-in visitor, with their browser session, as dw itself calls. */
 export const asVisitor = async (page: Page, method: string, path: string, data?: unknown) =>
   answered(await page.request.fetch(`${DEMO}${path}`, { method, data, headers: { origin: LOCAL_APP, 'x-longreach-client': 'dw' } }), `${method} ${path}`)
+
+/** One MCP call to the gateway as an assistant holding a key: a JSON-RPC request, its result. */
+export async function mcp(request: APIRequestContext, key: string, method: string, params: Record<string, unknown> = {}) {
+  const r = await request.post(`${API}/v1/mcp`, { data: { jsonrpc: '2.0', id: 1, method, params }, headers: { authorization: `Bearer ${key}` } })
+  const body = (await answered(r, `MCP ${method}`)) as { result?: { isError?: boolean; content?: { text: string }[] }; error?: unknown }
+  if (body.error || body.result?.isError) throw new Error(`MCP ${method}: ${JSON.stringify(body.error ?? body.result)}`)
+  return body.result
+}

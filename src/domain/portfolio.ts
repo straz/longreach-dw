@@ -1,7 +1,7 @@
 import type { IsoDate, QueryRow } from '../model/generated.ts'
 import { type Capital, type Headline, capitalOf, headline } from './capital.ts'
 import { groupBy } from './groupBy.ts'
-import { type ComingItem, buildComingUp } from './comingUp.ts'
+import { type ComingItem, buildComingUp, isOpen } from './comingUp.ts'
 import { type FieldState, fieldStates, proposedStatus } from './fields.ts'
 import { type Watch, buildWatch } from './materiality.ts'
 import { type BeliefEvaluation, type BeliefState, evaluateBelief, isMoved, judgmentsFrom } from './watchState.ts'
@@ -74,7 +74,6 @@ export type Portfolio = {
 }
 
 /** An option still to be decided: not exercised, declined or expired. */
-export const isOpen = (o: QueryRow<'options'>) => o.status !== 'exercised' && o.status !== 'declined' && o.status !== 'expired'
 
 const PAST = new Set(['fulfilled', 'released', 'revoked', 'expired', 'superseded', 'breached'])
 

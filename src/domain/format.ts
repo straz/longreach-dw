@@ -63,3 +63,6 @@ export function formatMetric(value: number, f: MetricFormat | undefined): string
 
 /** "1 flag", "3 flags". */
 export const plural = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? one : many}`
+
+/** Any field's value in words, as a record's changes show it: text as it is, nothing as a dash, anything else as JSON. */
+export const formatValue = (v: unknown) => (v === null || v === undefined || v === '' ? '—' : typeof v === 'string' ? v : JSON.stringify(v))

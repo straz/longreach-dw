@@ -47,6 +47,13 @@ export type Resolution = Schemas['Resolution']
 export const resolveConflicts = (p: Project, branch: string, records: Resolution[], confirm = false) =>
   answer(client.POST('/v1/projects/{org}/{project}/branches/{branch}/resolve', { params: { path: { ...where(p), branch } }, body: { records, confirm } }))
 
+/** Mark an AI's changes reviewed: those named, or all not yet reviewed (tyapi P14). The update's author only. */
+export const reviewChanges = (p: Project, branch: string, records: RecordRef[], all = false) =>
+  answer(client.POST('/v1/projects/{org}/{project}/branches/{branch}/reviews', { params: { path: { ...where(p), branch } }, body: { records, all } }))
+
+/** Make an API key for the signed-in user, shown once: what an assistant connects to /v1/mcp with. */
+export const makeKey = () => answer(client.POST('/v1/api-keys'))
+
 /** The record a change is to, keyed as the outline keys records (refKey). */
 export const changeKey = (c: Pick<Change, 'type' | 'id'>) => refKey({ type: c.type, slug: c.id })
 

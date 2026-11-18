@@ -11,9 +11,8 @@ import { useGateway } from '../gateway/react.tsx'
 import { isMain } from '../project.ts'
 import { Menu } from '../ui/Menu.tsx'
 import { startOver } from '../writes.ts'
-import { type DemoListing, useProjects, whoIs } from './session.ts'
+import { type DemoListing, sandboxKey, useProjects, whoIs } from './session.ts'
 import { say } from './Card.tsx'
-import { sandboxKey } from './Shell.tsx'
 import './Navbar.css'
 
 // The bar every screen shares, from test8's (docs/PLAN.md §2). The user menu is a disclosure (ui/Menu.tsx). The organization is the demo open, then the
@@ -164,6 +163,9 @@ function UserMenu({ demo, demos, me, onSignOut }: { demo: DemoListing; demos: De
             </>
           )}
           <div className="menu-sep" aria-hidden="true" />
+          <Link className="menu-item is-plain" to="/connect-ai" onClick={close}>
+            Connect your AI…
+          </Link>
           <p className="menu-note">Google account: {whoIs(me)}</p>
           <button type="button" className="menu-item is-plain" onClick={onSignOut}>
             Log out

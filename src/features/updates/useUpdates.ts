@@ -119,7 +119,8 @@ export function useUpdateDiffPoll(me: string) {
       try {
         const later = await getChanges(gateway, gateway.branch, held.cursor)
         queryClient.setQueryData<Changes>(key, { ...held, cursor: later.cursor, changes: mergeChanges(held.changes, later.changes) })
-        if (later.changes.some((c) => c.written_by.some((w) => w !== me))) void queryClient.invalidateQueries({ queryKey: [gateway.graph] })
+        // An assistant writes with the user's own key, so its changes are known by their mark, not their writer.
+        if (later.changes.some((c) => c.ai || c.written_by.some((w) => w !== me))) void queryClient.invalidateQueries({ queryKey: [gateway.graph] })
       } catch {
         // A failed poll is tried again on the next tick; the screen keeps what it has.
       } finally {

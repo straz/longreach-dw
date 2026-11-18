@@ -32,6 +32,9 @@ export const useProjects = () =>
 /** Whether a role may change a project: write, maintain or admin. */
 export const writes = (role: string | null | undefined) => role === 'write' || role === 'maintain' || role === 'admin'
 
+/** The sandbox's cached answer: the branch the visitor reads and writes in a demo (Navbar sets it on Start over). */
+export const sandboxKey = (graph: string) => ['sandbox', graph] as const
+
 /** The demo to open when the URL names none: the first with briefs, which has all of Decision Watch to show. */
 export const defaultDemo = (demos: DemoListing[]): DemoListing | undefined => demos.find((d) => d.briefs > 0) ?? demos[0]
 

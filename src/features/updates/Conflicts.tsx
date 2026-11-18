@@ -2,6 +2,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { ApiError } from '../../api.ts'
 import { say } from '../../app/Card.tsx'
+import { formatValue } from '../../domain/format.ts'
 import { textOf } from '../../domain/record.ts'
 import { useGateway } from '../../gateway/react.tsx'
 import { type Conflict, type Resolution, resolveConflicts } from '../../updates.ts'
@@ -15,7 +16,6 @@ import { type Conflict, type Resolution, resolveConflicts } from '../../updates.
 type Choice = Record<string, unknown> | null | undefined
 
 const idOf = (c: Pick<Conflict, 'kind' | 'type' | 'id'>) => `${c.kind}:${c.type}:${c.id}`
-const shown = (v: unknown) => (v === null || v === undefined || v === '' ? '—' : typeof v === 'string' ? v : JSON.stringify(v))
 
 /** What was typed, as the field's own type: a number stays a number, an empty field is no value. */
 export function typed(text: string, like: unknown): unknown {
@@ -134,9 +134,9 @@ function ConflictCard({ conflict: c, choice, onChoose, disabled }: { conflict: C
                 {f.name.replaceAll('_', ' ')}
                 {f.changed_by === 'both' && <span className="update-field"> · both changed: choose</span>}
               </th>
-              <td>{shown(f.was)}</td>
-              <td>{shown(f.main)}</td>
-              <td>{shown(f.update)}</td>
+              <td>{formatValue(f.was)}</td>
+              <td>{formatValue(f.main)}</td>
+              <td>{formatValue(f.update)}</td>
               <td>
                 <input
                   className="conflict-input"

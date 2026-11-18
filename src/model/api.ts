@@ -36,6 +36,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/healthz": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Whether the service can serve graph requests; needs no key */
+        get: operations["healthz_v1_healthz_head"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/graphs/discovery": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The ids of the graphs the caller can read */
+        get: operations["discover_graphs_v1_graphs_discovery_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/graphs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The graphs the caller can read, with each one's state and address */
+        get: operations["list_graphs_v1_graphs_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/books": {
         parameters: {
             query?: never;
@@ -539,6 +590,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/projects/{org}/{project}/branches/{branch}/reviews": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Mark an AI's changes in an update reviewed (its author) */
+        post: operations["review_v1_projects__org___project__branches__branch__reviews_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/projects/{org}/{project}/branches/{branch}/revert": {
         parameters: {
             query?: never;
@@ -773,57 +841,6 @@ export interface paths {
         put?: never;
         /** MCP (Streamable HTTP, JSON answers, no sessions): the data routes as tools */
         post: operations["mcp_v1_mcp_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/healthz": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Whether the service can serve graph requests; needs no key */
-        get: operations["healthz_v1_healthz_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/graphs/discovery": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** The ids of the graphs the caller can read */
-        get: operations["discover_graphs_v1_graphs_discovery_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/graphs": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** The graphs the caller can read, with each one's state and address */
-        get: operations["list_graphs_v1_graphs_get"];
-        put?: never;
-        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -1238,6 +1255,19 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** ApiKeyOut */
+        ApiKeyOut: {
+            /**
+             * Key
+             * @description The key, shown this once: only its hash is kept
+             */
+            key: string;
+            /**
+             * Prefix
+             * @description How the key is named afterwards, to revoke it
+             */
+            prefix: string;
+        };
         /** Assumptions */
         Assumptions: {
             /** Text */
@@ -1421,6 +1451,16 @@ export interface components {
              * @description The principals who wrote it on this update, first to last
              */
             written_by: string[];
+            /**
+             * Ai
+             * @description The assistant that last wrote it, when an AI did (P6)
+             */
+            ai?: string | null;
+            /**
+             * Reviewed
+             * @description For an AI's change: whether the update's author has reviewed it since
+             */
+            reviewed?: boolean | null;
         };
         /** ChangesOut */
         ChangesOut: {
@@ -2328,7 +2368,7 @@ export interface components {
             state: "creating" | "ready" | "failed";
             /**
              * Error
-             * @description Why making it failed, in the reconciler's words
+             * @description Why making its graph failed, as its deployment said
              */
             error?: string | null;
         };
@@ -2428,6 +2468,11 @@ export interface components {
              * @description Policies the update breaks, errors first
              */
             policies: components["schemas"]["PolicyCheck"][];
+            /**
+             * Unreviewed
+             * @description Changes an AI wrote that the update's author has not reviewed (P14)
+             */
+            unreviewed: components["schemas"]["UnreviewedChange"][];
         };
         /** ReadingChange */
         ReadingChange: {
@@ -2568,6 +2613,32 @@ export interface components {
              */
             subject: string;
         };
+        /** ReviewMarksIn */
+        ReviewMarksIn: {
+            /**
+             * Records
+             * @description The AI's changes reviewed; with all, every one not yet reviewed
+             * @default []
+             */
+            records: components["schemas"]["RecordRef"][];
+            /**
+             * All
+             * @default false
+             */
+            all: boolean;
+        };
+        /** ReviewMarksOut */
+        ReviewMarksOut: {
+            /** Graph */
+            graph: string;
+            /** Branch */
+            branch: string;
+            /**
+             * Reviewed
+             * @description Changes marked reviewed by this call
+             */
+            reviewed: number;
+        };
         /** SandboxOut */
         SandboxOut: {
             /** Graph */
@@ -2665,6 +2736,23 @@ export interface components {
             available: false;
             /** Why */
             why: string;
+        };
+        /** UnreviewedChange */
+        UnreviewedChange: {
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "node" | "edge";
+            /** Type */
+            type: string;
+            /** Id */
+            id: string;
+            /**
+             * Ai
+             * @description The assistant that wrote it
+             */
+            ai: string;
         };
         /** UpdateOut */
         UpdateOut: {
@@ -3312,7 +3400,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["ApiKeyOut"];
                 };
             };
         };
@@ -3344,6 +3432,66 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    healthz_v1_healthz_head: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+        };
+    };
+    discover_graphs_v1_graphs_discovery_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+        };
+    };
+    list_graphs_v1_graphs_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
                 };
             };
         };
@@ -4696,6 +4844,43 @@ export interface operations {
             };
         };
     };
+    review_v1_projects__org___project__branches__branch__reviews_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org: string;
+                project: string;
+                branch: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReviewMarksIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReviewMarksOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     revert_v1_projects__org___project__branches__branch__revert_post: {
         parameters: {
             query?: never;
@@ -5142,66 +5327,6 @@ export interface operations {
         };
     };
     mcp_v1_mcp_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": unknown;
-                };
-            };
-        };
-    };
-    healthz_v1_healthz_get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": unknown;
-                };
-            };
-        };
-    };
-    discover_graphs_v1_graphs_discovery_get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": unknown;
-                };
-            };
-        };
-    };
-    list_graphs_v1_graphs_get: {
         parameters: {
             query?: never;
             header?: never;

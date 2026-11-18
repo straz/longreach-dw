@@ -1,5 +1,5 @@
 import { expect, type Page, test } from '@playwright/test'
-import { asKey, asVisitor, keyFor, open, reseed } from './helpers.ts'
+import { asKey, asVisitor, keyFor, mcp, open, reseed } from './helpers.ts'
 
 // Updates (tyapi docs/20-projects-and-branches.md, Phase 2): the mock visitor starts an update, drafts in it, sees
 // its changes with pending marks, puts one back, finds the sandbox untouched, and discards the update.
@@ -114,4 +114,37 @@ test('a conflict is resolved by taking main’s version with my own change laid 
   await panel.getByRole('button', { name: 'Resolve conflicts' }).click()
   await expect(panel).toContainText('No conflicts with main')
   await expect(panel).not.toContainText('1 conflict with main')
+})
+
+test('an assistant’s changes wait for my review before the update merges', async ({ page, playwright }) => {
+  await open(page, 'draft')
+  // The assistant connects with my key, starts an update and proposes a commitment in it.
+  const ai = await playwright.request.newContext({ ignoreHTTPSErrors: true })
+  const key = keyFor('steve@strassmann.com')
+  await mcp(ai, key, 'initialize', { protocolVersion: '2025-06-18', clientInfo: { name: 'claude-code', title: 'Claude Code' } })
+  const call = async (name: string, args: Record<string, unknown>) => JSON.parse((await mcp(ai, key, 'tools/call', { name, arguments: args }))!.content![0].text)
+  const project = 'fairhaven/commitments'
+  const { branch } = await call('start_update', { project, name: 'Drafted by Claude' })
+  await call('put_record', {
+    project,
+    update: branch,
+    type: 'Commitment',
+    fields: { title: 'Second data center', statement: 'Open a second data center in Ohio', scale: 'program' },
+    links: [{ edge: 'Commits', from: 'fairhaven' }, { edge: 'OwnedBy', to: 'dana-whitlock' }],
+  })
+
+  // I open Decision Watch afterwards and work in its update: its changes are the assistant's, not reviewed, and they
+  // block the merge.
+  await page.reload()
+  await (await menu(page)).getByRole('button', { name: /Drafted by Claude/ }).click()
+  await (await menu(page)).getByRole('link', { name: 'See what this update changes' }).click()
+  const view = page.getByRole('region', { name: "The update's changes" })
+  await expect(view.locator('.update-row', { hasText: 'Second data center' })).toContainText('by Claude Code, for you · not reviewed')
+  const panel = page.getByRole('region', { name: 'Merge into main' })
+  await expect(panel).toContainText(/changes by Claude Code not reviewed/)
+
+  await view.getByRole('button', { name: 'Mark all reviewed' }).click()
+  await expect(view.locator('.update-row', { hasText: 'Second data center' })).toContainText('reviewed')
+  await expect(view.locator('.update-row', { hasText: 'Second data center' })).not.toContainText('not reviewed')
+  await expect(panel).not.toContainText('not reviewed')
 })

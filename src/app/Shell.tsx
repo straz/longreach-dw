@@ -18,7 +18,7 @@ import Chevrons, { PANEL_ID, tabId } from './Chevrons.tsx'
 import { demoFrom, projectFrom } from './demo.ts'
 import HeadlineStrip from './HeadlineStrip.tsx'
 import Navbar from './Navbar.tsx'
-import { type DemoListing, type ProjectListing, defaultDemo, useDemos, useProjects, useSession, whoIs, writes } from './session.ts'
+import { type DemoListing, type ProjectListing, defaultDemo, sandboxKey, useDemos, useProjects, useSession, whoIs, writes } from './session.ts'
 import './Shell.css'
 
 // One demo or project, as the URL names it, around test8's frame. A demo (#/<org>/…): its content from tyapi
@@ -46,9 +46,6 @@ export default function Shell() {
     </DemosGate>
   )
 }
-
-/** The sandbox's cached answer: the branch the visitor reads and writes in a demo (Navbar sets it on Start over). */
-export const sandboxKey = (graph: string) => ['sandbox', graph] as const
 
 function OpenDemo({ listing, demos }: { listing: DemoListing; demos: DemoListing[] }) {
   const content = useQuery({

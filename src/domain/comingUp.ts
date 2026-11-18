@@ -1,7 +1,10 @@
 import type { IsoDate, QueryRow } from '../model/generated.ts'
 import { addDays } from './dates.ts'
 import { groupBy } from './groupBy.ts'
-import { type CommitmentView, isOpen } from './portfolio.ts'
+import type { CommitmentView } from './portfolio.ts'
+
+/** Whether an option can still be exercised: not exercised, declined or expired. */
+export const isOpen = (o: QueryRow<'options'>) => o.status !== 'exercised' && o.status !== 'declined' && o.status !== 'expired'
 
 // The dated things ahead of the as-of date (docs/PLAN.md §4.3, Coming up):
 // windows and the capital that stops being avoidable, expected reports and

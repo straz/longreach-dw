@@ -1,4 +1,4 @@
-# tyapi's API description (`python -m gateway.openapi`) at bcd7d85 plus its working tree.
+# tyapi's API description (`python -m gateway.openapi`) at 3f26d88 plus its working tree.
 # Update with `pnpm api:pull`, then `pnpm gen:api`.
 openapi: 3.1.0
 info:
@@ -27,7 +27,8 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: '#/components/schemas/ApiKeyOut'
   /v1/api-keys/{prefix}:
     delete:
       summary: Revoke one of the caller's API keys
@@ -51,6 +52,37 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
+  /v1/healthz:
+    get:
+      summary: Whether the service can serve graph requests; needs no key
+      operationId: healthz_v1_healthz_head
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+      security: []
+  /v1/graphs/discovery:
+    get:
+      summary: The ids of the graphs the caller can read
+      operationId: discover_graphs_v1_graphs_discovery_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  /v1/graphs:
+    get:
+      summary: The graphs the caller can read, with each one's state and address
+      operationId: list_graphs_v1_graphs_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
   /v1/books:
     get:
       summary: The books the caller can read
@@ -1547,6 +1579,48 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
+  /v1/projects/{org}/{project}/branches/{branch}/reviews:
+    post:
+      summary: Mark an AI's changes in an update reviewed (its author)
+      operationId: review_v1_projects__org___project__branches__branch__reviews_post
+      parameters:
+      - name: org
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Org
+      - name: project
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Project
+      - name: branch
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Branch
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReviewMarksIn'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewMarksOut'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
   /v1/projects/{org}/{project}/branches/{branch}/revert:
     post:
       summary: Put records of an update back as they were where it started (its author)
@@ -1937,37 +2011,6 @@ paths:
     post:
       summary: 'MCP (Streamable HTTP, JSON answers, no sessions): the data routes as tools'
       operationId: mcp_v1_mcp_post
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema: {}
-  /v1/healthz:
-    get:
-      summary: Whether the service can serve graph requests; needs no key
-      operationId: healthz_v1_healthz_get
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema: {}
-      security: []
-  /v1/graphs/discovery:
-    get:
-      summary: The ids of the graphs the caller can read
-      operationId: discover_graphs_v1_graphs_discovery_get
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema: {}
-  /v1/graphs:
-    get:
-      summary: The graphs the caller can read, with each one's state and address
-      operationId: list_graphs_v1_graphs_get
       responses:
         '200':
           description: Successful Response
@@ -5603,6 +5646,21 @@ paths:
       description: A book's maintainers, into any branch but `main`; its publishers, into `main`. Not on a project.
 components:
   schemas:
+    ApiKeyOut:
+      properties:
+        key:
+          type: string
+          title: Key
+          description: 'The key, shown this once: only its hash is kept'
+        prefix:
+          type: string
+          title: Prefix
+          description: How the key is named afterwards, to revoke it
+      type: object
+      required:
+      - key
+      - prefix
+      title: ApiKeyOut
     Assumptions:
       properties:
         text:
@@ -5901,6 +5959,18 @@ components:
           type: array
           title: Written By
           description: The principals who wrote it on this update, first to last
+        ai:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Ai
+          description: The assistant that last wrote it, when an AI did (P6)
+        reviewed:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Reviewed
+          description: 'For an AI''s change: whether the update''s author has reviewed it since'
       type: object
       required:
       - kind
@@ -6378,6 +6448,7 @@ components:
         fields:
           additionalProperties: true
           type: object
+          maxProperties: 50
           title: Fields
           default: {}
       type: object
@@ -6508,6 +6579,7 @@ components:
         fields:
           additionalProperties: true
           type: object
+          maxProperties: 100
           title: Fields
           description: Fields to set; on a change, those left out keep their value and null clears one
           default: {}
@@ -6515,6 +6587,7 @@ components:
           items:
             $ref: '#/components/schemas/LinkIn'
           type: array
+          maxItems: 50
           title: Links
           description: Links written with the record, in the same load
           default: []
@@ -7381,7 +7454,7 @@ components:
           - type: string
           - type: 'null'
           title: Error
-          description: Why making it failed, in the reconciler's words
+          description: Why making its graph failed, as its deployment said
       type: object
       required:
       - graph
@@ -7538,6 +7611,12 @@ components:
           type: array
           title: Policies
           description: Policies the update breaks, errors first
+        unreviewed:
+          items:
+            $ref: '#/components/schemas/UnreviewedChange'
+          type: array
+          title: Unreviewed
+          description: Changes an AI wrote that the update's author has not reviewed (P14)
       type: object
       required:
       - graph
@@ -7548,6 +7627,7 @@ components:
       - changes
       - conflicts
       - policies
+      - unreviewed
       title: ReadinessOut
     ReadingChange:
       properties:
@@ -7812,6 +7892,39 @@ components:
       - key
       - subject
       title: ReviewIn
+    ReviewMarksIn:
+      properties:
+        records:
+          items:
+            $ref: '#/components/schemas/RecordRef'
+          type: array
+          title: Records
+          description: The AI's changes reviewed; with all, every one not yet reviewed
+          default: []
+        all:
+          type: boolean
+          title: All
+          default: false
+      type: object
+      title: ReviewMarksIn
+    ReviewMarksOut:
+      properties:
+        graph:
+          type: string
+          title: Graph
+        branch:
+          type: string
+          title: Branch
+        reviewed:
+          type: integer
+          title: Reviewed
+          description: Changes marked reviewed by this call
+      type: object
+      required:
+      - graph
+      - branch
+      - reviewed
+      title: ReviewMarksOut
     SandboxOut:
       properties:
         graph:
@@ -7969,6 +8082,31 @@ components:
       - available
       - why
       title: UnavailablePath
+    UnreviewedChange:
+      properties:
+        kind:
+          type: string
+          enum:
+          - node
+          - edge
+          title: Kind
+        type:
+          type: string
+          title: Type
+        id:
+          type: string
+          title: Id
+        ai:
+          type: string
+          title: Ai
+          description: The assistant that wrote it
+      type: object
+      required:
+      - kind
+      - type
+      - id
+      - ai
+      title: UnreviewedChange
     UpdateOut:
       properties:
         branch:

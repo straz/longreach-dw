@@ -2,6 +2,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { Link } from 'react-router'
 import { say } from '../../app/Card.tsx'
+import { plural } from '../../domain/format.ts'
 import { textOf } from '../../domain/record.ts'
 import { useGateway } from '../../gateway/react.tsx'
 import { useBasePath } from '../shared/routeState.ts'
@@ -28,8 +29,6 @@ export function mergedSummary(name: string, changes: Change[]): Merged {
     commitment: added('Commitment')[0]?.id,
   }
 }
-
-const plural = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? one : many}`
 
 export default function MergePanel({ onMerged }: { onMerged: (m: Merged) => void }) {
   const gateway = useGateway()
